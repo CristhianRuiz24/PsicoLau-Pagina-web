@@ -15,8 +15,7 @@ claridad y confianza clínica por encima de estética "corporativa" o de plantil
 ## Estructura del sitio (multipágina)
 1. Inicio
 2. Sobre mí
-3. Áreas de atención (Ansiedad, Depresión, Neurodivergencias en adultos —TEA/TDAH—, Trauma,
-   Dependencia emocional, Relaciones saludables)
+3. Áreas de atención (Neurodivergencias en adultos, Trauma y violencia, Ansiedad/Depresión y regulación emocional, Neuropsicología clínica, Relaciones y vínculos saludables)
 4. Experiencia y reconocimiento (medios, publicaciones)
 5. Contacto (formulario que envía correo + redes sociales)
 
@@ -54,3 +53,9 @@ Antes de marcar cualquier página como lista, usa el navegador integrado y revis
   - Se realizó una auditoría de ciberseguridad: Se bloqueó la subida de datos personales ignorando la carpeta de recursos originales en `.gitignore`, se agregaron cabeceras de seguridad CSP en el archivo `_headers` para Cloudflare, se añadió `rel="noopener noreferrer"` a enlaces externos y SRI a los CDNs.
   - Se crearon los archivos `robots.txt`, `sitemap.xml` y `README.md` para buenas prácticas de SEO.
   - Se resolvieron problemas de codificación UTF-8 que corrompieron tildes y guiones tras procesos automatizados.
+
+- **2026-08-21 (Sesión 3 - Ajustes de Contenido y UI)**:
+  - Se actualizaron las categorías en "Áreas de Atención" (de 6 a 5 principales) y se usó CSS Flexbox (`display: flex; flex-wrap: wrap; justify-content: center`) para evitar que las tarjetas de la fila inferior se estiren desproporcionadamente.
+  - Se añadieron iconos FontAwesome a las tarjetas de vista previa en `index.html`.
+  - Se corrigió la especificidad en CSS (`.btn` con `!important`) para evitar que `.nav-links a` sobreescribiera el color blanco del texto en botones al estado normal y de `:hover`.
+  - Se alinearon uniformemente los botones de la sección de Libros (`margin-top: auto`) y se corrigieron márgenes en iconos de `experiencia.html`.
