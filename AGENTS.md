@@ -59,3 +59,6 @@ Antes de marcar cualquier página como lista, usa el navegador integrado y revis
   - Se añadieron iconos FontAwesome a las tarjetas de vista previa en `index.html`.
   - Se corrigió la especificidad en CSS (`.btn` con `!important`) para evitar que `.nav-links a` sobreescribiera el color blanco del texto en botones al estado normal y de `:hover`.
   - Se alinearon uniformemente los botones de la sección de Libros (`margin-top: auto`) y se corrigieron márgenes en iconos de `experiencia.html`.
+
+- **2026-08-21 (Sesión 4 - Actualización de Experiencia)**:
+  - Se añadió el manual "Pensamiento autista y otras neurodivergencias (en proceso)" en la lista de publicaciones de `experiencia.html`.
