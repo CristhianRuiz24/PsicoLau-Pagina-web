@@ -1,0 +1,144 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contacto | PSICOLAU</title>
+  <meta name="description" content="Agenda tu cita de valoraciÃ³n psicolÃ³gica con Ana Laura GÃ³mez DÃ­az. AtenciÃ³n presencial y en lÃ­nea.">
+  <link rel="icon" type="image/png" href="Recursos para que use la IA/logo psicolau_Mesa de trabajo 1.png">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="container navbar">
+      <a href="index.html" class="logo-container">
+        <img src="Recursos para que use la IA/logo psicolau_Mesa de trabajo 1.png" alt="Logo de PsicoLau">
+      </a>
+      <button class="menu-toggle" aria-label="Abrir menÃº"><i class="fas fa-bars"></i></button>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html">Inicio</a></li>
+          <li><a href="sobre-mi.html">Sobre mÃ­</a></li>
+          <li><a href="areas-de-atencion.html">Ãreas de atenciÃ³n</a></li>
+          <li><a href="experiencia.html">Experiencia</a></li>
+          <li><a href="libros.html">Libros</a></li>
+          <li><a href="contacto.html" class="btn">Agenda tu consulta</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <section class="section">
+    <div class="container">
+      <h1 style="text-align: center; margin-bottom: 3rem;">Hablemos</h1>
+      
+      <div class="contact-container">
+        
+        <!-- Formulario -->
+        <div class="contact-form-wrapper">
+          <h2 style="margin-bottom: 1.5rem; font-size: 1.5rem;">EnvÃ­a un mensaje</h2>
+          <form id="contact-form" action="https://formspree.io/f/mjybzrge" method="POST">
+            <div class="form-group">
+              <label for="name">Nombre completo *</label>
+              <input type="text" id="name" name="name" class="form-control" required placeholder="Tu nombre">
+            </div>
+            
+            <div class="form-group">
+              <label for="email">Correo electrÃ³nico *</label>
+              <input type="email" id="email" name="_replyto" class="form-control" required placeholder="tu@correo.com">
+            </div>
+
+            <div class="form-group">
+              <label for="phone">TelÃ©fono (opcional)</label>
+              <input type="tel" id="phone" name="phone" class="form-control" placeholder="Tu nÃºmero de contacto">
+            </div>
+
+            <div class="form-group">
+              <label for="reason">Motivo de consulta (opcional)</label>
+              <select id="reason" name="reason" class="form-control" style="appearance: auto;">
+                <option value="">Selecciona una opciÃ³n</option>
+                <option value="ansiedad_depresion">Ansiedad / DepresiÃ³n</option>
+                <option value="neurodivergencias">Neurodivergencias (TEA/TDAH)</option>
+                <option value="trauma">Trauma</option>
+                <option value="dependencia">Dependencia Emocional</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="message">Mensaje *</label>
+              <textarea id="message" name="message" class="form-control" required placeholder="Â¿En quÃ© te puedo ayudar?"></textarea>
+            </div>
+            
+            <!-- Honeypot para evitar spam en Formspree -->
+            <input type="text" name="_gotcha" style="display:none" />
+            
+            <button type="submit" class="btn" style="width: 100%; border-radius: 8px;">Enviar mensaje</button>
+          </form>
+        </div>
+
+        <!-- Info Contacto -->
+        <div class="contact-info-wrapper">
+          <h2 style="margin-bottom: 1.5rem; font-size: 1.5rem;">InformaciÃ³n de Contacto</h2>
+          <p style="margin-bottom: 2rem; color: var(--color-text-light);">
+            Si prefieres contactarme directamente, puedes hacerlo a travÃ©s de los siguientes medios.
+          </p>
+
+          <div style="margin-bottom: 1.5rem;">
+            <strong style="color: var(--color-primary); display: block; margin-bottom: 0.5rem;"><i class="fab fa-whatsapp"></i> WhatsApp</strong>
+            <a href="https://wa.me/5216633641973" target="_blank" rel="noopener noreferrer" class="btn" style="background-color: #25D366; display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.5rem;">
+              <i class="fab fa-whatsapp" style="font-size: 1.2rem;"></i> Enviar mensaje
+            </a>
+            <p style="color: var(--color-text-light); font-size: 0.9rem; margin-top: 0.5rem;">+52 1 663 364 1973</p>
+          </div>
+
+          <div style="margin-bottom: 1.5rem;">
+            <strong style="color: var(--color-primary); display: block;"><i class="fas fa-envelope"></i> Correo ElectrÃ³nico</strong>
+            <a href="mailto:lince_lg@yahoo.com.mx" style="color: var(--color-text); font-size: 1.1rem;">lince_lg@yahoo.com.mx</a>
+          </div>
+
+          <div style="margin-bottom: 2rem;">
+            <strong style="color: var(--color-primary); display: block;"><i class="fas fa-location-dot"></i> Modalidad de Consulta</strong>
+            <p style="color: var(--color-text); font-size: 1.1rem;">AtenciÃ³n en lÃ­nea a cualquier parte del mundo de habla hispana.</p>
+          </div>
+
+          <div class="contact-info">
+            <h3 style="font-size: 1.2rem; color: var(--color-primary);">SÃ­gueme en Redes</h3>
+            <div class="social-links">
+              <a href="https://facebook.com/profile.php?id=100090214955219" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+              <a href="https://www.tiktok.com/@lorelinx" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+              <a href="https://www.instagram.com/Lorelinx" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+              <a href="https://www.youtube.com/@lorellinx/videos" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="logo-container" style="display: flex; justify-content: center; margin-bottom: 1rem;">
+        <img src="Recursos para que use la IA/logo psicolau_Mesa de trabajo 1.png" alt="PsicoLau Logo" style="height: 40px;">
+      </div>
+      <p>&copy; 2026 PSICOLAU â€” PsicologÃ­a y Resiliencia. Todos los derechos reservados.</p>
+      <div class="social-links" style="justify-content: center; margin-top: 1rem;">
+        <a href="https://facebook.com/profile.php?id=100090214955219" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+        <a href="https://www.tiktok.com/@lorelinx" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+        <a href="https://www.instagram.com/Lorelinx" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="https://www.youtube.com/@lorellinx/videos" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
+

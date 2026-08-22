@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Disallow: /Recursos para que use la IA/
