@@ -82,7 +82,7 @@ img {
 
 .btn:hover {
   background-color: var(--color-primary);
-  color: var(--color-white);
+  color: var(--color-white) !important;
   transform: translateY(-2px);
   box-shadow: 0 4px 10px rgba(236, 94, 134, 0.2);
 }
