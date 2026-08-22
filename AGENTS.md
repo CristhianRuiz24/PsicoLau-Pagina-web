@@ -68,3 +68,10 @@ Antes de marcar cualquier página como lista, usa el navegador integrado y revis
   - Se creó la página dedicada `preguntas-frecuentes.html` con un listado de 15 preguntas organizadas en un diseño tipo "Acordeón".
   - Se implementaron los estilos `.faq-container` y clases derivadas en `css/style.css`, así como la lógica en `js/main.js` para una transición fluida al desplegar/cerrar cada pregunta.
   - Se actualizó el footer de todas las páginas HTML para incluir un enlace a la sección de Preguntas Frecuentes.
+
+- **2026-08-22 (Sesión 6 - Terapias Grupales)**:
+  - Se creó la página `terapias-grupales.html` como un espacio genérico para anunciar diferentes módulos de terapia y futuras capacitaciones, iniciando con "Terapia Grupal para Autistas Adultos".
+  - Se agregó un botón de llamada a la acción enlazado directamente a WhatsApp (`wa.me`) con número específico y mensaje predeterminado.
+  - Se ajustaron los estilos `.btn-outline` en `style.css` para resolver conflictos de visibilidad de texto agregando `!important`.
+  - Se integró el acceso a la nueva página modificando el menú de navegación en todas las páginas HTML y agregando menciones en Inicio y Áreas de Atención.
+  - Se añadió una nota aclaratoria sobre el compromiso de continuidad para el protocolo de 12 sesiones y la apertura cíclica cada 3 meses.
