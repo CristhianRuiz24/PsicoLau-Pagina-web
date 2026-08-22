@@ -70,7 +70,7 @@ img {
 .btn {
   display: inline-block;
   background-color: var(--color-secondary);
-  color: var(--color-white);
+  color: var(--color-white) !important;
   padding: 0.8rem 2rem;
   border-radius: 30px;
   font-weight: 600;
