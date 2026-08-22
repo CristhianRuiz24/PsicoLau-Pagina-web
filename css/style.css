@@ -90,12 +90,22 @@ img {
 .btn-outline {
   background-color: transparent;
   border: 2px solid var(--color-primary);
-  color: var(--color-primary);
+  color: var(--color-primary) !important;
 }
 
 .btn-outline:hover {
   background-color: var(--color-primary);
   color: var(--color-white);
+}
+
+.btn-whatsapp {
+  background-color: #25D366;
+  color: var(--color-white) !important;
+}
+
+.btn-whatsapp:hover {
+  background-color: #128C7E;
+  box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
 }
 
 /* =========================================
