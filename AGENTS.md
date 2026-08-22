@@ -7,8 +7,8 @@ claridad y confianza clínica por encima de estética "corporativa" o de plantil
 
 ## Fuente de verdad para contenido
 - Toda la información profesional real (formación, experiencia, protocolos, publicaciones)
-  está en `Recursos para que use la IA/Currículum Vitae Laura Gómez-3.pdf`.
-- El logo oficial está en `Recursos para que use la IA/logo psicolau_Mesa de trabajo 1.png`.
+  está en `Recursos para que use la IA/Currículum Vitae Laura Gómez-3.pdf`. (Nota: Esta carpeta está ignorada en `.gitignore` por privacidad).
+- El logo oficial y las imágenes del sitio se encuentran en la carpeta `assets/`.
 - No inventes datos clínicos, credenciales ni cifras que no estén en el PDF. Si falta un dato,
   pregúntame en vez de inventarlo o dejar un placeholder tipo "Lorem ipsum".
 
@@ -48,4 +48,9 @@ Antes de marcar cualquier página como lista, usa el navegador integrado y revis
 ## Notas de trabajo
 - Registra aquí decisiones importantes que tomes (ej. "se eligió stack X porque...") para que
   sesiones futuras del agente tengan ese contexto sin que yo lo repita.
-- **2026-08-21**: Se decidió usar HTML/CSS/JS clásico para optimizar carga y simplicidad de mantenimiento en Cloudflare Pages, con formulario gestionado por Formspree.
+- **2026-08-21 (Sesión 1)**: Se decidió usar HTML/CSS/JS clásico para optimizar carga y simplicidad de mantenimiento en Cloudflare Pages, con formulario gestionado por Formspree.
+- **2026-08-21 (Sesión 2 - Seguridad y Despliegue)**: 
+  - Se configuró el repositorio Git conectándolo a Cloudflare Pages bajo el dominio `psicolau.com`.
+  - Se realizó una auditoría de ciberseguridad: Se bloqueó la subida de datos personales ignorando la carpeta de recursos originales en `.gitignore`, se agregaron cabeceras de seguridad CSP en el archivo `_headers` para Cloudflare, se añadió `rel="noopener noreferrer"` a enlaces externos y SRI a los CDNs.
+  - Se crearon los archivos `robots.txt`, `sitemap.xml` y `README.md` para buenas prácticas de SEO.
+  - Se resolvieron problemas de codificación UTF-8 que corrompieron tildes y guiones tras procesos automatizados.
