@@ -61,4 +61,5 @@ Antes de marcar cualquier página como lista, usa el navegador integrado y revis
   - Se alinearon uniformemente los botones de la sección de Libros (`margin-top: auto`) y se corrigieron márgenes en iconos de `experiencia.html`.
 
 - **2026-08-21 (Sesión 4 - Actualización de Experiencia)**:
-  - Se añadió el manual "Pensamiento autista y otras neurodivergencias (en proceso)" en la lista de publicaciones de `experiencia.html`.
+  - Se añadió la publicación "Pensamiento autista y otras neurodivergencias (en proceso)" en la lista de publicaciones de `experiencia.html`.
+  - Se añadió el enlace al artículo "Invisibilidad diagnóstica y vulnerabilidad relacional en mujeres autistas" de Saberes y Ciencias.
