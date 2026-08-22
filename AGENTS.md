@@ -63,3 +63,8 @@ Antes de marcar cualquier página como lista, usa el navegador integrado y revis
 - **2026-08-21 (Sesión 4 - Actualización de Experiencia)**:
   - Se añadió la publicación "Pensamiento autista y otras neurodivergencias (en proceso)" en la lista de publicaciones de `experiencia.html`.
   - Se añadió el enlace al artículo "Invisibilidad diagnóstica y vulnerabilidad relacional en mujeres autistas" de Saberes y Ciencias.
+
+- **2026-08-22 (Sesión 5 - Preguntas Frecuentes)**:
+  - Se creó la página dedicada `preguntas-frecuentes.html` con un listado de 15 preguntas organizadas en un diseño tipo "Acordeón".
+  - Se implementaron los estilos `.faq-container` y clases derivadas en `css/style.css`, así como la lógica en `js/main.js` para una transición fluida al desplegar/cerrar cada pregunta.
+  - Se actualizó el footer de todas las páginas HTML para incluir un enlace a la sección de Preguntas Frecuentes.

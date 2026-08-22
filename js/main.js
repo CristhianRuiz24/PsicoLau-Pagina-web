@@ -33,4 +33,21 @@ document.addEventListener('DOMContentLoaded', () => {
       menuItems[i].className = "active";
     }
   }
+  // Lógica del acordeón para Preguntas Frecuentes
+  const faqItems = document.querySelectorAll('.faq-item');
+  if (faqItems.length > 0) {
+    faqItems.forEach(item => {
+      const questionBtn = item.querySelector('.faq-question');
+      questionBtn.addEventListener('click', () => {
+        item.classList.toggle('active');
+        
+        const answer = item.querySelector('.faq-answer');
+        if (item.classList.contains('active')) {
+          answer.style.maxHeight = answer.scrollHeight + "px";
+        } else {
+          answer.style.maxHeight = null;
+        }
+      });
+    });
+  }
 });

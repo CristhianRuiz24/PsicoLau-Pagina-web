@@ -396,3 +396,69 @@ footer {
     gap: 2rem;
   }
 }
+
+/* =========================================
+   FAQ Accordion
+   ========================================= */
+.faq-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.faq-item {
+  border-bottom: 1px solid #EAEAEA;
+  margin-bottom: 1rem;
+}
+
+.faq-item:last-child {
+  border-bottom: none;
+}
+
+.faq-question {
+  width: 100%;
+  background: none;
+  border: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.2rem 0;
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+  transition: var(--transition);
+}
+
+.faq-question:hover {
+  color: var(--color-primary);
+}
+
+.faq-icon {
+  color: var(--color-secondary);
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+}
+
+.faq-item.active .faq-icon {
+  transform: rotate(45deg); /* Convertir el + en un x (o al revés) */
+}
+.faq-item.active .faq-question {
+  color: var(--color-primary);
+}
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, padding 0.4s ease;
+}
+
+.faq-item.active .faq-answer {
+  /* Se calculará y asignará dinámicamente con JS, pero añadimos un max-height para el fallback si no se usa JS complejo. JS controlará max-height inline. */
+}
+
+.faq-answer p {
+  padding-bottom: 1.5rem;
+  color: var(--color-text);
+}
