@@ -153,6 +153,7 @@ header {
   cursor: pointer;
   background: none;
   border: none;
+  margin-left: auto;
 }
 
 /* =========================================
