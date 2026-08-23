@@ -75,3 +75,11 @@ Antes de marcar cualquier página como lista, usa el navegador integrado y revis
   - Se ajustaron los estilos `.btn-outline` en `style.css` para resolver conflictos de visibilidad de texto agregando `!important`.
   - Se integró el acceso a la nueva página modificando el menú de navegación en todas las páginas HTML y agregando menciones en Inicio y Áreas de Atención.
   - Se añadió una nota aclaratoria sobre el compromiso de continuidad para el protocolo de 12 sesiones y la apertura cíclica cada 3 meses.
+
+- **2026-08-23 (Sesión 7 - Testimonios)**:
+  - Se creó la página `testimonios.html` extrayendo los testimonios más contundentes y presentándolos en formato de tarjetas (CSS Grid / Masonry).
+  - Se añadieron estilos `.testimonial-card` y `.quote-icon` en `style.css` para darle un toque visual distintivo (comillas grandes).
+  - Se incluyó un bloque de "Vista previa" con 3 testimonios en `index.html`.
+  - Se actualizó el menú de navegación (`<nav>`) en todas las páginas y el archivo `sitemap.xml` para incluir `testimonios.html` y otros enlaces faltantes.
+  - Se añadieron testimonios multimedia: dos videos incrustados de YouTube (usando iframe con contenedor responsivo `.video-responsive-container`) y un archivo de audio local (`testimonio-audio.ogg`) usando una etiqueta `<audio controls>`.
+  - Se corrigió la alineación de las tarjetas en la última fila mediante la implementación de `flexbox` (`display: flex; flex-wrap: wrap; justify-content: center;`) en los contenedores `.grid-cards` dentro de `testimonios.html`, asegurando un espaciado uniforme y adaptativo.

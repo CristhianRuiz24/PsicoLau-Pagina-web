@@ -472,3 +472,77 @@ footer {
   padding-bottom: 1.5rem;
   color: var(--color-text);
 }
+
+/* =========================================
+   Testimonios (Testimonials)
+   ========================================= */
+.testimonial-card {
+  position: relative;
+  padding: 3rem 2rem 2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 300px;
+  max-width: 450px;
+}
+
+.quote-icon {
+  position: absolute;
+  top: -15px;
+  left: 20px;
+  font-size: 3rem;
+  color: var(--color-secondary);
+  opacity: 0.2;
+}
+
+.testimonial-text {
+  font-style: italic;
+  margin-bottom: 1.5rem;
+  color: var(--color-text);
+  flex-grow: 1;
+}
+
+.testimonial-author {
+  color: var(--color-primary);
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  border-top: 1px solid #EAEAEA;
+  padding-top: 1rem;
+  margin-bottom: 0;
+}
+
+/* =========================================
+   Multimedia (Videos y Audio)
+   ========================================= */
+.video-responsive-container {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+  height: 0;
+  overflow: hidden;
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  margin-bottom: 1.5rem;
+  background-color: #000;
+}
+
+.video-responsive-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.audio-player-container {
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.audio-player-container audio {
+  width: 100%;
+  height: 40px;
+  border-radius: 20px;
+  outline: none;
+}
+
