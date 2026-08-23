@@ -83,3 +83,6 @@ Antes de marcar cualquier página como lista, usa el navegador integrado y revis
   - Se actualizó el menú de navegación (`<nav>`) en todas las páginas y el archivo `sitemap.xml` para incluir `testimonios.html` y otros enlaces faltantes.
   - Se añadieron testimonios multimedia: dos videos incrustados de YouTube (usando iframe con contenedor responsivo `.video-responsive-container`) y un archivo de audio local (`testimonio-audio.ogg`) usando una etiqueta `<audio controls>`.
   - Se corrigió la alineación de las tarjetas en la última fila mediante la implementación de `flexbox` (`display: flex; flex-wrap: wrap; justify-content: center;`) en los contenedores `.grid-cards` dentro de `testimonios.html`, asegurando un espaciado uniforme y adaptativo.
+
+- **2026-08-23 (Sesión 8 - Corrección del Menú Activo)**:
+  - Se añadió manualmente la clase `active` a los enlaces de navegación en `index.html`, `sobre-mi.html`, `areas-de-atencion.html` y `experiencia.html` para unificar el comportamiento con el resto de las páginas y asegurar que el menú resalte correctamente la página actual.
