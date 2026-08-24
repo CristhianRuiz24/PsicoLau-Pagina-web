@@ -86,3 +86,7 @@ Antes de marcar cualquier página como lista, usa el navegador integrado y revis
 
 - **2026-08-23 (Sesión 8 - Corrección del Menú Activo)**:
   - Se añadió manualmente la clase `active` a los enlaces de navegación en `index.html`, `sobre-mi.html`, `areas-de-atencion.html` y `experiencia.html` para unificar el comportamiento con el resto de las páginas y asegurar que el menú resalte correctamente la página actual.
+
+- **2026-08-23 (Sesión 9 - Corrección de repositorio)**:
+  - Se eliminó la carpeta `caso-estudio` del seguimiento de Git usando `git rm -r --cached` ya que fue subida por error.
+  - Se corrigió el archivo `.gitignore` para eliminar espacios innecesarios que impedían que la regla `caso-estudio/` funcionara correctamente.
