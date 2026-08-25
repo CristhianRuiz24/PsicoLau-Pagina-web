@@ -483,7 +483,7 @@ function renderAuditoriaPagos() {
         <div class="audit-card-info">
           <div class="audit-card-title">
             <span>${nombre}</span>
-            ${esCompletada ? `<span style="font-size: 0.65rem; padding: 1px 6px; border-radius: 4px; background: #dcfce7; color: #15803d; font-weight: 700;">✓ Realizada</span>` : `<span style="font-size: 0.65rem; padding: 1px 6px; border-radius: 4px; background: #fef9c3; color: #854d0e; font-weight: 700;">⏳ Por realizar</span>`}
+            ${esCompletada ? `<span style="font-size: 0.65rem; padding: 1px 6px; border-radius: 4px; background: #dcfce7; color: #15803d; font-weight: 700;">✓ Realizada</span>` : `<span style="font-size: 0.65rem; padding: 1px 6px; border-radius: 4px; background: #fef9c3; color: #854d0e; font-weight: 700;">Por realizar</span>`}
           </div>
           <div class="audit-card-meta">
             <span><i class="fa-solid fa-calendar-day" style="color: var(--turquesa); margin-right: 3px;"></i> ${fechaTxt}</span>
@@ -733,7 +733,7 @@ function renderEasyTable() {
           const color = cita.color || '#3EB8CC';
           const textColor = getContrastColor(color);
           const esPagado = cita.estado_pago === 'PAGADO';
-          const payLabel = esPagado ? '💳 Pagado' : '⏳ Por Pagar';
+          const payLabel = esPagado ? 'Pagado' : 'Por Pagar';
           const payClass = esPagado ? 'paid' : 'unpaid';
 
           const esBloqueo = (cita.categoria && cita.categoria.startsWith('[BLOQUEO]')) || (cita.paciente && cita.paciente.nombre.startsWith('[BLOQUEO]'));
