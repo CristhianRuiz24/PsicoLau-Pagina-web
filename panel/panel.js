@@ -602,6 +602,49 @@ window.enviarWhatsAppRecordatorio = function(id, e) {
   window.open(`https://wa.me/${telLimpio}?text=${mensaje}`, '_blank');
 };
 
+// Obtener el siguiente color de la paleta que no se haya usado aún (o el menos usado)
+function obtenerSiguienteColorDisponible() {
+  // Colores clínicos disponibles para pacientes (excluyendo tonos de bloqueo/neutros)
+  const coloresDisponibles = PALETA_COLORES
+    .map(c => c.hex)
+    .filter(hex => hex.toLowerCase() !== '#94a3b8' && hex.toLowerCase() !== '#475569' && hex.toLowerCase() !== '#78350f');
+
+  // Contar frecuencias de uso de cada color en las citas activas de la base de datos
+  const frecuencias = {};
+  coloresDisponibles.forEach(hex => {
+    frecuencias[hex.toLowerCase()] = 0;
+  });
+
+  citasCache.forEach(cita => {
+    if (cita.estado_cita !== 'CANCELADA' && cita.color) {
+      const hex = cita.color.toLowerCase();
+      if (frecuencias[hex] !== undefined) {
+        frecuencias[hex]++;
+      }
+    }
+  });
+
+  // 1. Prioridad: Buscar un color que tenga 0 usos
+  const noUsado = coloresDisponibles.find(hex => frecuencias[hex.toLowerCase()] === 0);
+  if (noUsado) {
+    return noUsado;
+  }
+
+  // 2. Si todos ya se usaron al menos una vez, elegir el que tenga menor frecuencia
+  let menorFrecuencia = Infinity;
+  let colorMenosUsado = coloresDisponibles[0];
+
+  for (const hex of coloresDisponibles) {
+    const freq = frecuencias[hex.toLowerCase()] || 0;
+    if (freq < menorFrecuencia) {
+      menorFrecuencia = freq;
+      colorMenosUsado = hex;
+    }
+  }
+
+  return colorMenosUsado;
+}
+
 // Recordar color por paciente
 window.autoDetectarColorPaciente = function(nombre) {
   if (!nombre || tipoRegistroActual === 'BLOQUEO') return;
@@ -1038,8 +1081,17 @@ window.seleccionarTipoRegistro = function(tipo) {
     if (seccionRecurrencia) seccionRecurrencia.style.display = 'block';
     if (lblNombre) lblNombre.innerHTML = '<i class="fa-solid fa-user" style="color: var(--turquesa); margin-right: 4px;"></i> Nombre del paciente / Asunto *';
     if (inputNombre) inputNombre.placeholder = 'Ej: Mariana López, Carlos Ruiz...';
-    document.getElementById('nc_color').value = '#3EB8CC';
-    renderSwatches('#3EB8CC');
+    
+    // Si es una nueva cita (no edición), pre-seleccionar un color que no se haya usado
+    const idInput = document.getElementById('nc_id');
+    if (!idInput || !idInput.value) {
+      const colorNuevo = obtenerSiguienteColorDisponible();
+      document.getElementById('nc_color').value = colorNuevo;
+      renderSwatches(colorNuevo);
+    } else {
+      const colorExistente = document.getElementById('nc_color').value || '#3EB8CC';
+      renderSwatches(colorExistente);
+    }
   }
 };
 
