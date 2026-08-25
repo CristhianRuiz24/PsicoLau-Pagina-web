@@ -1311,10 +1311,17 @@ window.editarCita = function(id) {
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
     const hh = String(d.getHours()).padStart(2, '0');
-    const min = String(d.getMinutes()).padStart(2, '0');
+    const minRaw = d.getMinutes();
+    const min = minRaw >= 30 ? '30' : '00';
 
     document.getElementById('nc_fecha').value = `${yyyy}-${mm}-${dd}`;
-    document.getElementById('nc_hora').value = `${hh}:${min}`;
+    const horaSelect = document.getElementById('nc_hora');
+    if (horaSelect) {
+      horaSelect.value = `${hh}:${min}`;
+      if (!horaSelect.value) {
+        horaSelect.value = '07:00';
+      }
+    }
   }
 
   // Mostrar botón eliminar en edición
@@ -1387,10 +1394,17 @@ window.revisarCitaCancelada = function(id) {
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
     const hh = String(d.getHours()).padStart(2, '0');
-    const min = String(d.getMinutes()).padStart(2, '0');
+    const minRaw = d.getMinutes();
+    const min = minRaw >= 30 ? '30' : '00';
 
     document.getElementById('nc_fecha').value = `${yyyy}-${mm}-${dd}`;
-    document.getElementById('nc_hora').value = `${hh}:${min}`;
+    const horaSelect = document.getElementById('nc_hora');
+    if (horaSelect) {
+      horaSelect.value = `${hh}:${min}`;
+      if (!horaSelect.value) {
+        horaSelect.value = '07:00';
+      }
+    }
   }
 
   // Opción para eliminar permanentemente (Hard Delete con confirmación estricta)
@@ -1495,7 +1509,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const fecha = document.getElementById('nc_fecha').value;
       const hora = document.getElementById('nc_hora').value;
-      const fechaHora = `${fecha}T${hora}`;
+      
+      // Construir la fecha exacta en la zona horaria local del navegador
+      const [yyyy, mm, dd] = fecha.split('-').map(Number);
+      const [hh, min] = (hora || '07:00').split(':').map(Number);
+      const fechaLocal = new Date(yyyy, mm - 1, dd, hh, min, 0);
+      const fechaHora = fechaLocal.toISOString();
 
       let nombre = document.getElementById('nc_nombre').value.trim();
       let notas = document.getElementById('nc_notas').value.trim();
