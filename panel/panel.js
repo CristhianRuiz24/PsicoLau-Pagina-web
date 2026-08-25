@@ -46,8 +46,8 @@ let filtroDias = parseInt(localStorage.getItem('psicolau_filtro_dias')) || 7;
 let terminoBusqueda = '';
 let tipoRegistroActual = 'CITA'; // 'CITA' | 'BLOQUEO'
 
-// Verificar autenticación en páginas privadas
-if (window.location.pathname.includes('agenda.html')) {
+// Verificar autenticación e inicializar en la página de la agenda (soporta Clean URLs de Cloudflare)
+if (window.location.pathname.includes('agenda') || document.getElementById('easyTableWrapper')) {
   const token = localStorage.getItem('psicolau_token');
   if (!token) {
     window.location.href = 'index.html';
