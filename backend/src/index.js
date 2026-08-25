@@ -19,7 +19,7 @@ app.use(express.json());
 // Montar todas las rutas
 app.use('/api', routes);
 
-// Endpoint de prueba
+// Endpoint de prueba y salud de la API
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'API funcionando correctamente' });
 });

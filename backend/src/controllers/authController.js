@@ -11,9 +11,11 @@ const login = async (req, res) => {
     }
 
     // Acceso exclusivo de desarrollo local (inactivo y bloqueado en producción)
+    const hostHeader = (req.get('host') || '').toLowerCase();
     const esEntornoLocal = process.env.NODE_ENV !== 'production';
-    const esHostLocal = req.hostname === 'localhost' || req.hostname === '127.0.0.1';
-    const esCredencialDev = (email === 'admin' || email === 'admin@local.com' || email === 'dev') && password === 'admin';
+    const esHostLocal = hostHeader.includes('localhost') || hostHeader.includes('127.0.0.1') || req.hostname === 'localhost' || req.hostname === '127.0.0.1';
+    const emailNormalizado = (email || '').trim().toLowerCase();
+    const esCredencialDev = (emailNormalizado === 'admin' || emailNormalizado === 'admin@local.com' || emailNormalizado === 'dev') && password === 'admin';
 
     if (esEntornoLocal && esHostLocal && esCredencialDev) {
       const tokenDev = jwt.sign(
