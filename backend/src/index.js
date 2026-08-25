@@ -6,6 +6,9 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Habilitar trust proxy para despliegues detrás de proxies (Render, Cloudflare)
+app.set('trust proxy', 1);
+
 const routes = require('./routes');
 
 // Middlewares de seguridad y parseo
