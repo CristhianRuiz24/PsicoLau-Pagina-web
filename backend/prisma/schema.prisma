@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  password_hash String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Paciente {
+  id        Int      @id @default(autoincrement())
+  nombre    String
+  telefono  String
+  email     String   @unique
+  citas     Cita[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Cita {
+  id               Int                @id @default(autoincrement())
+  pacienteId       Int
+  paciente         Paciente           @relation(fields: [pacienteId], references: [id])
+  fechaHora        DateTime
+  categoria        String?            
+  color            String?            @default("#3EB8CC")
+  estado_cita      EstadoCita         @default(PENDIENTE)
+  estado_pago      EstadoPago         @default(PENDIENTE)
+  notificaciones   LogNotificacion[]
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+}
+
+model LogNotificacion {
+  id          Int              @id @default(autoincrement())
+  citaId      Int
+  cita        Cita             @relation(fields: [citaId], references: [id])
+  tipo        TipoNotificacion
+  fecha_envio DateTime         @default(now())
+  estado      String           
+}
+
+enum EstadoCita {
+  PENDIENTE
+  CONFIRMADA
+  CANCELADA
+}
+
+enum EstadoPago {
+  PENDIENTE
+  PAGADO
+}
+
+enum TipoNotificacion {
+  CONFIRMACION_NUEVA_CITA
+  RECORDATORIO_PREVIO
+}

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agenda Semanal - PsicoLau</title>
+  <link rel="stylesheet" href="panel.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+
+  <!-- Barra de Encabezado Superior -->
+  <header class="dashboard-header no-print">
+    <div style="display: flex; align-items: center; gap: 0.8rem;">
+      <i class="fa-solid fa-brain" style="font-size: 1.6rem; color: var(--rosa-coral);"></i>
+      <h1 style="margin: 0; font-size: 1.4rem;">PsicoLau Panel</h1>
+    </div>
+
+    <!-- Buscador Rápido de Pacientes -->
+    <div class="search-box-wrapper">
+      <i class="fa-solid fa-magnifying-glass search-icon"></i>
+      <input type="text" id="busquedaInput" placeholder="Buscar paciente, nota o teléfono..." oninput="filtrarCitasEnTabla(this.value)" autocomplete="off">
+      <button id="btnLimpiarBusqueda" style="display: none;" onclick="limpiarBusqueda()" title="Limpiar búsqueda">&times;</button>
+      
+      <!-- Panel Desplegable de Resultados Globales (Histórico y Futuro) -->
+      <div id="panelResultadosBusqueda" class="search-results-dropdown" style="display: none;"></div>
+    </div>
+
+    <!-- Acciones de Cabecera -->
+    <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+      <button class="btn btn-header-action" onclick="abrirModalAuditoriaPagos()" title="Auditar citas pendientes de cobro">
+        <i class="fa-solid fa-clock-rotate-left" style="color: #ea580c;"></i>
+        <span>Auditar Pagos</span>
+      </button>
+      <button class="btn btn-header-action" onclick="abrirModalDatosPago()" title="Configurar datos bancarios y enlaces de pago">
+        <i class="fa-solid fa-credit-card" style="color: var(--turquesa);"></i>
+        <span>Datos de Cobro</span>
+      </button>
+      <button class="btn btn-header-action" onclick="toggleNotasSemana()" title="Bloc de notas del consultorio">
+        <i class="fa-solid fa-note-sticky"></i>
+        <span>Notas</span>
+      </button>
+      <button class="btn btn-header-action" onclick="imprimirAgenda()" title="Imprimir o guardar en PDF">
+        <i class="fa-solid fa-print"></i>
+        <span>Imprimir</span>
+      </button>
+      <button class="btn-logout" id="logoutBtn" title="Cerrar sesión segura">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+        <span>Salir</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Barra de Controles y Resumen Semanal -->
+  <section class="agenda-controls no-print">
+    <!-- Navegación de Semanas -->
+    <div style="display: flex; align-items: center; gap: 0.4rem;">
+      <button class="btn btn-nav" onclick="cambiarSemana(-1)" title="Semana anterior"><i class="fa-solid fa-chevron-left"></i></button>
+      <button class="btn btn-nav" onclick="irHoy()" title="Ir a la semana actual"><i class="fa-solid fa-calendar-day"></i> Hoy</button>
+      <button class="btn btn-nav" onclick="cambiarSemana(1)" title="Semana siguiente"><i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+
+    <!-- Título y Métricas en Vivo -->
+    <div class="stats-center-wrapper">
+      <h2 id="rangoSemana" style="font-size: 1.15rem; font-weight: 700; color: var(--texto-oscuro); text-align: center; margin-bottom: 0.3rem;">Semana Actual</h2>
+      
+      <div class="stats-pills-row">
+        <div class="stat-pill" title="Total de citas agendadas esta semana">
+          <i class="fa-solid fa-calendar-check" style="color: var(--turquesa);"></i>
+          <span id="statTotalCitas">0 citas</span>
+        </div>
+        <div class="stat-pill" title="Citas marcadas como pagadas">
+          <i class="fa-solid fa-circle-check" style="color: #16a34a;"></i>
+          <span id="statPagadas">0 pagadas</span>
+        </div>
+        <div class="stat-pill clickable" id="pillPorPagar" onclick="abrirModalAuditoriaPagos()" title="Clic para ver y gestionar citas pendientes de cobro">
+          <i class="fa-solid fa-clock-rotate-left" style="color: #ea580c;"></i>
+          <span id="statPorPagar">0 por pagar</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtro de Días y Botón de Nueva Cita -->
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <!-- Toggle de Días (Lun-Vie / Lun-Dom) -->
+      <div class="day-filter-switch">
+        <button id="btnFiltro5" class="filter-opt" onclick="setFiltroDias(5)" title="Ver de Lunes a Viernes">Lun - Vie</button>
+        <button id="btnFiltro7" class="filter-opt active" onclick="setFiltroDias(7)" title="Ver de Lunes a Domingo">7 Días</button>
+      </div>
+
+      <button class="btn btn-nueva-cita" onclick="abrirModal()">
+        <i class="fa-solid fa-plus"></i> Agendar
+      </button>
+      <button class="btn btn-icon-refresh" onclick="initAgenda()" title="Recargar agenda">
+        <i class="fa-solid fa-arrows-rotate"></i>
+      </button>
+    </div>
+  </section>
+
+  <!-- Encabezado exclusivo para Impresión / PDF -->
+  <div class="print-only-header">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <h1 style="color: #EC5E86; font-size: 1.5rem; margin: 0;">PsicoLau — Agenda Semanal</h1>
+        <p style="color: #666; font-size: 0.9rem; margin: 0.2rem 0 0 0;">Ana Laura Gómez Díaz · Psicología Clínica y Neuropsicología</p>
+      </div>
+      <div id="printRangoSemana" style="font-weight: 700; font-size: 1rem; color: #333;"></div>
+    </div>
+  </div>
+
+  <!-- Modal para Nueva / Editar Cita y Bloqueos -->
+  <div id="modalNuevaCita" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; padding: 1rem;">
+    <div style="background: white; padding: 1.8rem; border-radius: 14px; width: 100%; max-width: 480px; max-height: 94vh; overflow-y: auto; box-shadow: 0 16px 40px rgba(0,0,0,0.25);">
+      <!-- Cabecera del Modal -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.2rem; gap: 0.8rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.8rem;">
+        <div style="flex: 1; min-width: 0;">
+          <h3 id="modalTitulo" style="color: var(--rosa-coral); font-size: 1.3rem; margin: 0; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+            <i class="fa-solid fa-calendar-plus"></i>
+            <span>Agendar Cita</span>
+          </h3>
+          <div id="modalSubtitulo" style="display: none; margin-top: 5px;"></div>
+        </div>
+        <button type="button" onclick="cerrarModal()" class="btn-close-modal" title="Cerrar modal">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Selector de Tipo de Registro: Cita vs Bloqueo Personal -->
+      <div id="seccionTabsTipo" class="event-type-tabs" style="display: flex; gap: 0.5rem; margin-bottom: 1.2rem;">
+        <button type="button" id="tabTipoCita" class="tab-btn active" onclick="seleccionarTipoRegistro('CITA')">
+          <i class="fa-solid fa-user-doctor"></i> Cita Paciente
+        </button>
+        <button type="button" id="tabTipoBloqueo" class="tab-btn" onclick="seleccionarTipoRegistro('BLOQUEO')">
+          <i class="fa-solid fa-ban"></i> Bloqueo / Personal
+        </button>
+      </div>
+
+      <form id="formNuevaCita">
+        <input type="hidden" id="nc_id">
+
+        <!-- Campo de Nombre / Motivo de Bloqueo -->
+        <div class="form-group">
+          <label id="lblNombre" for="nc_nombre"><i class="fa-solid fa-user" style="color: var(--turquesa); margin-right: 4px;"></i> Nombre del paciente / Asunto *</label>
+          <input type="text" id="nc_nombre" required placeholder="Ej: Mariana López, Carlos Ruiz..." oninput="autoDetectarColorPaciente(this.value)">
+        </div>
+
+        <!-- Campos de Contacto (Ocultos si es Bloqueo) -->
+        <div id="camposContactoPaciente" style="display: grid; grid-template-columns: 1fr 1.25fr; gap: 0.8rem;">
+          <div class="form-group">
+            <label for="nc_email"><i class="fa-solid fa-envelope" style="color: var(--turquesa); margin-right: 4px;"></i> Correo Electrónico</label>
+            <input type="email" id="nc_email" placeholder="correo@ejemplo.com" style="width: 100%; text-overflow: ellipsis;">
+          </div>
+          <div class="form-group">
+            <label for="nc_telefono"><i class="fa-brands fa-whatsapp" style="color: #16a34a; margin-right: 4px;"></i> WhatsApp / Teléfono</label>
+            <div style="display: flex; gap: 0.35rem;">
+              <select id="nc_prefijo" onchange="actualizarPlaceholderTelefono(this.value)" style="width: 95px; padding: 0.72rem 0.3rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.84rem; background: #f8fafc; font-weight: 600; cursor: pointer; flex-shrink: 0;">
+                <option value="+52" selected>🇲🇽 +52</option>
+                <option value="+1">🇺🇸/🇨🇦 +1</option>
+                <option value="+34">🇪🇸 +34</option>
+                <option value="+57">🇨🇴 +57</option>
+                <option value="+54">🇦🇷 +54</option>
+                <option value="+56">🇨🇱 +56</option>
+                <option value="+51">🇵🇪 +51</option>
+                <option value="+593">🇪🇨 +593</option>
+                <option value="+502">🇬🇹 +502</option>
+                <option value="+506">🇨🇷 +506</option>
+                <option value="+503">🇸🇻 +503</option>
+                <option value="+504">🇭🇳 +504</option>
+                <option value="+505">🇳🇮 +505</option>
+                <option value="+507">🇵🇦 +507</option>
+                <option value="+598">🇺🇾 +598</option>
+                <option value="+58">🇻🇪 +58</option>
+                <option value="+49">🇩🇪 +49</option>
+                <option value="+33">🇫🇷 +33</option>
+                <option value="+44">🇬🇧 +44</option>
+                <option value="+39">🇮🇹 +39</option>
+                <option value="+41">🇨🇭 +41</option>
+                <option value="">🌐 Otro</option>
+              </select>
+              <input type="tel" id="nc_telefono" placeholder="Número de WhatsApp" style="flex: 1; min-width: 0; padding: 0.72rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.92rem;">
+            </div>
+          </div>
+        </div>
+
+        <!-- Fecha y Hora -->
+        <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 0.8rem; margin-bottom: 0.8rem;">
+          <div>
+            <label style="display: block; margin-bottom: 0.4rem; font-weight: 500;"><i class="fa-solid fa-calendar" style="color: var(--turquesa); margin-right: 4px;"></i> Fecha *</label>
+            <input type="date" id="nc_fecha" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem;">
+          </div>
+          <div>
+            <label style="display: block; margin-bottom: 0.4rem; font-weight: 500;"><i class="fa-solid fa-clock" style="color: var(--turquesa); margin-right: 4px;"></i> Hora *</label>
+            <input type="time" id="nc_hora" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem;">
+          </div>
+        </div>
+
+        <!-- Notas / Observaciones -->
+        <div class="form-group">
+          <label for="nc_notas"><i class="fa-solid fa-comment-dots" style="color: var(--turquesa); margin-right: 4px;"></i> Notas / Observaciones (opcional)</label>
+          <textarea id="nc_notas" rows="2" placeholder="Ej: cada 15 días, primera sesión, evaluación..." style="width: 100%; padding: 0.7rem; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; font-size: 0.9rem; resize: vertical;"></textarea>
+        </div>
+
+        <!-- Opciones de Citas Recurrentes (Solo al Crear Nueva Cita) -->
+        <div id="seccionRecurrencia" class="form-group" style="background: #f8fafc; padding: 0.8rem; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 1.2rem;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <label style="margin: 0; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.4rem;">
+              <input type="checkbox" id="nc_repetir" onchange="toggleOpcionesRecurrencia(this.checked)" style="width: 16px; height: 16px; cursor: pointer;">
+              <span><i class="fa-solid fa-repeat" style="color: var(--turquesa);"></i> Programar cita recurrente</span>
+            </label>
+          </div>
+
+          <div id="opcionesRecurrenciaDetalle" style="display: none; margin-top: 0.8rem; padding-top: 0.6rem; border-top: 1px dashed #cbd5e1;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
+              <div>
+                <label style="font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 0.2rem;">Frecuencia:</label>
+                <select id="nc_frecuencia" style="width: 100%; padding: 0.45rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem;">
+                  <option value="SEMANAL">Cada semana (7 días)</option>
+                  <option value="QUINCENAL">Cada 15 días (quincenal)</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 0.2rem;">Total de sesiones:</label>
+                <select id="nc_repeticiones" style="width: 100%; padding: 0.45rem; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem;">
+                  <option value="2">2 sesiones</option>
+                  <option value="4" selected>4 sesiones (1 mes aprox.)</option>
+                  <option value="8">8 sesiones (2 meses aprox.)</option>
+                  <option value="12">12 sesiones (protocolo completo)</option>
+                </select>
+              </div>
+            </div>
+            <small style="color: #64748b; font-size: 0.75rem; display: block; margin-top: 0.4rem;">Se crearán las citas automáticamente en las semanas correspondientes.</small>
+          </div>
+        </div>
+
+        <!-- Selector de Color (Easy Table Style) -->
+        <div id="seccionColorBloque" class="form-group" style="margin-bottom: 1.3rem;">
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;"><i class="fa-solid fa-palette" style="color: var(--turquesa); margin-right: 4px;"></i> Color del bloque:</label>
+          <div id="swatchesContainer" style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+            <!-- Generado por JS -->
+          </div>
+          <input type="hidden" id="nc_color" value="#3EB8CC">
+        </div>
+
+        <div id="editExtraActions" style="display: none; margin-bottom: 1.2rem; text-align: right;">
+          <button type="button" id="btnEliminarModal" style="background: none; border: none; color: #dc2626; font-size: 0.88rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+            <i class="fa-solid fa-trash-can"></i> Eliminar esta cita
+          </button>
+        </div>
+
+        <div id="modalFooterActions" style="display: flex; gap: 0.8rem;">
+          <button type="submit" id="btnGuardarModal" class="btn" style="flex: 1.5;"><i class="fa-solid fa-check" style="margin-right: 4px;"></i> Confirmar y Guardar</button>
+          <button type="button" id="btnCancelarModal" class="btn" style="flex: 1; background: var(--gris-calido);" onclick="cerrarModal()">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal / Bloc de Notas Semanales -->
+  <div id="modalNotasSemana" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; padding: 1rem;">
+    <div style="background: #fffef2; padding: 1.8rem; border-radius: 12px; width: 100%; max-width: 480px; box-shadow: 0 12px 35px rgba(0,0,0,0.25); border-top: 6px solid #eab308;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 style="color: #854d0e; font-size: 1.25rem; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fa-solid fa-note-sticky"></i> Bloc de Notas del Consultorio
+        </h3>
+        <button onclick="toggleNotasSemana()" style="background:none; border:none; font-size:1.5rem; color:#aaa; cursor:pointer;">&times;</button>
+      </div>
+      <p style="font-size: 0.85rem; color: #713f12; margin-bottom: 0.8rem;">Escribe recordatorios clínicos, tareas pendientes o pendientes de materiales. Se guardan automáticamente.</p>
+      <textarea id="textoNotasConsultorio" rows="7" placeholder="Ej:&#10;- Entregar reporte neuropsicológico el jueves&#10;- Enviar escalas de TEA a paciente nuevo&#10;- Revisar lecturas del grupo de adultos..." style="width: 100%; padding: 0.8rem; border: 1px solid #fde047; border-radius: 8px; font-family: inherit; font-size: 0.95rem; line-height: 1.5; background: #ffffff;" oninput="guardarNotasConsultorio(this.value)"></textarea>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.8rem;">
+        <span id="labelNotasGuardadas" style="font-size: 0.78rem; color: #16a34a; display: flex; align-items: center; gap: 4px;"><i class="fa-solid fa-check"></i> Guardado automáticamente</span>
+        <button class="btn" style="padding: 0.4rem 1rem; width: auto; font-size: 0.85rem;" onclick="toggleNotasSemana()">Listo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal / Auditoría de Pagos y Cobranza -->
+  <div id="modalAuditoriaPagos" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; padding: 1rem;">
+    <div style="background: #ffffff; padding: 1.8rem; border-radius: 14px; width: 100%; max-width: 580px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 16px 40px rgba(0,0,0,0.25);">
+      <!-- Cabecera de Auditoría -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.8rem;">
+        <div>
+          <h3 style="color: #ea580c; font-size: 1.3rem; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-clock-rotate-left"></i> Auditoría de Pagos
+          </h3>
+          <p id="auditSubtitulo" style="font-size: 0.84rem; color: #64748b; margin: 0.25rem 0 0 0;">Control de sesiones pendientes por cobrar</p>
+        </div>
+        <button type="button" class="btn-close-modal" onclick="cerrarModalAuditoriaPagos()" title="Cerrar modal">&times;</button>
+      </div>
+
+      <!-- Filtros: Esta Semana vs Todo el Historial -->
+      <div class="audit-tabs-row">
+        <button type="button" id="tabAuditSemana" class="audit-tab-btn active" onclick="cambiarFiltroAuditoria('SEMANA')">
+          <i class="fa-solid fa-calendar-week"></i> Esta Semana
+        </button>
+        <button type="button" id="tabAuditTodas" class="audit-tab-btn" onclick="cambiarFiltroAuditoria('TODAS')">
+          <i class="fa-solid fa-layer-group"></i> Todo el Historial
+        </button>
+      </div>
+
+      <!-- Lista de Cuentas por Cobrar -->
+      <div id="auditListaContainer" style="flex: 1; overflow-y: auto; padding-right: 4px; margin-bottom: 1rem; min-height: 180px;">
+        <!-- Se genera dinámicamente -->
+      </div>
+
+      <!-- Pie del Modal -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.8rem; border-top: 1px solid #f1f5f9;">
+        <button type="button" class="btn" style="background: var(--gris-calido); width: auto; padding: 0.5rem 1.4rem;" onclick="cerrarModalAuditoriaPagos()">Cerrar</button>
+        <button type="button" class="btn" style="background: var(--turquesa); width: auto; padding: 0.5rem 1.2rem; font-size: 0.85rem;" onclick="cerrarModalAuditoriaPagos(); abrirModalDatosPago();">
+          <i class="fa-solid fa-gear" style="margin-right: 4px;"></i> Configurar Datos de Pago
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal / Configuración de Datos Bancarios y Enlaces de Pago -->
+  <div id="modalDatosPago" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; padding: 1rem;">
+    <div style="background: #ffffff; padding: 1.8rem; border-radius: 14px; width: 100%; max-width: 500px; max-height: 92vh; overflow-y: auto; box-shadow: 0 16px 40px rgba(0,0,0,0.25);">
+      <!-- Cabecera -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.8rem;">
+        <h3 style="color: var(--rosa-coral); font-size: 1.25rem; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fa-solid fa-credit-card" style="color: var(--turquesa);"></i> Datos de Cobro
+        </h3>
+        <button type="button" class="btn-close-modal" onclick="cerrarModalDatosPago()" title="Cerrar modal">&times;</button>
+      </div>
+
+      <div class="datos-pago-tip-box">
+        <i class="fa-solid fa-circle-info" style="margin-right: 4px;"></i>
+        Estos datos se insertarán automáticamente en los mensajes de WhatsApp cuando envíes recordatorios de cobro o pidas comprobantes.
+      </div>
+
+      <form id="formDatosPago" onsubmit="guardarDatosPago(event)">
+        <div class="form-group">
+          <label for="dp_banco"><i class="fa-solid fa-building-columns" style="color: var(--turquesa); margin-right: 4px;"></i> Banco / Institución</label>
+          <input type="text" id="dp_banco" placeholder="Ej: BBVA, Santander, Nu, Hey Banco, Banorte..." style="width: 100%;">
+        </div>
+
+        <div class="form-group">
+          <label for="dp_titular"><i class="fa-solid fa-user-check" style="color: var(--turquesa); margin-right: 4px;"></i> Titular de la Cuenta</label>
+          <input type="text" id="dp_titular" placeholder="Ej: Ana Laura Gómez Díaz" style="width: 100%;">
+        </div>
+
+        <div class="form-group">
+          <label for="dp_clabe"><i class="fa-solid fa-money-bill-transfer" style="color: var(--turquesa); margin-right: 4px;"></i> Cuenta CLABE (18 dígitos) o Tarjeta</label>
+          <input type="text" id="dp_clabe" placeholder="Ej: 012 180 01512345678 9" style="width: 100%;">
+        </div>
+
+        <div class="form-group">
+          <label for="dp_enlace"><i class="fa-brands fa-paypal" style="color: #0284c7; margin-right: 4px;"></i> Enlace Internacional (PayPal / Stripe / Wise)</label>
+          <input type="text" id="dp_enlace" placeholder="Ej: paypal.me/PsicoLau o https://buy.stripe.com/..." style="width: 100%;">
+        </div>
+
+        <div class="form-group">
+          <label for="dp_monto"><i class="fa-solid fa-tag" style="color: var(--turquesa); margin-right: 4px;"></i> Cuota sugerida por sesión (Opcional)</label>
+          <input type="text" id="dp_monto" placeholder="Ej: $700 MXN o $45 USD" style="width: 100%;">
+        </div>
+
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.8rem; margin: 1rem 0;">
+          <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.86rem; color: #334155; cursor: pointer; font-weight: 500;">
+            <input type="checkbox" id="dp_incluir_recordatorio" style="margin-top: 3px;">
+            <span><strong>Incluir datos bancarios automáticamente</strong> al final del recordatorio de cita previo a la sesión.</span>
+          </label>
+        </div>
+
+        <div style="display: flex; gap: 0.8rem; margin-top: 1.2rem;">
+          <button type="submit" class="btn" style="flex: 1.5;"><i class="fa-solid fa-floppy-disk" style="margin-right: 4px;"></i> Guardar Datos de Cobro</button>
+          <button type="button" class="btn" style="flex: 1; background: var(--gris-calido);" onclick="cerrarModalDatosPago()">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Contenedor Principal de la Agenda -->
+  <main class="agenda-container">
+    <div id="loader">Cargando agenda...</div>
+    
+    <div id="easyTableWrapper" class="easytable-wrapper" style="display: none;">
+      <table class="easytable" id="easyTable">
+        <thead id="easyTableHead">
+          <!-- Cabecera generada dinámicamente -->
+        </thead>
+        <tbody id="easyTableBody">
+          <!-- Filas de franjas horarias y celdas de citas -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script src="panel.js"></script>
+</body>
+</html>

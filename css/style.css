@@ -465,10 +465,6 @@ footer {
   transition: max-height 0.4s ease, padding 0.4s ease;
 }
 
-.faq-item.active .faq-answer {
-  /* Se calculará y asignará dinámicamente con JS, pero añadimos un max-height para el fallback si no se usa JS complejo. JS controlará max-height inline. */
-}
-
 .faq-answer p {
   padding-bottom: 1.5rem;
   color: var(--color-text);
