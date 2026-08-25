@@ -75,7 +75,11 @@ Es un espacio de salud mental: prioriza la calidez, claridad, ética y confianza
 
 ## 🔒 Reglas de Seguridad y Despliegue
 1. **Cloudflare Pages**: Despliegue estático del frontend desde GitHub con headers de seguridad CSP en `_headers`.
-2. **Blindaje `.gitignore`**:
+2. **Render (Backend API)**: Alojamiento del servicio Node.js (`/backend`) con root directory `backend`, build command `npm install && npx prisma generate`, start command `npm start` y subdominio oficial `api.psicolau.com`.
+3. **📌 Recordatorio para Despliegue en Producción (UptimeRobot)**:
+   - En el plan gratuito de Render, el servicio se suspende tras 15 minutos de inactividad.
+   - **Acción requerida al desplegar**: Configurar un monitor gratuito en [UptimeRobot](https://uptimerobot.com/) o [cron-job.org](https://cron-job.org/) que envíe una petición HTTP cada 10 minutos a `https://api.psicolau.com/api/health`. Esto mantendrá la API despierta 24/7 con respuesta instantánea sin costo.
+4. **Blindaje `.gitignore`**:
    - Variables de entorno (`.env`, `.env.*`, `**/.env`).
    - Dependencias (`node_modules/`, `**/node_modules/`).
    - Documentos privados (`Recursos para que use la IA/`, `caso-estudio/`).
