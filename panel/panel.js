@@ -1,4 +1,4 @@
-const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:' || !window.location.hostname)
   ? 'http://localhost:3000/api'
   : (window.PSICOLAU_API_URL || 'https://api.psicolau.com/api');
 
