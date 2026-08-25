@@ -10,6 +10,25 @@ const login = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Email y contraseña son requeridos' });
     }
 
+    // Acceso exclusivo de desarrollo local (inactivo y bloqueado en producción)
+    const esEntornoLocal = process.env.NODE_ENV !== 'production';
+    const esHostLocal = req.hostname === 'localhost' || req.hostname === '127.0.0.1';
+    const esCredencialDev = (email === 'admin' || email === 'admin@local.com' || email === 'dev') && password === 'admin';
+
+    if (esEntornoLocal && esHostLocal && esCredencialDev) {
+      const tokenDev = jwt.sign(
+        { id: 9999, email: 'dev@local.com', role: 'DEV_ADMIN' },
+        process.env.JWT_SECRET || 'psicolau_dev_jwt_secret',
+        { expiresIn: '24h' }
+      );
+
+      return res.json({
+        success: true,
+        token: tokenDev,
+        message: 'Acceso de desarrollo local concedido'
+      });
+    }
+
     // Buscar usuaria en la base de datos
     const usuario = await prisma.usuario.findUnique({
       where: { email }
