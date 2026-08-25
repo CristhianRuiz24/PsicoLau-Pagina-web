@@ -984,6 +984,16 @@ window.agendarEnCelda = function(fecha, hora) {
   document.getElementById('nc_hora').value = hora;
 };
 
+// Imprimir o exportar la agenda semanal a PDF
+window.imprimirAgenda = function() {
+  const rangoEl = document.getElementById('rangoSemana');
+  const printRangoEl = document.getElementById('printRangoSemana');
+  if (rangoEl && printRangoEl) {
+    printRangoEl.textContent = rangoEl.textContent;
+  }
+  window.print();
+};
+
 // Cálculo de contraste de texto
 function getContrastColor(hexColor) {
   if (!hexColor) return '#ffffff';
@@ -1122,7 +1132,11 @@ function setModoFormulario(modo) {
     campos.forEach(id => {
       const el = document.getElementById(id);
       if (el) {
-        el.readOnly = true;
+        if (el.tagName === 'SELECT') {
+          el.disabled = true;
+        } else {
+          el.readOnly = true;
+        }
         el.style.backgroundColor = '#f8fafc';
         el.style.borderColor = '#e2e8f0';
         el.style.color = '#334155';
@@ -1140,7 +1154,11 @@ function setModoFormulario(modo) {
     campos.forEach(id => {
       const el = document.getElementById(id);
       if (el) {
-        el.readOnly = false;
+        if (el.tagName === 'SELECT') {
+          el.disabled = false;
+        } else {
+          el.readOnly = false;
+        }
         el.style.backgroundColor = '';
         el.style.borderColor = '';
         el.style.color = '';

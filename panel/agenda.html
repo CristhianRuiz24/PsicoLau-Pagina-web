@@ -12,9 +12,9 @@
 
   <!-- Barra de Encabezado Superior -->
   <header class="dashboard-header no-print">
-    <div style="display: flex; align-items: center; gap: 0.8rem;">
+    <div class="dashboard-brand" style="display: flex; align-items: center; gap: 0.8rem;">
       <i class="fa-solid fa-brain" style="font-size: 1.6rem; color: var(--rosa-coral);"></i>
-      <h1 style="margin: 0; font-size: 1.4rem;">PsicoLau Panel</h1>
+      <h1 style="margin: 0; font-size: 1.35rem;">PsicoLau Panel</h1>
     </div>
 
     <!-- Buscador Rápido de Pacientes -->
@@ -28,26 +28,26 @@
     </div>
 
     <!-- Acciones de Cabecera -->
-    <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+    <div class="header-actions-group">
       <button class="btn btn-header-action" onclick="abrirModalAuditoriaPagos()" title="Auditar citas pendientes de cobro">
         <i class="fa-solid fa-clock-rotate-left" style="color: #ea580c;"></i>
-        <span>Auditar Pagos</span>
+        <span class="btn-text">Auditar Pagos</span>
       </button>
       <button class="btn btn-header-action" onclick="abrirModalDatosPago()" title="Configurar datos bancarios y enlaces de pago">
         <i class="fa-solid fa-credit-card" style="color: var(--turquesa);"></i>
-        <span>Datos de Cobro</span>
+        <span class="btn-text">Datos de Cobro</span>
       </button>
       <button class="btn btn-header-action" onclick="toggleNotasSemana()" title="Bloc de notas del consultorio">
         <i class="fa-solid fa-note-sticky"></i>
-        <span>Notas</span>
+        <span class="btn-text">Notas</span>
       </button>
-      <button class="btn btn-header-action" onclick="imprimirAgenda()" title="Imprimir o guardar en PDF">
+      <button class="btn btn-header-action btn-print-desktop" onclick="imprimirAgenda()" title="Imprimir o guardar en PDF">
         <i class="fa-solid fa-print"></i>
-        <span>Imprimir</span>
+        <span class="btn-text">Imprimir</span>
       </button>
       <button class="btn-logout" id="logoutBtn" title="Cerrar sesión segura">
         <i class="fa-solid fa-arrow-right-from-bracket"></i>
-        <span>Salir</span>
+        <span class="btn-text">Salir</span>
       </button>
     </div>
   </header>
@@ -191,7 +191,43 @@
           </div>
           <div>
             <label style="display: block; margin-bottom: 0.4rem; font-weight: 500;"><i class="fa-solid fa-clock" style="color: var(--turquesa); margin-right: 4px;"></i> Hora *</label>
-            <input type="time" id="nc_hora" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem;">
+            <select id="nc_hora" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem; background: #ffffff; cursor: pointer;">
+              <option value="07:00">07:00 a.m.</option>
+              <option value="07:30">07:30 a.m.</option>
+              <option value="08:00">08:00 a.m.</option>
+              <option value="08:30">08:30 a.m.</option>
+              <option value="09:00">09:00 a.m.</option>
+              <option value="09:30">09:30 a.m.</option>
+              <option value="10:00">10:00 a.m.</option>
+              <option value="10:30">10:30 a.m.</option>
+              <option value="11:00">11:00 a.m.</option>
+              <option value="11:30">11:30 a.m.</option>
+              <option value="12:00">12:00 p.m.</option>
+              <option value="12:30">12:30 p.m.</option>
+              <option value="13:00">01:00 p.m.</option>
+              <option value="13:30">01:30 p.m.</option>
+              <option value="14:00">02:00 p.m.</option>
+              <option value="14:30">02:30 p.m.</option>
+              <option value="15:00">03:00 p.m.</option>
+              <option value="15:30">03:30 p.m.</option>
+              <option value="16:00">04:00 p.m.</option>
+              <option value="16:30">04:30 p.m.</option>
+              <option value="17:00">05:00 p.m.</option>
+              <option value="17:30">05:30 p.m.</option>
+              <option value="18:00">06:00 p.m.</option>
+              <option value="18:30">06:30 p.m.</option>
+              <option value="19:00">07:00 p.m.</option>
+              <option value="19:30">07:30 p.m.</option>
+              <option value="20:00">08:00 p.m.</option>
+              <option value="20:30">08:30 p.m.</option>
+              <option value="21:00">09:00 p.m.</option>
+              <option value="21:30">09:30 p.m.</option>
+              <option value="22:00">10:00 p.m.</option>
+              <option value="22:30">10:30 p.m.</option>
+              <option value="23:00">11:00 p.m.</option>
+              <option value="23:30">11:30 p.m.</option>
+              <option value="00:00">12:00 a.m. (Medianoche)</option>
+            </select>
           </div>
         </div>
 

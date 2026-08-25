@@ -950,6 +950,186 @@ body {
   line-height: 1.4;
 }
 
+/* ==========================================================================
+   RESPONSIVE DESIGN (TABLETS & MÓVILES)
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  /* Cabecera Principal */
+  .dashboard-header {
+    flex-wrap: wrap;
+    padding: 0.75rem 1rem;
+    gap: 0.6rem;
+  }
+
+  .dashboard-brand {
+    flex: 1 1 auto;
+  }
+
+  .dashboard-brand h1 {
+    font-size: 1.2rem !important;
+  }
+
+  .header-actions-group {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-wrap: nowrap;
+  }
+
+  .btn-header-action, .btn-logout {
+    padding: 0.45rem 0.65rem;
+    font-size: 0.8rem;
+  }
+
+  /* Ocultar texto largo en botones de cabecera en móviles */
+  .btn-header-action .btn-text,
+  .btn-logout .btn-text {
+    display: none;
+  }
+
+  .btn-header-action i,
+  .btn-logout i {
+    font-size: 1.05rem;
+    margin: 0;
+  }
+
+  .btn-print-desktop {
+    display: none !important;
+  }
+
+  /* Buscador a ancho completo en la segunda fila */
+  .search-box-wrapper {
+    order: 3;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 0.2rem;
+  }
+
+  .search-results-dropdown {
+    min-width: 100%;
+    max-width: 100%;
+  }
+
+  /* Controles de la Agenda */
+  .agenda-controls {
+    padding: 0.75rem 1rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .agenda-controls > div {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .stats-center-wrapper {
+    order: -1;
+    width: 100%;
+  }
+
+  .stats-center-wrapper h2 {
+    font-size: 1.05rem !important;
+  }
+
+  .stats-pills-row {
+    width: 100%;
+    justify-content: center;
+    gap: 0.4rem;
+  }
+
+  .stat-pill {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.72rem;
+  }
+
+  /* Tabla Semanal Fácil */
+  .easytable-wrapper {
+    margin: 0.5rem;
+    border-radius: 8px;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+
+  .easytable {
+    min-width: 780px;
+  }
+
+  /* Columna fija de horas para desplazamiento horizontal fluido */
+  .easytable th.time-col-header,
+  .easytable td.time-col {
+    position: sticky;
+    left: 0;
+    z-index: 20;
+    background: #f8fafc;
+    box-shadow: 2px 0 6px rgba(0, 0, 0, 0.08);
+    width: 85px !important;
+    min-width: 85px !important;
+    max-width: 85px !important;
+    font-size: 0.78rem;
+    padding: 0.4rem 0.2rem;
+  }
+
+  .easytable th {
+    font-size: 0.82rem;
+    padding: 0.6rem 0.3rem;
+  }
+
+  .easytable td.slot-cell {
+    min-width: 100px;
+    height: 58px;
+  }
+
+  .appointment-block {
+    font-size: 0.78rem;
+    padding: 0.3rem 0.35rem;
+  }
+
+  .appointment-block .patient-name {
+    font-size: 0.8rem;
+  }
+
+  .card-actions-capsule {
+    padding: 0 2px;
+  }
+
+  .card-btn, .btn-check-completada {
+    font-size: 0.82rem;
+    padding: 2px 3px;
+  }
+
+  /* Modales en Móviles */
+  #modalNuevaCita > div,
+  #modalNotasSemana > div,
+  #modalAuditoriaPagos > div,
+  #modalDatosPago > div {
+    padding: 1.2rem !important;
+    max-width: 96% !important;
+    border-radius: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .easytable {
+    min-width: 700px;
+  }
+
+  .easytable td.slot-cell {
+    min-width: 90px;
+  }
+
+  .day-filter-switch .filter-opt {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .btn-nueva-cita {
+    padding: 0.45rem 0.8rem;
+    font-size: 0.8rem;
+  }
+}
+
 /* === ESTILOS PARA IMPRESIÓN Y PDF === */
 .print-only-header {
   display: none;
