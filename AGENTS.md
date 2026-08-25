@@ -118,4 +118,12 @@ Es un espacio de salud mental: prioriza la calidez, claridad, ética y confianza
     - **Recordatorios Cordiales de Cobro por WhatsApp** (`enviarWhatsAppCobro`): Mensajes empáticos y clínicos preformateados con datos bancarios y solicitud de comprobante listos para enviar en 1 clic.
     - **Botón Rápido de Cobro en Tarjeta**: Icono de factura (`fa-file-invoice-dollar`) visible en tarjetas con pago pendiente en la matriz semanal.
     - **Saneamiento de Formato WhatsApp**: Sustitución de emojis y caracteres especiales por viñetas limpias (`•`) y negritas nativas (`*texto*`) para garantizar compatibilidad multiplataforma sin caracteres corruptos (``).
+- **2026-08-25 (Sesión 12 - Auditoría Integral y Optimización de Producción)**:
+  - **Auditoría Técnica Completa**: Revisión exhaustiva de frontend, panel, backend, seguridad, base de datos, CSP y SEO.
+  - **Control de Versiones Integral**: Seguimiento de todo el backend (`/backend`) y panel administrativo (`/panel`) en Git con blindaje de secretos y `.env`.
+  - **Centralización y Flexibilidad de API**: Configuración dinámica de `API_URL` / `API_BASE` en `panel.js`, `panel/index.html` y `main.js` para detección automática de entorno local (`localhost:3000`) o producción (`api.psicolau.com` / `window.PSICOLAU_API_URL`).
+  - **Actualización de Seguridad CSP (`_headers`)**: Eliminación definitiva de Formspree y adición de directivas `connect-src` (`http://localhost:3000`, `https://api.psicolau.com`) y `script-src 'unsafe-inline'`.
+  - **Optimización de SEO y Rastreo**: Bloqueo del panel administrativo en `robots.txt` (`Disallow: /panel/`), referencia directa a `sitemap.xml` y adición de etiquetas `<lastmod>` en cada URL.
+  - **Prevención de Saturación de Conexiones**: Documentación de parámetros de Connection Pooling (`connection_limit=5&pool_timeout=20`) para optimización de Supabase Free Tier en `.env.example`.
+
 
