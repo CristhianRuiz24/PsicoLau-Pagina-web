@@ -67,12 +67,13 @@ function renderAuditoriaPagos() {
   const subtitulo = document.getElementById('auditSubtitulo');
   if (!container) return;
 
-  // Filtrar citas no canceladas, que no sean bloqueos y que tengan estado de pago PENDIENTE
+  // Filtrar citas no canceladas, que no sean bloqueos ni terapias grupales y que tengan estado de pago PENDIENTE
   let pendientes = citasCache.filter(c => {
     if (c.estado_cita === 'CANCELADA') return false;
     if (c.estado_pago === 'PAGADO') return false;
     const esBloqueo = (c.categoria && c.categoria.startsWith('[BLOQUEO]')) || (c.paciente && c.paciente.nombre && c.paciente.nombre.startsWith('[BLOQUEO]'));
-    return !esBloqueo;
+    const esGrupal = (c.categoria && c.categoria.startsWith('[GRUPAL]')) || (c.paciente && c.paciente.nombre && c.paciente.nombre.startsWith('[GRUPAL]'));
+    return !esBloqueo && !esGrupal;
   });
 
   if (filtroAuditoriaActual === 'SEMANA') {

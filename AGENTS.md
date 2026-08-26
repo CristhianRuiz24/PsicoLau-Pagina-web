@@ -213,6 +213,11 @@ Es un espacio de salud mental: prioriza la calidez, claridad, ética y confianza
   - **Ocultamiento de Selector de Pestañas en Edición**: Bloqueo del contenedor `#seccionTabsTipo` (`display: none`) al invocar `editarCita(id)`, impidiendo que una cita individual se convierta por error en grupo o bloqueo, o viceversa.
   - **Badges Informativos Inmutables**: Renderizado de badge visual en `#modalSubtitulo` (`.badge-tipo-info`) indicando de forma explícita y de solo lectura la naturaleza de la sesión (`👤 Cita Individual`, `👥 Terapia Grupal` o `🚫 Bloqueo de Horario`).
   - **Blindaje en Frontend y Backend**: Normalización del `tipoEfectivo` en el submit de `app.js` basado en la cita original en memoria y validación estricta en el controlador `editarCita` de `agendaController.js` para asegurar la persistencia invariable de prefijos y relaciones en PostgreSQL.
+- **2026-08-26 (Sesión 23 - Depuración de WhatsApp y Exclusión de Terapias Grupales en Auditoría de Pagos)**:
+  - **Depuración de Cápsula en Tarjetas Grupales**: Ocultamiento del botón de WhatsApp en tarjetas con `esGrupal` en la matriz semanal, conservando exclusivamente `[ ✓ Realizada ]`, `[ 📹 Zoom ]`, `[ ✏️ Editar ]` y `[ 🗑️ Eliminar ]`.
+  - **Exclusión de Grupos en Auditoría de Pagos**: Filtrado estricto en `renderAuditoriaPagos` de `pagos.js` para ignorar registros `[GRUPAL]`, manteniendo el modal `#modalAuditoriaPagos` 100% focalizado en cobranza y cuentas por cobrar de pacientes individuales.
+  - **Calibración de Métricas Semanales**: Ajuste del contador de citas `pagadas / por pagar` en la cabecera para excluir terapias grupales y bloqueos, calculando ingresos de sesiones individuales.
+
 
 
 

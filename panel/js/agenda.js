@@ -229,7 +229,8 @@ function renderEasyTable() {
 
   citasEstaSemana.forEach(c => {
     const esBloqueo = (c.categoria && c.categoria.startsWith('[BLOQUEO]')) || (c.paciente && c.paciente.nombre.startsWith('[BLOQUEO]'));
-    if (!esBloqueo) {
+    const esGrupal = (c.categoria && c.categoria.startsWith('[GRUPAL]')) || (c.paciente && c.paciente.nombre.startsWith('[GRUPAL]'));
+    if (!esBloqueo && !esGrupal) {
       countTotal++;
       if (c.estado_pago === 'PAGADO') {
         countPagadas++;
@@ -340,9 +341,11 @@ function renderEasyTable() {
                     <button type="button" class="card-btn btn-zoom" onclick="abrirZoomSesion(${cita.id}, event)" title="${cita.paciente && cita.paciente.enlaceZoom ? (esGrupal ? 'Entrar a la sala grupal de Zoom' : 'Entrar a la sesión de Zoom (' + nombreLimpio + ')') : 'Configurar enlace de Zoom'}" style="color: ${cita.paciente && cita.paciente.enlaceZoom ? '#2563eb' : '#94a3b8'};">
                       <i class="fa-solid fa-video"></i>
                     </button>
-                    <button type="button" class="card-btn" onclick="enviarWhatsAppRecordatorio(${cita.id}, event)" title="${esGrupal ? 'Compartir enlace de Zoom por WhatsApp' : 'Recordatorio de cita por WhatsApp'}" style="color: #16a34a;">
-                      <i class="fa-brands fa-whatsapp"></i>
-                    </button>
+                    ${!esGrupal ? `
+                      <button type="button" class="card-btn" onclick="enviarWhatsAppRecordatorio(${cita.id}, event)" title="Recordatorio de cita por WhatsApp" style="color: #16a34a;">
+                        <i class="fa-brands fa-whatsapp"></i>
+                      </button>
+                    ` : ''}
                     ${!esPagado && !esGrupal ? `
                       <button type="button" class="card-btn" onclick="enviarWhatsAppCobro(${cita.id}, event)" title="Recordar pago y enviar datos bancarios por WhatsApp" style="color: #ea580c;">
                         <i class="fa-solid fa-file-invoice-dollar"></i>
