@@ -165,9 +165,9 @@ Es un espacio de salud mental: prioriza la calidez, claridad, ética y confianza
       - `[ ✏️ Editar ]` (Edición In Situ): Permite editar directamente los 8 campos y la fecha dentro de la misma vista ampliada sin regresar al listado de sesiones, guardando con `PUT /api/expediente/:id` y actualizando la vista inmediatamente en memoria.
       - `[ 🖨️ Imprimir PDF ]`: Genera la nota clínica oficial exclusivamente de esa sesión ajustada y calibrada para encajar en **1 sola página limpia**, con membrete de PSICOLAU, firma y pie legal confidencial sin desbordamientos a una segunda página en blanco.
       - `[ 📄 Guardar .txt ]`: Descarga el archivo de texto estructurado de esa sesión en particular.
-- **2026-08-26 (Sesión 16 - Auditoría Integral, Blindaje y Sincronización)**:
-  - **Auditoría Técnica Completa**: Revisión general de backend, frontend, seguridad, base de datos y Git.
-  - **Relaciones en Cascada en Prisma**: Configuración de `onDelete: Cascade` en `Cita` y `LogNotificacion` para integridad referencial consistente en la base de datos PostgreSQL.
-  - **Rate Limiting Defensivo**: Implementación de limitador de tasa (`120 req / min`) en rutas autenticadas de agenda, pacientes y expedientes para prevención de saturación.
-  - **Unificación de Rutas REST**: Limpieza del alias redundante `/expedientes` en `routes/index.js`, consolidando el uso de `/expediente`.
-  - **Control de Versiones y Seguimiento**: Verificación y preparación de los 11 archivos de código nuevos para seguimiento en Git sin fugas ni omisiones.
+- **2026-08-26 (Sesión 17 - Optimización Integral de SEO, Open Graph y Schema.org)**:
+  - **Open Graph & Twitter Cards**: Implementación completa de metadatos para vistas previas enriquecidas en WhatsApp, Facebook, LinkedIn y Twitter en las 9 páginas públicas.
+  - **Etiquetas Canónicas**: Adición de `<link rel="canonical">` en cada página pública para consolidación de autoridad y prevención de contenido duplicado.
+  - **Datos Estructurados Schema.org (JSON-LD)**: Implementación de esquemas clínicos (`Psychologist`, `MedicalBusiness`, `ProfilePage`, `FAQPage`, `MedicalWebPage`, `Book`, `ContactPage`) para paneles de conocimiento y rich snippets en Google.
+  - **Doble Blindaje de Indexación**: Adición de directiva `<meta name="robots" content="noindex, nofollow">` en `panel/index.html` y `panel/agenda.html` para protección redundante de la suite clínica.
+
