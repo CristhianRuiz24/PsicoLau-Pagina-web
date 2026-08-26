@@ -1138,13 +1138,304 @@ body {
   border-bottom: 2px solid #EC5E86;
 }
 
+/* =========================================================
+   MÓDULO DE EXPEDIENTES CLÍNICOS Y NOTAS DE SESIÓN (PSICOLAU)
+   ========================================================= */
+
+/* Tarjetas del Directorio de Pacientes */
+.directorio-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.directorio-card:hover {
+  border-color: var(--turquesa);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(62, 184, 204, 0.12);
+}
+
+.pill-exp-count {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pill-exp-count.has-notes {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.pill-exp-count.no-notes {
+  background: #f8fafc;
+  color: #94a3b8;
+  border: 1px solid #e2e8f0;
+}
+
+.btn-ver-expediente-directorio {
+  background: #f8fafc;
+  color: var(--texto-oscuro);
+  border: 1px solid #cbd5e1;
+  padding: 0.45rem 0.85rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  width: auto;
+}
+
+.btn-ver-expediente-directorio:hover {
+  background: var(--turquesa);
+  color: #ffffff;
+  border-color: var(--turquesa);
+}
+
+.btn-borrar-paciente-directorio {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fee2e2;
+  padding: 0.45rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  width: auto;
+}
+
+.btn-borrar-paciente-directorio:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-color: #fca5a5;
+  transform: scale(1.05);
+}
+
+.btn-borrar-paciente-directorio.is-disabled {
+  background: #f8fafc;
+  color: #94a3b8;
+  border-color: #e2e8f0;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.btn-borrar-paciente-directorio.is-disabled:hover {
+  background: #f1f5f9;
+  color: #64748b;
+  border-color: #cbd5e1;
+  transform: none;
+}
+
+
+
+/* Tarjetas individuales de notas de sesión */
+.nota-expediente-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.2rem;
+  margin-bottom: 1.2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  transition: border-color 0.2s;
+}
+
+.nota-expediente-card:hover {
+  border-color: #cbd5e1;
+}
+
+.nota-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 0.6rem;
+  gap: 0.8rem;
+}
+
+.badge-numero-sesion {
+  background: var(--rosa-coral);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.nota-fecha-titulo {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.nota-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btn-nota-action {
+  background: none;
+  border: 1px solid #e2e8f0;
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.btn-nota-action.enlarge {
+  color: var(--turquesa);
+  background: #f0fdfa;
+  border-color: #ccfbf1;
+  font-weight: 700;
+}
+
+.btn-nota-action.enlarge:hover {
+  background: var(--turquesa);
+  color: #ffffff;
+  border-color: var(--turquesa);
+}
+
+.btn-nota-action.print {
+  color: #0284c7;
+  background: #f0f9ff;
+  border-color: #e0f2fe;
+}
+
+.btn-nota-action.print:hover {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+}
+
+.btn-nota-action.file {
+  color: #475569;
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.btn-nota-action.file:hover {
+  background: #475569;
+  color: #ffffff;
+  border-color: #475569;
+}
+
+.btn-nota-action.edit {
+  color: #334155;
+  background: #f8fafc;
+}
+
+.btn-nota-action.edit:hover {
+  background: #f1f5f9;
+  color: var(--turquesa);
+  border-color: var(--turquesa);
+}
+
+.btn-nota-action.delete {
+  color: #dc2626;
+  background: #fef2f2;
+  border-color: #fee2e2;
+}
+
+.btn-nota-action.delete:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+
+.nota-resumen-box {
+  background: #f0fdf4;
+  border-left: 3px solid #22c55e;
+  padding: 0.65rem 0.9rem;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #166534;
+  margin-bottom: 0.9rem;
+  line-height: 1.45;
+}
+
+.nota-campos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 0.8rem;
+  margin-bottom: 0.8rem;
+}
+
+.campo-clinico-item {
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+}
+
+.campo-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #475569;
+  margin-bottom: 0.3rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.campo-contenido {
+  font-size: 0.88rem;
+  color: #334155;
+  line-height: 1.45;
+  white-space: pre-line;
+}
+
+.nota-footer-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.73rem;
+  color: #94a3b8;
+  border-top: 1px solid #f8fafc;
+  padding-top: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.highlight-expediente {
+  background: #fef08a;
+  color: #854d0e;
+  font-weight: 700;
+  padding: 1px 3px;
+  border-radius: 3px;
+}
+
 @media print {
   body {
     background: #ffffff !important;
     font-size: 10pt;
   }
 
-  .no-print, header.dashboard-header, section.agenda-controls, #modalNuevaCita, #modalNotasSemana {
+  .no-print, header.dashboard-header, section.agenda-controls, #modalNuevaCita, #modalNotasSemana, #modalDirectorioExpedientes, #modalExpedientePaciente, #modalAuditoriaPagos, #modalDatosPago {
     display: none !important;
   }
 
@@ -1184,3 +1475,4 @@ body {
     display: none !important;
   }
 }
+

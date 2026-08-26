@@ -214,6 +214,9 @@ function renderEasyTable() {
                     <button type="button" class="btn-check-completada ${esCompletada ? 'completed' : 'pending'}" onclick="toggleCompletarCita(${cita.id}, event)" title="${esCompletada ? 'Sesión realizada (clic para desmarcar)' : 'Marcar sesión como realizada / completada'}">
                       <i class="${esCompletada ? 'fa-solid fa-circle-check' : 'fa-regular fa-circle'}"></i>
                     </button>
+                    <button type="button" class="card-btn" onclick="abrirExpedientePorCita(${cita.id}, event)" title="Expediente clínico del paciente (notas y sesiones)" style="color: var(--rosa-coral);">
+                      <i class="fa-solid fa-folder-open"></i>
+                    </button>
                     <button type="button" class="card-btn" onclick="enviarWhatsAppRecordatorio(${cita.id}, event)" title="Recordatorio de cita por WhatsApp" style="color: #16a34a;">
                       <i class="fa-brands fa-whatsapp"></i>
                     </button>
@@ -223,6 +226,7 @@ function renderEasyTable() {
                       </button>
                     ` : ''}
                   ` : ''}
+
                   <button type="button" class="card-btn" onclick="editarCita(${cita.id})" style="color: #334155;" title="Editar cita">
                     <i class="fa-solid fa-pen"></i>
                   </button>

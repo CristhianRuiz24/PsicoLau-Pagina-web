@@ -29,6 +29,10 @@
 
     <!-- Acciones de Cabecera -->
     <div class="header-actions-group">
+      <button class="btn btn-header-action" onclick="abrirDirectorioExpedientes()" title="Directorio y búsqueda de Expedientes Clínicos">
+        <i class="fa-solid fa-folder-open" style="color: var(--rosa-coral);"></i>
+        <span class="btn-text">Expedientes</span>
+      </button>
       <button class="btn btn-header-action" onclick="abrirModalAuditoriaPagos()" title="Auditar citas pendientes de cobro">
         <i class="fa-solid fa-clock-rotate-left" style="color: #ea580c;"></i>
         <span class="btn-text">Auditar Pagos</span>
@@ -41,6 +45,7 @@
         <i class="fa-solid fa-note-sticky"></i>
         <span class="btn-text">Notas</span>
       </button>
+
       <button class="btn btn-header-action btn-print-desktop" onclick="imprimirAgenda()" title="Imprimir o guardar en PDF">
         <i class="fa-solid fa-print"></i>
         <span class="btn-text">Imprimir</span>
@@ -406,7 +411,256 @@
     </div>
   </div>
 
+  <!-- Modal / Directorio General de Expedientes Clínicos -->
+  <div id="modalDirectorioExpedientes" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; padding: 1rem;">
+    <div style="background: #ffffff; padding: 1.8rem; border-radius: 14px; width: 100%; max-width: 680px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 16px 40px rgba(0,0,0,0.25);">
+      <!-- Cabecera del Directorio -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.8rem;">
+        <div>
+          <h3 style="color: var(--rosa-coral); font-size: 1.35rem; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-folder-open" style="color: var(--rosa-coral);"></i> Directorio de Expedientes Clínicos
+          </h3>
+          <p style="font-size: 0.84rem; color: #64748b; margin: 0.25rem 0 0 0;">Acceso confidencial al historial de sesiones de cada paciente</p>
+        </div>
+        <button type="button" class="btn-close-modal" onclick="cerrarDirectorioExpedientes()" title="Cerrar modal">&times;</button>
+      </div>
+
+      <!-- Barra de Búsqueda Rápida en Directorio -->
+      <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; align-items: center;">
+        <div style="position: relative; flex: 1;">
+          <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.9rem;"></i>
+          <input type="text" id="busquedaDirectorioInput" placeholder="Buscar paciente por nombre, teléfono o correo..." oninput="filtrarDirectorioExpedientes(this.value)" autocomplete="off" style="width: 100%; padding: 0.75rem 0.75rem 0.75rem 2.2rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.92rem; outline: none;">
+        </div>
+        <span id="directorioTotalPacientes" style="font-size: 0.8rem; font-weight: 700; background: #f1f5f9; color: #475569; padding: 0.5rem 0.8rem; border-radius: 6px; white-space: nowrap;">0 pacientes</span>
+      </div>
+
+      <!-- Lista de Pacientes -->
+      <div id="directorioPacientesLista" style="flex: 1; overflow-y: auto; padding-right: 4px; min-height: 240px; display: flex; flex-direction: column; gap: 0.6rem;">
+        <!-- Se genera dinámicamente -->
+      </div>
+
+      <!-- Pie del Modal -->
+      <div style="display: flex; justify-content: flex-end; align-items: center; padding-top: 0.8rem; border-top: 1px solid #f1f5f9; margin-top: 0.8rem;">
+        <button type="button" class="btn" style="background: var(--gris-calido); width: auto; padding: 0.5rem 1.4rem;" onclick="cerrarDirectorioExpedientes()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal / Expediente Clínico del Paciente (Historial, Notas y Cifrado) -->
+  <div id="modalExpedientePaciente" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1001; justify-content: center; align-items: center; padding: 1rem;">
+    <div style="background: #ffffff; padding: 1.8rem; border-radius: 14px; width: 100%; max-width: 860px; max-height: 94vh; display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.3);">
+      
+      <!-- Cabecera del Expediente -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.8rem; margin-bottom: 1rem; gap: 1rem;">
+        <div style="flex: 1; min-width: 0;">
+          <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+            <h3 id="expNombrePaciente" style="color: var(--rosa-coral); font-size: 1.35rem; margin: 0; font-weight: 800;">Nombre del Paciente</h3>
+            <span id="expBadgeTotalNotas" style="background: #fdf2f8; color: var(--rosa-coral); border: 1px solid #fbcfe8; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 20px;">0 Sesiones</span>
+            <span style="font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; background: #ecfdf5; color: #047857; font-weight: 700;"><i class="fa-solid fa-shield-halved"></i> AES-256-GCM</span>
+          </div>
+          <div id="expInfoPaciente" style="font-size: 0.84rem; color: #64748b; margin-top: 0.3rem;">
+            <!-- Teléfono y email dinámicos -->
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; flex-wrap: wrap;">
+          <button type="button" class="btn" style="width: auto; padding: 0.5rem 0.85rem; font-size: 0.85rem; background: #f8fafc; color: #334155; border: 1px solid #cbd5e1;" onclick="volverAlDirectorioExpedientes()" title="Volver al Directorio de Expedientes">
+            <i class="fa-solid fa-arrow-left" style="margin-right: 4px;"></i> Volver al Directorio
+          </button>
+          <button type="button" class="btn" style="width: auto; padding: 0.5rem 0.85rem; font-size: 0.85rem; background: #f8fafc; color: #475569; border: 1px solid #cbd5e1;" onclick="toggleMaximizarModalExpediente()" title="Agrandar o reducir tamaño del expediente para lectura cómoda">
+            <i class="fa-solid fa-expand" id="iconAgrandarModalExpediente" style="margin-right: 3px;"></i> Agrandar
+          </button>
+          <button type="button" class="btn" style="width: auto; padding: 0.5rem 0.9rem; font-size: 0.85rem; background: var(--turquesa); color: white;" onclick="mostrarFormularioNuevaNota()" title="Agregar nueva nota de sesión">
+            <i class="fa-solid fa-plus" style="margin-right: 4px;"></i> Nueva Sesión
+          </button>
+          <button type="button" class="btn-close-modal" onclick="cerrarModalExpediente()" title="Cerrar expediente">&times;</button>
+        </div>
+      </div>
+
+
+      <!-- Barra de Búsqueda Interna del Expediente -->
+      <div style="position: relative; margin-bottom: 1rem;">
+        <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.9rem;"></i>
+        <input type="text" id="busquedaNotaExpedienteInput" placeholder="Buscar por palabra clave en notas (resumen, síntomas, intervenciones, tareas, insights)..." oninput="buscarEnNotasExpediente(this.value)" autocomplete="off" style="width: 100%; padding: 0.72rem 0.75rem 0.72rem 2.2rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; outline: none; background: #f8fafc;">
+      </div>
+
+      <!-- Contenedor con Scroll para Formulario y Notas -->
+      <div style="flex: 1; overflow-y: auto; padding-right: 4px;">
+
+        <!-- Sección Desplegable de Formulario para Registrar / Editar Nota -->
+        <div id="seccionFormNotaExpediente" style="display: none; background: #ffffff; border: 2px solid var(--turquesa); border-radius: 12px; padding: 1.2rem; margin-bottom: 1.4rem; box-shadow: 0 8px 24px rgba(62,184,204,0.12);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.6rem;">
+            <h4 id="formNotaTitulo" style="color: var(--texto-oscuro); margin: 0; font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+              <i class="fa-solid fa-plus-circle" style="color: var(--turquesa);"></i> Registrar Nueva Nota de Sesión
+            </h4>
+            <button type="button" onclick="ocultarFormularioNota()" style="background: none; border: none; font-size: 1.2rem; color: #94a3b8; cursor: pointer;">&times;</button>
+          </div>
+
+          <form id="formNotaExpediente" onsubmit="guardarNotaExpediente(event)">
+            <input type="hidden" id="exp_nota_id">
+
+            <!-- Selector de Fecha de Sesión -->
+            <div class="form-group" style="margin-bottom: 1rem; max-width: 260px;">
+              <label for="exp_fechaSesion" style="font-size: 0.88rem; font-weight: 600; color: #334155; margin-bottom: 0.3rem;">
+                <i class="fa-solid fa-calendar-day" style="color: var(--turquesa); margin-right: 4px;"></i> Fecha de la Sesión *
+              </label>
+              <input type="date" id="exp_fechaSesion" required style="width: 100%; padding: 0.65rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.92rem;">
+            </div>
+
+            <!-- Resumen Breve (Campo Principal de Búsqueda) -->
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label for="exp_resumenBreve" style="font-size: 0.88rem; font-weight: 600; color: #334155; margin-bottom: 0.3rem;">
+                <i class="fa-solid fa-bookmark" style="color: var(--turquesa); margin-right: 4px;"></i> Resumen Breve de la Sesión (Opcional)
+              </label>
+              <textarea id="exp_resumenBreve" rows="2" placeholder="Ej: Sesión 4: Manejo asertivo en entorno laboral y disminución de crisis de ansiedad..." style="width: 100%; padding: 0.65rem; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.9rem; resize: vertical;"></textarea>
+            </div>
+
+            <!-- Grid de 6 Campos Clínicos -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; margin-bottom: 1rem;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="exp_estadoActual" style="font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 0.3rem;">
+                  <i class="fa-solid fa-heart-pulse" style="color: #ec4899; margin-right: 4px;"></i> 1. Estado Actual / Motivo de Sesión
+                </label>
+                <textarea id="exp_estadoActual" rows="3" placeholder="Ej: Reporta mejoría en episodios de ansiedad. Menor rumiación..." style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.88rem; resize: vertical;"></textarea>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="exp_insightPaciente" style="font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 0.3rem;">
+                  <i class="fa-solid fa-lightbulb" style="color: #eab308; margin-right: 4px;"></i> 2. Insight del Paciente
+                </label>
+                <textarea id="exp_insightPaciente" rows="3" placeholder="Ej: Identifica disparadores de sobrecarga sensorial en el trabajo..." style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.88rem; resize: vertical;"></textarea>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="exp_eventoPrincipal" style="font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 0.3rem;">
+                  <i class="fa-solid fa-star" style="color: #f97316; margin-right: 4px;"></i> 3. Evento Principal / Más Importante
+                </label>
+                <textarea id="exp_eventoPrincipal" rows="3" placeholder="Ej: Conversación asertiva con su jefe aplicando técnicas..." style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.88rem; resize: vertical;"></textarea>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="exp_intervenciones" style="font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 0.3rem;">
+                  <i class="fa-solid fa-hand-holding-medical" style="color: var(--turquesa); margin-right: 4px;"></i> 4. Intervenciones Clínicas Realizadas
+                </label>
+                <textarea id="exp_intervenciones" rows="3" placeholder="Ej: Reestructuración cognitiva, respiración diafragmática..." style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.88rem; resize: vertical;"></textarea>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="exp_formulacionClinica" style="font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 0.3rem;">
+                  <i class="fa-solid fa-brain" style="color: #8b5cf6; margin-right: 4px;"></i> 5. Formulación Clínica en Evolución
+                </label>
+                <textarea id="exp_formulacionClinica" rows="3" placeholder="Ej: Avance positivo en desensibilización sistemática..." style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.88rem; resize: vertical;"></textarea>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="exp_tareasAsignadas" style="font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 0.3rem;">
+                  <i class="fa-solid fa-list-check" style="color: #10b981; margin-right: 4px;"></i> 6. Tareas / Acuerdos Asignados
+                </label>
+                <textarea id="exp_tareasAsignadas" rows="3" placeholder="Ej: Llevar autorregistro de detonantes y respiración 10 min..." style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.88rem; resize: vertical;"></textarea>
+              </div>
+            </div>
+
+            <!-- Campo 8: Pendientes para la Próxima Sesión -->
+            <div class="form-group" style="margin-bottom: 1.2rem;">
+              <label for="exp_pendientesProximaSesion" style="font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 0.3rem;">
+                <i class="fa-solid fa-clipboard-question" style="color: #ea580c; margin-right: 4px;"></i> 7. Pendientes para la Próxima Sesión
+              </label>
+              <textarea id="exp_pendientesProximaSesion" rows="2" placeholder="Ej: Revisar autorregistro y evaluar escalas de bienestar..." style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.88rem; resize: vertical;"></textarea>
+            </div>
+
+            <!-- Botones de Acción del Formulario -->
+            <div style="display: flex; justify-content: flex-end; gap: 0.8rem;">
+              <button type="button" class="btn" style="width: auto; padding: 0.6rem 1.4rem; background: var(--gris-calido);" onclick="ocultarFormularioNota()">Cancelar</button>
+              <button type="submit" id="btnGuardarNotaExpediente" class="btn" style="width: auto; padding: 0.6rem 1.8rem; background: var(--turquesa);">
+                <i class="fa-solid fa-lock" style="margin-right: 4px;"></i> Guardar Nota Cifrada
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Lista Cronológica de Notas de Sesión -->
+        <div id="listaNotasExpediente">
+          <!-- Se genera dinámicamente -->
+        </div>
+
+      </div>
+
+      <!-- Pie del Expediente -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.8rem; border-top: 1px solid #f1f5f9; margin-top: 0.8rem; flex-wrap: wrap; gap: 0.5rem;">
+        <div id="contenedorBtnEliminarExpedienteModal">
+          <button type="button" class="btn" id="btnEliminarExpedienteModal" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; width: auto; padding: 0.45rem 1rem; font-size: 0.84rem; font-weight: 600;" onclick="if(pacienteActivoExpediente) eliminarPacienteDirectorio(pacienteActivoExpediente.id, pacienteActivoExpediente.nombre)" title="Eliminar paciente y todo su expediente clínico permanentemente">
+            <i class="fa-solid fa-trash-can" style="margin-right: 4px;"></i> Eliminar Expediente de este Paciente
+          </button>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.8rem;">
+          <span style="font-size: 0.78rem; color: #64748b; display: flex; align-items: center; gap: 4px;">
+            <i class="fa-solid fa-user-shield" style="color: #16a34a;"></i> Cifrado AES-256-GCM
+          </span>
+          <button type="button" class="btn" style="background: #f8fafc; color: #334155; border: 1px solid #cbd5e1; width: auto; padding: 0.5rem 1.2rem;" onclick="volverAlDirectorioExpedientes()"><i class="fa-solid fa-arrow-left"></i> Volver</button>
+          <button type="button" class="btn" style="background: var(--gris-calido); width: auto; padding: 0.5rem 1.4rem;" onclick="cerrarModalExpediente()">Cerrar</button>
+        </div>
+      </div>
+
+
+
+    </div>
+  </div>
+
+  <!-- Modal / Vista Cómoda y Agrandada de Sesión Individual -->
+  <div id="modalDetalleSesionExpediente" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); z-index: 1020; justify-content: center; align-items: center; padding: 1.2rem; backdrop-filter: blur(4px);">
+    <div id="dialogoDetalleSesion" style="background: #ffffff; padding: 2rem; border-radius: 16px; width: 100%; max-width: 960px; max-height: 94vh; display: flex; flex-direction: column; box-shadow: 0 25px 60px rgba(0,0,0,0.35); transition: all 0.25s ease;">
+      
+      <!-- Cabecera de la Vista de Sesión -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #f1f5f9; padding-bottom: 1rem; margin-bottom: 1.2rem; gap: 1rem; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 260px;">
+          <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+            <span id="detalleSesionBadgeNum" style="background: var(--rosa-coral); color: white; font-weight: 800; font-size: 0.85rem; padding: 3px 10px; border-radius: 6px;">Sesión #</span>
+            <h3 id="detalleSesionFecha" style="color: #0f172a; font-size: 1.3rem; margin: 0; font-weight: 800;">Fecha de la Sesión</h3>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.8rem; margin-top: 0.4rem; font-size: 0.88rem; color: #64748b; flex-wrap: wrap;">
+            <span id="detalleSesionPaciente" style="font-weight: 700; color: var(--turquesa);"><i class="fa-solid fa-user-check"></i> Paciente</span>
+            <span><i class="fa-solid fa-lock" style="color: #16a34a;"></i> Cifrado AES-256-GCM</span>
+          </div>
+        </div>
+
+        <!-- Acciones Individuales de la Sesión -->
+        <div id="detalleSesionAccionesTop" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+          <button type="button" class="btn" style="width: auto; padding: 0.55rem 0.95rem; font-size: 0.85rem; background: #0284c7; color: white;" onclick="imprimirNotaActualDetalle()" title="Imprimir o guardar en PDF únicamente esta sesión">
+            <i class="fa-solid fa-file-pdf" style="margin-right: 4px;"></i> Imprimir PDF
+          </button>
+          <button type="button" class="btn" style="width: auto; padding: 0.55rem 0.95rem; font-size: 0.85rem; background: #475569; color: white;" onclick="descargarNotaActualTxt()" title="Descargar nota en archivo de texto (.txt)">
+            <i class="fa-solid fa-file-lines" style="margin-right: 4px;"></i> Guardar .txt
+          </button>
+          <button type="button" class="btn" style="width: auto; padding: 0.55rem 0.95rem; font-size: 0.85rem; background: #f8fafc; color: var(--texto-oscuro); border: 1px solid #cbd5e1;" onclick="editarNotaDesdeDetalle()" title="Editar nota clínica en esta misma vista">
+            <i class="fa-solid fa-pen-to-square" style="color: var(--turquesa); margin-right: 4px;"></i> Editar
+          </button>
+          <button type="button" class="btn" style="width: auto; padding: 0.55rem 0.85rem; font-size: 0.85rem; background: #f8fafc; color: #475569; border: 1px solid #cbd5e1;" onclick="toggleAgrandarDetalleSesion()" title="Agrandar o reducir tamaño para mayor comodidad visual">
+            <i class="fa-solid fa-expand" id="iconAgrandarDetalle"></i>
+          </button>
+          <button type="button" class="btn-close-modal" onclick="cerrarDetalleSesion()" title="Cerrar vista">&times;</button>
+        </div>
+      </div>
+
+      <!-- Contenido Amplio y Cómodo de la Sesión -->
+      <div id="detalleSesionContenido" style="flex: 1; overflow-y: auto; padding-right: 6px;">
+        <!-- Se genera dinámicamente -->
+      </div>
+
+      <!-- Pie de la Vista de Sesión -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.8rem; border-top: 1px solid #f1f5f9; margin-top: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+        <span style="font-size: 0.8rem; color: #94a3b8;">
+          <i class="fa-solid fa-shield-halved" style="color: #16a34a; margin-right: 3px;"></i> Documento médico confidencial sujeto a secreto profesional · PsicoLau
+        </span>
+        <button type="button" class="btn" style="background: #f8fafc; color: #334155; border: 1px solid #cbd5e1; width: auto; padding: 0.5rem 1.4rem;" onclick="cerrarDetalleSesion()">
+          <i class="fa-solid fa-arrow-left" style="margin-right: 4px;"></i> Volver al Historial
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- Contenedor Principal de la Agenda -->
+
   <main class="agenda-container">
     <div id="loader">Cargando agenda...</div>
     
@@ -427,7 +681,9 @@
   <script src="js/audio.js"></script>
   <script src="js/whatsapp.js"></script>
   <script src="js/pagos.js"></script>
+  <script src="js/expedientes.js"></script>
   <script src="js/agenda.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
+

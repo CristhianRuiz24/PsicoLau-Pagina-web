@@ -97,30 +97,54 @@ const crearCita = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Nombre y fecha/hora son obligatorios' });
     }
 
-    // Buscar o asociar paciente existente
+    // Buscar o asociar paciente existente (comparación flexible e insensible a mayúsculas/minúsculas)
+    const nombreLimpio = nombre.trim();
+    const emailLimpio = email ? email.trim() : null;
+    const telefonoLimpio = telefono ? telefono.trim() : null;
+
+
     let paciente;
-    if (email) {
-      paciente = await prisma.paciente.findUnique({ where: { email } });
-    } else if (telefono) {
-      paciente = await prisma.paciente.findFirst({ where: { nombre, telefono } });
-    } else {
-      paciente = await prisma.paciente.findFirst({ where: { nombre } });
+    if (emailLimpio) {
+      paciente = await prisma.paciente.findFirst({
+        where: { email: { equals: emailLimpio, mode: 'insensitive' } }
+      });
+    }
+
+    if (!paciente && telefonoLimpio) {
+      paciente = await prisma.paciente.findFirst({
+        where: {
+          telefono: { equals: telefonoLimpio },
+          nombre: { equals: nombreLimpio, mode: 'insensitive' }
+        }
+      });
+    }
+
+    if (!paciente) {
+      paciente = await prisma.paciente.findFirst({
+        where: { nombre: { equals: nombreLimpio, mode: 'insensitive' } }
+      });
     }
     
     if (!paciente) {
-      const emailSeguro = email || `sin-email-${Date.now()}-${Math.random().toString(36).substring(2, 9)}@local.com`;
+      const emailSeguro = emailLimpio || `sin-email-${Date.now()}-${Math.random().toString(36).substring(2, 9)}@local.com`;
       paciente = await prisma.paciente.create({
         data: {
-          nombre,
-          telefono: telefono || '',
+          nombre: nombreLimpio,
+          telefono: telefonoLimpio || '',
           email: emailSeguro
         }
       });
-    } else if (telefono && paciente.telefono !== telefono) {
-      await prisma.paciente.update({
-        where: { id: paciente.id },
-        data: { telefono }
-      });
+    } else {
+      // Actualizar datos de contacto si cambiaron
+      const dataUpdate = {};
+      if (telefonoLimpio && paciente.telefono !== telefonoLimpio) dataUpdate.telefono = telefonoLimpio;
+      if (emailLimpio && (!paciente.email || paciente.email.startsWith('sin-email-'))) dataUpdate.email = emailLimpio;
+      if (Object.keys(dataUpdate).length > 0) {
+        await prisma.paciente.update({
+          where: { id: paciente.id },
+          data: dataUpdate
+        });
+      }
     }
 
     const totalSesiones = Math.min(Math.max(parseInt(repeticiones) || 1, 1), 24);
@@ -145,6 +169,7 @@ const crearCita = async (req, res) => {
         },
         include: { paciente: true }
       });
+
       citasCreadas.push(nuevaCita);
     }
 
@@ -189,14 +214,31 @@ const eliminarCita = async (req, res) => {
       return res.status(400).json({ success: false, message: 'ID de cita inválido' });
     }
     
-    // Primero eliminar registros relacionados (notificaciones si las hay)
+    // Obtener la cita para conocer el pacienteId
+    const cita = await prisma.cita.findUnique({
+      where: { id: citaId }
+    });
+
+    if (!cita) {
+      return res.status(404).json({ success: false, message: 'Cita no encontrada' });
+    }
+
+    // Eliminar notificaciones si las hay
     await prisma.logNotificacion.deleteMany({
       where: { citaId: citaId }
     });
     
+    // Eliminar la cita
     await prisma.cita.delete({
       where: { id: citaId }
     });
+
+    // Si el paciente no tiene más citas ni expedientes, limpiar registro huérfano
+    const totalCitasRestantes = await prisma.cita.count({ where: { pacienteId: cita.pacienteId } });
+    const totalExpRestantes = await prisma.expediente.count({ where: { pacienteId: cita.pacienteId } });
+    if (totalCitasRestantes === 0 && totalExpRestantes === 0) {
+      await prisma.paciente.delete({ where: { id: cita.pacienteId } }).catch(() => {});
+    }
 
     res.json({ success: true, message: 'Cita eliminada permanentemente' });
   } catch (error) {
@@ -204,6 +246,7 @@ const eliminarCita = async (req, res) => {
     res.status(500).json({ success: false, message: 'Error interno del servidor' });
   }
 };
+
 
 // Actualizar cita completa (editar datos del paciente, fecha/hora, notas y color)
 const editarCita = async (req, res) => {

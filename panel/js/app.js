@@ -53,9 +53,20 @@ async function initAgenda() {
   }
 }
 
-// Buscador global en tiempo real con historial completo y navegación directa
+// Helper para normalizar cadenas (sin acentos, minúsculas, espacios recortados)
+function normalizarTexto(str) {
+  if (!str) return '';
+  return String(str)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
+}
+
+// Buscador global en tiempo real con historial completo, navegación directa y acceso a Expedientes
 window.filtrarCitasEnTabla = function(query) {
-  terminoBusqueda = (query || '').toLowerCase().trim();
+  const queryLimpia = (query || '').trim();
+  terminoBusqueda = normalizarTexto(queryLimpia);
   const btnLimpiar = document.getElementById('btnLimpiarBusqueda');
   const panel = document.getElementById('panelResultadosBusqueda');
   
@@ -72,26 +83,81 @@ window.filtrarCitasEnTabla = function(query) {
     return;
   }
 
-  // Buscar en TODO el historial (todas las citas pasadas, presentes y futuras)
-  const coincidencias = citasCache.filter(c => {
-    const nombre = (c.paciente && c.paciente.nombre ? c.paciente.nombre : '').toLowerCase();
-    const tel = (c.paciente && c.paciente.telefono ? c.paciente.telefono : '').toLowerCase();
-    const email = (c.paciente && c.paciente.email && !c.paciente.email.startsWith('sin-email-') ? c.paciente.email : '').toLowerCase();
-    const notas = (c.categoria || '').toLowerCase();
+  // 1. Buscar en Directorio de Pacientes / Expedientes
+  const pacientesCoincidentes = (window.directorioPacientesCache || []).filter(p => {
+    const nom = normalizarTexto(p.nombre);
+    const tel = normalizarTexto(p.telefono);
+    const email = normalizarTexto(p.email && !p.email.startsWith('sin-email-') ? p.email : '');
+    return nom.includes(terminoBusqueda) || tel.includes(terminoBusqueda) || email.includes(terminoBusqueda);
+  });
+
+  // 2. Buscar en Citas Agendadas (todas las citas pasadas, presentes y futuras)
+  const citasCoincidentes = citasCache.filter(c => {
+    const nombre = normalizarTexto(c.paciente && c.paciente.nombre ? c.paciente.nombre : '');
+    const tel = normalizarTexto(c.paciente && c.paciente.telefono ? c.paciente.telefono : '');
+    const email = normalizarTexto(c.paciente && c.paciente.email && !c.paciente.email.startsWith('sin-email-') ? c.paciente.email : '');
+    const notas = normalizarTexto(c.categoria || '');
     return nombre.includes(terminoBusqueda) || tel.includes(terminoBusqueda) || email.includes(terminoBusqueda) || notas.includes(terminoBusqueda);
   });
 
-  // Ordenar por fecha más próxima
-  coincidencias.sort((a, b) => new Date(a.fechaHora) - new Date(b.fechaHora));
+  // Ordenar citas por fecha
+  citasCoincidentes.sort((a, b) => new Date(a.fechaHora) - new Date(b.fechaHora));
 
   if (panel) {
     panel.style.display = 'block';
-    if (coincidencias.length === 0) {
-      panel.innerHTML = `<div class="no-results-msg"><i class="fa-solid fa-circle-question" style="margin-right: 4px;"></i> No se encontraron citas con "<strong>${query}</strong>"</div>`;
-    } else {
-      let html = `<div style="font-size: 0.72rem; font-weight: 700; color: #64748b; padding: 0.3rem 0.5rem 0.5rem; text-transform: uppercase; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between;"><span>Resultados encontrados (${coincidencias.length})</span> <span>Clic para ir a la fecha</span></div>`;
-      
-      coincidencias.slice(0, 20).forEach(c => {
+
+    if (pacientesCoincidentes.length === 0 && citasCoincidentes.length === 0) {
+      panel.innerHTML = `<div class="no-results-msg"><i class="fa-solid fa-circle-question" style="margin-right: 4px;"></i> No se encontraron pacientes ni citas con "<strong>${queryLimpia}</strong>"</div>`;
+      return;
+    }
+
+    let html = '';
+
+    // SECCIÓN 1: EXPEDIENTES / PACIENTES COINCIDENTES
+    if (pacientesCoincidentes.length > 0) {
+      html += `
+        <div style="font-size: 0.72rem; font-weight: 800; color: var(--rosa-coral); padding: 0.4rem 0.6rem; text-transform: uppercase; background: #fff1f2; border-bottom: 1px solid #ffe4e6; display: flex; align-items: center; justify-content: space-between; letter-spacing: 0.3px;">
+          <span><i class="fa-solid fa-folder-open" style="margin-right: 4px;"></i> Expedientes Clínicos (${pacientesCoincidentes.length})</span>
+          <span style="font-size: 0.68rem; color: #9f1239; text-transform: none;">Clic para abrir expediente</span>
+        </div>
+      `;
+
+      pacientesCoincidentes.forEach(p => {
+        const numNotas = p._count ? p._count.expedientes : 0;
+        const numCitas = p._count ? p._count.citas : 0;
+        html += `
+          <div class="search-result-item" onclick="abrirExpedientePorId(${p.id})" title="Abrir expediente clínico de ${p.nombre}">
+            <div style="flex: 1; min-width: 0; padding-right: 8px;">
+              <div class="item-title">
+                <i class="fa-solid fa-user-check" style="color: var(--turquesa); font-size: 0.85rem;"></i>
+                <span style="font-weight: 700; color: #0f172a;">${p.nombre}</span>
+                <span style="font-size: 0.68rem; padding: 1px 6px; border-radius: 4px; background: #fdf2f8; color: var(--rosa-coral); font-weight: 700; border: 1px solid #fbcfe8;">
+                  <i class="fa-solid fa-notes-medical"></i> ${numNotas} ${numNotas === 1 ? 'nota' : 'notas'}
+                </span>
+              </div>
+              <div class="item-meta">
+                ${p.telefono ? `<i class="fa-brands fa-whatsapp" style="color: #16a34a; margin-right: 2px;"></i> ${p.telefono} · ` : ''}
+                <span><i class="fa-solid fa-calendar-check" style="color: #6366f1; margin-right: 2px;"></i> ${numCitas} citas</span>
+              </div>
+            </div>
+            <button type="button" class="btn-jump" style="background: #fdf2f8; color: var(--rosa-coral); border-color: #fbcfe8;">
+              <i class="fa-solid fa-folder-open"></i> <span>Abrir Expediente</span>
+            </button>
+          </div>
+        `;
+      });
+    }
+
+    // SECCIÓN 2: CITAS AGENDADAS
+    if (citasCoincidentes.length > 0) {
+      html += `
+        <div style="font-size: 0.72rem; font-weight: 800; color: #475569; padding: 0.4rem 0.6rem; text-transform: uppercase; background: #f8fafc; border-bottom: 1px solid #e2e8f0; border-top: ${pacientesCoincidentes.length > 0 ? '1px solid #e2e8f0' : 'none'}; display: flex; align-items: center; justify-content: space-between; letter-spacing: 0.3px;">
+          <span><i class="fa-solid fa-calendar-days" style="margin-right: 4px; color: var(--turquesa);"></i> Citas Agendadas (${citasCoincidentes.length})</span>
+          <span style="font-size: 0.68rem; color: #64748b; text-transform: none;">Clic para ir a la fecha</span>
+        </div>
+      `;
+
+      citasCoincidentes.slice(0, 15).forEach(c => {
         const d = new Date(c.fechaHora);
         const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
         const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
@@ -106,8 +172,12 @@ window.filtrarCitasEnTabla = function(query) {
         const esCompletada = c.estado_cita === 'REALIZADA' || c.estado_cita === 'CONFIRMADA';
 
         const clickAccion = esCancelada ? `revisarCitaCancelada(${c.id})` : `irAFechaDeCita('${c.fechaHora}')`;
+        const btnExpediente = (!esBloqueo && c.paciente && c.paciente.id)
+          ? `<button type="button" class="btn-jump" onclick="event.stopPropagation(); abrirExpedientePorId(${c.paciente.id});" style="background: #fdf2f8; color: var(--rosa-coral); border-color: #fbcfe8;" title="Ver expediente clínico de ${nombre}"><i class="fa-solid fa-folder-open"></i></button>`
+          : '';
+
         const btnTexto = esCancelada 
-          ? `<button type="button" class="btn-jump" style="background: #f8fafc; color: #475569; border-color: #cbd5e1;"><span>Ver detalle</span> <i class="fa-solid fa-eye"></i></button>`
+          ? `<button type="button" class="btn-jump" style="background: #f8fafc; color: #475569; border-color: #cbd5e1;"><span>Ver</span> <i class="fa-solid fa-eye"></i></button>`
           : `<button type="button" class="btn-jump"><span>Ir a cita</span> <i class="fa-solid fa-arrow-right"></i></button>`;
 
         html += `
@@ -125,15 +195,19 @@ window.filtrarCitasEnTabla = function(query) {
                 ${notas ? ` · <span style="color: #334155; font-weight: 500;">${notas}</span>` : ''}
               </div>
             </div>
-            ${btnTexto}
+            <div style="display: flex; align-items: center; gap: 4px;">
+              ${btnExpediente}
+              ${btnTexto}
+            </div>
           </div>
         `;
       });
-
-      panel.innerHTML = html;
     }
+
+    panel.innerHTML = html;
   }
 };
+
 
 // Navegar directamente a la semana donde se encuentra una cita encontrada
 window.irAFechaDeCita = function(fechaHoraIso) {

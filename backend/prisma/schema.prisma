@@ -16,19 +16,43 @@ model Usuario {
 }
 
 model Paciente {
-  id        Int      @id @default(autoincrement())
-  nombre    String
-  telefono  String
-  email     String   @unique
-  citas     Cita[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          Int          @id @default(autoincrement())
+  nombre      String
+  telefono    String
+  email       String       @unique
+  citas       Cita[]
+  expedientes Expediente[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Expediente {
+  id                      Int       @id @default(autoincrement())
+  pacienteId              Int
+  paciente                Paciente  @relation(fields: [pacienteId], references: [id], onDelete: Cascade)
+  fechaSesion             DateTime
+  
+  // 8 campos de contenido clínico (Cifrados con AES-256-GCM a nivel de aplicación)
+  estadoActual            String?   @db.Text
+  insightPaciente         String?   @db.Text
+  eventoPrincipal         String?   @db.Text
+  intervenciones          String?   @db.Text
+  formulacionClinica      String?   @db.Text
+  tareasAsignadas         String?   @db.Text
+  pendientesProximaSesion String?   @db.Text
+  resumenBreve            String?   @db.Text
+  
+  creadoEn                DateTime  @default(now())
+  actualizadoEn           DateTime  @updatedAt
+
+  @@index([pacienteId])
+  @@index([pacienteId, fechaSesion(sort: Desc)])
 }
 
 model Cita {
   id               Int                @id @default(autoincrement())
   pacienteId       Int
-  paciente         Paciente           @relation(fields: [pacienteId], references: [id])
+  paciente         Paciente           @relation(fields: [pacienteId], references: [id], onDelete: Cascade)
   fechaHora        DateTime
   categoria        String?            
   color            String?            @default("#3EB8CC")
@@ -42,7 +66,7 @@ model Cita {
 model LogNotificacion {
   id          Int              @id @default(autoincrement())
   citaId      Int
-  cita        Cita             @relation(fields: [citaId], references: [id])
+  cita        Cita             @relation(fields: [citaId], references: [id], onDelete: Cascade)
   tipo        TipoNotificacion
   fecha_envio DateTime         @default(now())
   estado      String           

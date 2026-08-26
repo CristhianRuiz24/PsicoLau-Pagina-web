@@ -145,3 +145,29 @@ Es un espacio de salud mental: prioriza la calidez, claridad, ética y confianza
   - **Sanitización de HTML en Correos**: Creación de `sanitizer.js` (`escapeHtml`) y neutralización de caracteres especiales en `emailService.js` para evitar inyecciones XSS en avisos clínicos y formularios de contacto.
   - **Validación Estricta de Parámetros**: Blindaje de los controladores de agenda contra IDs inválidos o no numéricos (`parseId`), respondiendo con HTTP 400 controlado.
   - **Ampliación del Enum de Citas (`REALIZADA`)**: Adición formal del estado `REALIZADA` a `EstadoCita` en `schema.prisma` y sincronización con Supabase para persistencia del check de cita realizada.
+- **2026-08-26 (Sesión 15 - Módulo de Expedientes Clínicos Cifrados AES-256-GCM)**:
+  - **Modelo `Expediente` en Prisma**: Tabla de notas clínicas relacionada con `Paciente` (`1 fila = 1 sesión`). Índices en `pacienteId` y `[pacienteId, fechaSesion(sort: Desc)]`.
+  - **Cifrado Simétrico a Nivel de Aplicación (`backend/src/utils/crypto.js`)**: Algoritmo `AES-256-GCM` con clave de 256 bits (`ENCRYPTION_KEY`), vector de inicialización único de 12 bytes (`IV`) y tag de autenticación de 16 bytes. Ningún dato clínico llega en texto plano a PostgreSQL/Supabase.
+  - **Endpoints Protegidos con JWT**:
+    - `GET /api/pacientes`: Directorio de pacientes con métricas de sesiones.
+    - `GET /api/pacientes/:id/expediente`: Consulta de todas las notas descifradas en memoria.
+    - `POST /api/pacientes/:id/expediente`: Creación de nota de sesión con cifrado de los 8 campos clínicos.
+    - `PUT /api/expediente/:id`: Edición y actualización segura de notas existentes.
+    - `GET /api/pacientes/:id/expediente/buscar?q=texto`: Búsqueda clínica en memoria sobre notas descifradas (`case-insensitive` en `resumenBreve` y todos los campos clínicos).
+    - `DELETE /api/expediente/:id`: Eliminación física de notas clínicas.
+  - **Suite de Frontend (`panel/js/expedientes.js`)**:
+    - **Botón de Directorio en Cabecera**: Acceso directo al menú de expedientes clínicos con buscador en vivo de pacientes.
+    - **Botón en Tarjeta de Cita y Buscador Global**: Acceso en 1 clic al expediente del paciente desde cualquier cita de la matriz semanal o buscador general.
+    - **Navegación Fluida**: Botón `[ ← Volver al Directorio ]` para regresar al listado de pacientes desde el expediente individual sin perder contexto.
+    - **Eliminación Segura de Expedientes**: Botón de borrado de paciente/expediente disponible en el directorio y ficha del paciente **exclusivamente para pacientes sin citas activas** (`DELETE /api/pacientes/:id`). Si el paciente tiene citas agendadas, el sistema protege el registro y bloquea el borrado hasta que sus citas sean canceladas/eliminadas.
+    - **Ficha del Expediente**: Modal completo con historial cronológico de notas de sesión, visualización de los 8 campos con badges de colores, buscador interno de notas y formulario para registrar/editar notas.
+    - **Vista Ampliada de Sesión Individual (`#modalDetalleSesionExpediente`)**: Visualización espaciosa y cómoda de una sesión específica (`Sesión #X`) con modo pantalla completa (`[ ⛶ Agrandar ]`), lectura nítida de los 8 campos clínicos y acciones individuales:
+      - `[ ✏️ Editar ]` (Edición In Situ): Permite editar directamente los 8 campos y la fecha dentro de la misma vista ampliada sin regresar al listado de sesiones, guardando con `PUT /api/expediente/:id` y actualizando la vista inmediatamente en memoria.
+      - `[ 🖨️ Imprimir PDF ]`: Genera la nota clínica oficial exclusivamente de esa sesión ajustada y calibrada para encajar en **1 sola página limpia**, con membrete de PSICOLAU, firma y pie legal confidencial sin desbordamientos a una segunda página en blanco.
+      - `[ 📄 Guardar .txt ]`: Descarga el archivo de texto estructurado de esa sesión en particular.
+- **2026-08-26 (Sesión 16 - Auditoría Integral, Blindaje y Sincronización)**:
+  - **Auditoría Técnica Completa**: Revisión general de backend, frontend, seguridad, base de datos y Git.
+  - **Relaciones en Cascada en Prisma**: Configuración de `onDelete: Cascade` en `Cita` y `LogNotificacion` para integridad referencial consistente en la base de datos PostgreSQL.
+  - **Rate Limiting Defensivo**: Implementación de limitador de tasa (`120 req / min`) en rutas autenticadas de agenda, pacientes y expedientes para prevención de saturación.
+  - **Unificación de Rutas REST**: Limpieza del alias redundante `/expedientes` en `routes/index.js`, consolidando el uso de `/expediente`.
+  - **Control de Versiones y Seguimiento**: Verificación y preparación de los 11 archivos de código nuevos para seguimiento en Git sin fugas ni omisiones.
