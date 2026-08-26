@@ -33,7 +33,7 @@
     "mainEntity": {
       "@type": "MedicalBusiness",
       "name": "PSICOLAU",
-      "telephone": "+522223849927",
+      "telephone": "+526633641973",
       "email": "contacto@psicolau.com",
       "url": "https://psicolau.com"
     }
@@ -72,8 +72,19 @@
   <!-- Content -->
   <section class="section">
     <div class="container">
-      <h1 style="text-align: center; margin-bottom: 3rem;">Hablemos</h1>
+      <h1 style="text-align: center; margin-bottom: 2rem;">Hablemos</h1>
       
+      <!-- Descargo de Responsabilidad para Situaciones de Emergencia / Crisis -->
+      <div class="crisis-banner">
+        <div class="crisis-banner-title">
+          <i class="fas fa-triangle-exclamation"></i>
+          <span>Importante: Atención a Situaciones de Crisis y Emergencias Médicas</span>
+        </div>
+        <p>
+          Este espacio y sus formularios de contacto <strong>no están destinados a la atención de urgencias psiquiátricas inmediatas ni situaciones de riesgo vital</strong>. Si tú o alguien que conoces se encuentra en una situación de crisis emocional grave, riesgo de daño o ideación suicida en México, comunícate de inmediato con la <strong>Línea de la Vida al <a href="tel:8009112000" style="color: var(--color-primary);">800 911 2000</a></strong> (gratuita, 24 horas) o llama al <strong><a href="tel:911" style="color: var(--color-primary);">911</a></strong>.
+        </p>
+      </div>
+
       <div class="contact-container">
         
         <!-- Formulario -->
@@ -112,6 +123,13 @@
               <textarea id="mensaje" name="mensaje" class="form-control" required placeholder="¿En qué te puedo ayudar?"></textarea>
             </div>
             
+            <div class="privacy-agreement">
+              <input type="checkbox" id="privacyCheck" name="privacyCheck" required>
+              <label for="privacyCheck">
+                He leído y acepto el <a href="privacidad.html" target="_blank" style="color: var(--color-secondary); text-decoration: underline;">Aviso de Privacidad</a> para el tratamiento confidencial y ético de mis datos de contacto y consulta. *
+              </label>
+            </div>
+
             <p id="formMessage" style="display: none; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;"></p>
             
             <button type="submit" class="btn" style="width: 100%; border-radius: 8px;">Enviar mensaje</button>
@@ -164,8 +182,9 @@
       <div class="logo-container" style="display: flex; justify-content: center; margin-bottom: 1rem;">
         <img src="assets/logo.png" alt="PsicoLau Logo" style="height: 40px;">
       </div>
-      <div style="text-align: center; margin-bottom: 0.5rem;">
+      <div style="text-align: center; margin-bottom: 0.5rem; display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap;">
         <a href="preguntas-frecuentes.html" style="color: var(--color-text-light); text-decoration: underline; font-size: 0.95rem;">Preguntas Frecuentes</a>
+        <a href="privacidad.html" style="color: var(--color-text-light); text-decoration: underline; font-size: 0.95rem;">Aviso de Privacidad</a>
       </div>
       <p>&copy; 2026 PSICOLAU — Psicología y Resiliencia. Todos los derechos reservados.</p>
       <div class="social-links" style="justify-content: center; margin-top: 1rem;">

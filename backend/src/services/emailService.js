@@ -13,9 +13,8 @@ const transporter = nodemailer.createTransport({
 });
 
 // Remitente y Destinatario
-// Nota: Resend en modo gratuito/sandbox (onboarding@resend.dev) sólo permite enviar al correo de la cuenta registrada.
-const REMITENTE = process.env.REMITENTE || 'PsicoLau Web <onboarding@resend.dev>';
-const CORREO_DESTINO = process.env.CORREO_LAURA || process.env.EMAIL_DESTINO || 'crisr686868@gmail.com';
+const REMITENTE = process.env.REMITENTE || 'PsicoLau Web <contacto@psicolau.com>';
+const CORREO_DESTINO = process.env.CORREO_LAURA || 'lince_lg@yahoo.com.mx';
 
 const enviarConfirmacionPaciente = async (emailPaciente, nombrePaciente, fechaHora) => {
   try {

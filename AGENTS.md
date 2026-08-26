@@ -171,5 +171,15 @@ Es un espacio de salud mental: prioriza la calidez, claridad, ética y confianza
   - **Acceso Directo a Zoom en la Matriz Semanal**: Botón con icono de videollamada (`fa-solid fa-video`) dentro de la cápsula flotante `.card-actions-capsule` de cada cita. Con 1 solo clic abre la reunión del paciente en nueva pestaña (`window.open`), o abre el modal de edición si el enlace aún no ha sido configurado.
   - **Integración con WhatsApp**: Inclusión automática del enlace personalizado de Zoom en el mensaje preformateado de recordatorio de cita.
   - **Visibilidad en Directorio y Ficha de Expediente**: Indicador de sala de Zoom vinculada en la tarjeta del paciente en el directorio y enlace directo en la cabecera de su expediente clínico.
+- **2026-08-26 (Sesión 19 - Auditoría Integral, Cumplimiento Legal LFPDPPP, Accesibilidad WCAG 2.1 AA y Blindaje Ético)**:
+  - **Aviso de Privacidad Integral (`privacidad.html`)**: Creación de la página oficial de privacidad adaptada a la práctica de psicología clínica y telepsicología conforme a la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP), detallando el cifrado simétrico AES-256-GCM, derechos ARCO y límites ético-legales de confidencialidad.
+  - **Descargo de Emergencias Médicas (Crisis Disclaimer)**: Banner visible en `contacto.html` y canales de atención con los números oficiales de urgencias en México: Línea de la Vida (800 911 2000) y Emergencias (911).
+  - **Consentimiento Informado en Formulario Web**: Casilla obligatoria (`#privacyCheck`) para aceptación expresa del Aviso de Privacidad previo al envío de datos de salud en `contacto.html`.
+  - **Accesibilidad Visual WCAG 2.1 AA**: Calibración del color secundario a `#1E94A8` para garantizar un contraste $\ge 4.5:1$ con texto blanco en todos los botones y componentes interactivos.
+  - **Soporte `prefers-reduced-motion`**: Implementación de reglas `@media (prefers-reduced-motion: reduce)` en `style.css` y `panel.css` para respetar las preferencias de usuarios con sensibilidad vestibular.
+  - **Accesibilidad ARIA en Acordeón de FAQs**: Inclusión de `aria-expanded` dinámico y `aria-controls` en `preguntas-frecuentes.html` y `main.js`.
+  - **Corrección de Sintaxis y Homogenización Académica**: Cierre del tag `</div>` en `experiencia.html`, homogeneización de leyendas académicas *(Maestría en Psicología Clínica con cédula en trámite, diplomados completados)* y unificación de teléfono oficial en Schema JSON-LD.
+  - **Optimización de Despliegue**: Adición de cabecera HSTS `Strict-Transport-Security` en `_headers`, atributo `loading="lazy"` en videos embebidos de testimonios y actualización integral de `sitemap.xml`.
+
 
 

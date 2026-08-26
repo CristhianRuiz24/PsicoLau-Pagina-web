@@ -71,21 +71,34 @@ document.addEventListener('DOMContentLoaded', () => {
       link.classList.add('active');
     }
   });
-  // Lógica del acordeón para Preguntas Frecuentes
+  // Lógica del acordeón para Preguntas Frecuentes con Accesibilidad ARIA
   const faqItems = document.querySelectorAll('.faq-item');
   if (faqItems.length > 0) {
-    faqItems.forEach(item => {
+    faqItems.forEach((item, index) => {
       const questionBtn = item.querySelector('.faq-question');
-      questionBtn.addEventListener('click', () => {
-        item.classList.toggle('active');
-        
-        const answer = item.querySelector('.faq-answer');
-        if (item.classList.contains('active')) {
-          answer.style.maxHeight = answer.scrollHeight + "px";
-        } else {
-          answer.style.maxHeight = null;
-        }
-      });
+      const answer = item.querySelector('.faq-answer');
+      const answerId = `faq-answer-${index + 1}`;
+      
+      if (answer && !answer.id) {
+        answer.id = answerId;
+      }
+      
+      if (questionBtn) {
+        questionBtn.setAttribute('aria-expanded', 'false');
+        questionBtn.setAttribute('aria-controls', answerId);
+
+        questionBtn.addEventListener('click', () => {
+          const isActive = item.classList.toggle('active');
+          questionBtn.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+          
+          if (isActive) {
+            answer.style.maxHeight = answer.scrollHeight + "px";
+          } else {
+            answer.style.maxHeight = null;
+          }
+        });
+      }
     });
   }
 });
+
