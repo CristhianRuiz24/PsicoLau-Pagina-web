@@ -85,6 +85,9 @@ Es un espacio de salud mental: prioriza la calidez, claridad, ética y confianza
    - Documentos privados (`Recursos para que use la IA/`, `caso-estudio/`).
    - Archivos de sistema y logs (`*.log`, `.DS_Store`, `Thumbs.db`).
    - Plantilla de configuración pública: `backend/.env.example`.
+5. **🚀 Protocolo de Pruebas Locales Obligatorias antes de Despliegue**:
+   - Todo cambio nuevo, refactorización o funcionalidad grande debe desarrollarse y probarse **únicamente en el entorno local** (`http://127.0.0.1:5500` con la base de datos de pruebas en Supabase).
+   - **No ejecutar `git push origin main`** de forma prematura: solo realizar el push a producción cuando el usuario haya revisado, probado y aprobado explícitamente el resultado en su navegador local.
 
 ---
 
