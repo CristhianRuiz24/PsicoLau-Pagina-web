@@ -20,6 +20,9 @@ function iniciarApp() {
   renderSwatches();
   actualizarUIFiltroDias();
   cargarNotasConsultorio();
+  if (window.cargarDirectorioEnSegundoPlano) {
+    window.cargarDirectorioEnSegundoPlano();
+  }
   initAgenda();
 }
 
@@ -45,6 +48,9 @@ async function initAgenda() {
       citasCache = data.data || [];
       if (loader) loader.style.display = 'none';
       if (wrapper) wrapper.style.display = 'block';
+      if (window.actualizarDatalistPacientes) {
+        window.actualizarDatalistPacientes();
+      }
       renderEasyTable();
     }
   } catch (error) {
@@ -304,7 +310,10 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const zoomInput = document.getElementById('nc_enlace_zoom');
-      const enlaceZoomVal = (zoomInput && tipoRegistroActual !== 'BLOQUEO') ? zoomInput.value.trim() : '';
+      let enlaceZoomVal = (zoomInput && tipoRegistroActual !== 'BLOQUEO') ? zoomInput.value.trim() : '';
+      if (enlaceZoomVal && !enlaceZoomVal.startsWith('http://') && !enlaceZoomVal.startsWith('https://')) {
+        enlaceZoomVal = `https://${enlaceZoomVal}`;
+      }
 
       const data = {
         nombre: nombre,

@@ -58,13 +58,29 @@ function renderSwatches(colorSeleccionado = '#3EB8CC') {
 window.actualizarDatalistPacientes = function() {
   const datalist = document.getElementById('listaPacientesAutocompletar');
   if (!datalist) return;
-  const lista = window.directorioPacientesCache || [];
+  const listaDirectorio = window.directorioPacientesCache || [];
+  const nombresVistos = new Set();
   let html = '';
-  lista.forEach(p => {
-    if (!p.nombre.startsWith('[BLOQUEO]')) {
+
+  listaDirectorio.forEach(p => {
+    if (p.nombre && !p.nombre.startsWith('[BLOQUEO]') && !nombresVistos.has(p.nombre.toLowerCase().trim())) {
+      nombresVistos.add(p.nombre.toLowerCase().trim());
       html += `<option value="${p.nombre}">`;
     }
   });
+
+  if (typeof citasCache !== 'undefined' && Array.isArray(citasCache)) {
+    citasCache.forEach(c => {
+      if (c.paciente && c.paciente.nombre && !c.paciente.nombre.startsWith('[BLOQUEO]')) {
+        const nomLimpio = c.paciente.nombre.toLowerCase().trim();
+        if (!nombresVistos.has(nomLimpio)) {
+          nombresVistos.add(nomLimpio);
+          html += `<option value="${c.paciente.nombre}">`;
+        }
+      }
+    });
+  }
+
   datalist.innerHTML = html;
 };
 
@@ -88,17 +104,24 @@ window.manejarInputNombrePaciente = function(valor) {
     return;
   }
 
-  // Buscar coincidencia en directorio de pacientes
+  // Buscar coincidencia en directorio de pacientes O en citasCache
   const lista = window.directorioPacientesCache || [];
-  const coincidencia = lista.find(p => p.nombre.toLowerCase().trim() === nombreLimpio);
+  let coincidencia = lista.find(p => p.nombre && p.nombre.toLowerCase().trim() === nombreLimpio);
+
+  if (!coincidencia && typeof citasCache !== 'undefined' && Array.isArray(citasCache)) {
+    const citaPrevia = citasCache.find(c => c.paciente && c.paciente.nombre && c.paciente.nombre.toLowerCase().trim() === nombreLimpio);
+    if (citaPrevia && citaPrevia.paciente) {
+      coincidencia = citaPrevia.paciente;
+    }
+  }
 
   if (coincidencia) {
     if (badge) badge.style.display = 'inline-flex';
     
     // Autocompletar Correo (si no es generado automáticamente)
     const emailEl = document.getElementById('nc_email');
-    if (emailEl) {
-      emailEl.value = (coincidencia.email && !coincidencia.email.startsWith('sin-email-')) ? coincidencia.email : '';
+    if (emailEl && coincidencia.email && !coincidencia.email.startsWith('sin-email-')) {
+      emailEl.value = coincidencia.email;
     }
 
     // Autocompletar Teléfono con prefijo internacional
@@ -110,10 +133,10 @@ window.manejarInputNombrePaciente = function(valor) {
       if (telEl) telEl.value = parsedTel.numero || '';
     }
 
-    // Autocompletar Enlace de Zoom
+    // Autocompletar Enlace de Zoom (solo si el paciente ya tiene uno registrado)
     const zoomEl = document.getElementById('nc_enlace_zoom');
-    if (zoomEl) {
-      zoomEl.value = coincidencia.enlaceZoom || '';
+    if (zoomEl && coincidencia.enlaceZoom) {
+      zoomEl.value = coincidencia.enlaceZoom;
     }
 
     // Autocompletar Color de la paleta

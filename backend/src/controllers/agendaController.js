@@ -140,7 +140,7 @@ const crearCita = async (req, res) => {
       const dataUpdate = {};
       if (telefonoLimpio && paciente.telefono !== telefonoLimpio) dataUpdate.telefono = telefonoLimpio;
       if (emailLimpio && (!paciente.email || paciente.email.startsWith('sin-email-'))) dataUpdate.email = emailLimpio;
-      if (enlaceZoomLimpio !== undefined && paciente.enlaceZoom !== enlaceZoomLimpio) dataUpdate.enlaceZoom = enlaceZoomLimpio;
+      if (enlaceZoomLimpio) dataUpdate.enlaceZoom = enlaceZoomLimpio;
       if (Object.keys(dataUpdate).length > 0) {
         await prisma.paciente.update({
           where: { id: paciente.id },
