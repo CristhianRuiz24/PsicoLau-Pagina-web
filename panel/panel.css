@@ -80,6 +80,11 @@ body {
   border-color: var(--turquesa);
 }
 
+.form-group input::-webkit-calendar-picker-indicator {
+  display: none !important;
+  -webkit-appearance: none;
+}
+
 .btn {
   display: inline-block;
   background: var(--turquesa);

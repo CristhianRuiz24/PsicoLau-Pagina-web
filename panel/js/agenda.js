@@ -545,7 +545,6 @@ window.seleccionarTipoRegistro = function(tipo) {
     if (lblNombre) lblNombre.innerHTML = '<i class="fa-solid fa-ban" style="color: #ef4444; margin-right: 4px;"></i> Motivo del Bloqueo / Horario No Disponible *';
     if (inputNombre) {
       inputNombre.placeholder = 'Ej: Comida, Supervisión, Asunto personal...';
-      inputNombre.removeAttribute('list');
     }
     document.getElementById('nc_color').value = '#94a3b8';
     renderSwatches('#94a3b8');
@@ -560,7 +559,6 @@ window.seleccionarTipoRegistro = function(tipo) {
     if (inputZoom) inputZoom.placeholder = 'https://zoom.us/j/... (Enlace para todos los participantes)';
     if (inputNombre) {
       inputNombre.placeholder = 'Ej: Terapia Grupal para Autistas Adultos...';
-      inputNombre.setAttribute('list', 'listaGruposSugeridos');
     }
     
     const idInput = document.getElementById('nc_id');
@@ -583,8 +581,7 @@ window.seleccionarTipoRegistro = function(tipo) {
     if (lblZoom) lblZoom.innerHTML = '<i class="fa-solid fa-video" style="color: #2563eb; margin-right: 4px;"></i> Enlace personal de Zoom / Videollamada (opcional)';
     if (inputZoom) inputZoom.placeholder = 'https://zoom.us/j/... o Google Meet';
     if (inputNombre) {
-      inputNombre.placeholder = 'Escribe o selecciona paciente...';
-      inputNombre.setAttribute('list', 'listaPacientesAutocompletar');
+      inputNombre.placeholder = 'Ej: Mariana López, Carlos Ruiz...';
     }
     
     const idInput = document.getElementById('nc_id');

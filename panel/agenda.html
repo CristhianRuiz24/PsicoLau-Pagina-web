@@ -158,15 +158,7 @@
               <i class="fa-solid fa-circle-check"></i> Paciente registrado
             </span>
           </div>
-          <input type="text" id="nc_nombre" list="listaPacientesAutocompletar" required placeholder="Escribe o selecciona paciente..." oninput="manejarInputNombrePaciente(this.value)" onchange="manejarInputNombrePaciente(this.value)" autocomplete="off">
-          <datalist id="listaPacientesAutocompletar"></datalist>
-          <datalist id="listaGruposSugeridos">
-            <option value="Terapia Grupal para Autistas Adultos"></option>
-            <option value="Taller de Habilidades Sociales y Comunicación"></option>
-            <option value="Círculo Terapéutico Neuroafirmativo"></option>
-            <option value="Taller de Regulación Emocional y Sensorial"></option>
-            <option value="Grupo de Acompañamiento y Resiliencia"></option>
-          </datalist>
+          <input type="text" id="nc_nombre" required placeholder="Escribe el nombre del paciente..." oninput="manejarInputNombrePaciente(this.value)" onchange="manejarInputNombrePaciente(this.value)" autocomplete="off">
         </div>
 
         <!-- Campos de Contacto Individual (Ocultos si es Grupal o Bloqueo) -->
