@@ -77,6 +77,11 @@ const obtenerExpedientePaciente = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Paciente no encontrado' });
     }
 
+    const nomUpper = (paciente.nombre || '').toUpperCase().trim();
+    if (nomUpper.startsWith('[BLOQUEO]') || nomUpper.startsWith('[GRUPAL]')) {
+      return res.status(400).json({ success: false, message: 'Este registro corresponde a un evento de agenda y no posee expediente clínico' });
+    }
+
     const notas = await prisma.expediente.findMany({
       where: { pacienteId },
       orderBy: [
@@ -353,7 +358,10 @@ const listarDirectorioPacientes = async (req, res) => {
     });
 
     // Excluir registros automáticos que sean de bloqueos personales o terapias grupales
-    const filtrados = pacientes.filter(p => !p.nombre.startsWith('[BLOQUEO]') && !p.nombre.startsWith('[GRUPAL]'));
+    const filtrados = pacientes.filter(p => {
+      const nomUpper = (p.nombre || '').toUpperCase().trim();
+      return !nomUpper.startsWith('[BLOQUEO]') && !nomUpper.startsWith('[GRUPAL]');
+    });
 
     res.json({
       success: true,

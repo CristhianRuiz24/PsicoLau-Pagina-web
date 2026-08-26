@@ -97,11 +97,19 @@ window.cerrarDirectorioExpedientes = function() {
 function renderDirectorioPacientes(pacientes, query = '') {
   const container = document.getElementById('directorioPacientesLista');
   const badgeTotal = document.getElementById('directorioTotalPacientes');
-  if (badgeTotal) badgeTotal.innerText = `${pacientes.length} paciente${pacientes.length === 1 ? '' : 's'}`;
+  
+  // Excluir estrictamente cualquier registro de bloqueo o grupo
+  const listaLimpia = (pacientes || []).filter(p => {
+    if (!p.nombre) return false;
+    const u = p.nombre.toUpperCase().trim();
+    return !u.startsWith('[BLOQUEO]') && !u.startsWith('[GRUPAL]');
+  });
+
+  if (badgeTotal) badgeTotal.innerText = `${listaLimpia.length} paciente${listaLimpia.length === 1 ? '' : 's'}`;
 
   if (!container) return;
 
-  if (pacientes.length === 0) {
+  if (listaLimpia.length === 0) {
     container.innerHTML = `
       <div style="text-align: center; padding: 2.5rem 1rem; color: #64748b;">
         <i class="fa-solid fa-folder-open" style="font-size: 2.4rem; color: #cbd5e1; margin-bottom: 0.8rem;"></i>
@@ -113,7 +121,7 @@ function renderDirectorioPacientes(pacientes, query = '') {
   }
 
   let html = '';
-  pacientes.forEach(p => {
+  listaLimpia.forEach(p => {
     const numExp = p._count ? p._count.expedientes : 0;
     const numCitas = p._count ? p._count.citas : 0;
     const tieneEmail = p.email && !p.email.startsWith('sin-email-');
@@ -182,7 +190,10 @@ window.filtrarDirectorioExpedientes = function(query) {
     return;
   }
 
-  const filtrados = window.directorioPacientesCache.filter(p => {
+  const filtrados = (window.directorioPacientesCache || []).filter(p => {
+    if (!p.nombre) return false;
+    const u = p.nombre.toUpperCase().trim();
+    if (u.startsWith('[BLOQUEO]') || u.startsWith('[GRUPAL]')) return false;
     const nombre = (p.nombre || '').toLowerCase();
     const tel = (p.telefono || '').toLowerCase();
     const email = (p.email || '').toLowerCase();

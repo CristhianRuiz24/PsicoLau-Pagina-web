@@ -113,7 +113,7 @@ window.manejarInputNombrePaciente = function(valor) {
         const esGrup = (c.categoria && c.categoria.startsWith('[GRUPAL]')) || (c.paciente.nombre.startsWith('[GRUPAL]'));
         if (!esGrup) return false;
         const nom = c.paciente.nombre.toLowerCase().replace(/^\[(bloqueo|grupal)\]\s*/i, '').trim();
-        return nom === nombreLimpio || (nombreLimpio.length >= 4 && nom.includes(nombreLimpio));
+        return nom === nombreLimpio;
       });
     }
 

@@ -220,6 +220,10 @@ Es un espacio de salud mental: prioriza la calidez, claridad, ética y confianza
 - **2026-08-26 (Sesión 24 - Autocompletado Predictivo para Terapias Grupales)**:
   - **Normalización de Prefijos de Búsqueda**: Ajuste en `manejarInputNombrePaciente` y `autoDetectarColorPaciente` para ignorar prefijos `[GRUPAL]` al comparar nombres de grupos.
   - **Autocompletado de Sala y Color Grupal**: Al escribir el nombre de un grupo registrado, el sistema muestra el badge `✓ Grupo detectado` en tono violeta (`#f3e8ff` / `#7c3aed`), rellenando instantáneamente el enlace de Zoom de la sala grupal y su color asignado.
+- **2026-08-26 (Sesión 25 - Aislamiento Total de Expedientes y Coincidencia Exacta en Autocompletado Grupal)**:
+  - **Coincidencia Exacta en Autocompletado Grupal**: Eliminación de la búsqueda por subcadena parcial para evitar disparos prematuros al escribir palabras genéricas como *"grupal"* o *"taller"*; el autorrellenado de Zoom y color ahora se activa exclusivamente al escribir el nombre completo del grupo (`nom === nombreLimpio`).
+  - **Aislamiento Estricto de Expedientes Clínicos**: Blindaje defensivo multidireccional en el buscador global (`app.js`), directorio de expedientes (`expedientes.js`) y API (`expedienteController.js`) para garantizar que ningún registro `[GRUPAL]` o `[BLOQUEO]` se liste o abra bajo la sección de expedientes médicos.
+
 
 
 

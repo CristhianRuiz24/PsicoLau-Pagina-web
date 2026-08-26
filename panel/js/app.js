@@ -89,8 +89,11 @@ window.filtrarCitasEnTabla = function(query) {
     return;
   }
 
-  // 1. Buscar en Directorio de Pacientes / Expedientes
+  // 1. Buscar en Directorio de Pacientes / Expedientes (excluyendo estrictamente bloqueos y grupos)
   const pacientesCoincidentes = (window.directorioPacientesCache || []).filter(p => {
+    if (!p.nombre) return false;
+    const nomUpper = p.nombre.toUpperCase().trim();
+    if (nomUpper.startsWith('[BLOQUEO]') || nomUpper.startsWith('[GRUPAL]')) return false;
     const nom = normalizarTexto(p.nombre);
     const tel = normalizarTexto(p.telefono);
     const email = normalizarTexto(p.email && !p.email.startsWith('sin-email-') ? p.email : '');
