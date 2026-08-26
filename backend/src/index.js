@@ -23,17 +23,23 @@ if (process.env.FRONTEND_URL) {
   allowedOrigins.push(process.env.FRONTEND_URL);
 }
 
-app.use(cors({
-  origin: function (origin, callback) {
-    // Permitir requests sin origin (como herramientas de línea de comandos, pero en un entorno real a veces es mejor rechazar si es un API solo para web, sin embargo, cors() sin origin suele rechazar si no lo permitimos explícitamente, pero lo dejaremos estricto)
-    // Para mayor seguridad, exigimos que el origin esté en la lista permitida.
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('No permitido por CORS'));
+const isLocal = process.env.NODE_ENV !== 'production';
+
+if (isLocal) {
+  // En desarrollo (y al abrir archivos con file://), permitimos todo para facilitar pruebas
+  app.use(cors());
+} else {
+  // Configuración de CORS estricta para producción
+  app.use(cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('No permitido por CORS'));
+      }
     }
-  }
-}));
+  }));
+}
 app.use(express.json());
 
 // Montar todas las rutas
