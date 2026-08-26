@@ -488,8 +488,12 @@ function renderEasyTable() {
 
               <div class="patient-name">${esBloqueo ? `<i class="fa-solid fa-ban" style="margin-right: 3px;"></i>${nombreLimpio}` : (esGrupal ? `<i class="fa-solid fa-users" style="margin-right: 4px;"></i>${nombreLimpio}` : nombreLimpio)}</div>
               ${notasLimpias ? `<div class="appointment-note">${notasLimpias}</div>` : ''}
-              ${esGrupal ? `<div class="badge-grupal"><i class="fa-solid fa-people-group"></i> Grupal</div>` : ''}
-              ${esCompletada && !esBloqueo ? `<div class="badge-completada"><i class="fa-solid fa-check"></i> Realizada</div>` : ''}
+              ${(esGrupal || (esCompletada && !esBloqueo)) ? `
+                <div class="card-badges-row">
+                  ${esGrupal ? `<div class="badge-grupal"><i class="fa-solid fa-people-group"></i> Grupal</div>` : ''}
+                  ${esCompletada && !esBloqueo ? `<div class="badge-completada"><i class="fa-solid fa-check"></i> Realizada</div>` : ''}
+                </div>
+              ` : ''}
               
               ${!esBloqueo && !esGrupal ? `
                 <div style="margin-top: 4px;">

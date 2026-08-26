@@ -227,6 +227,10 @@ Es un espacio de salud mental: prioriza la calidez, claridad, ética y confianza
   - **Persistencia en `localStorage`**: Implementación de `guardarColorPersonalizado` y `getColoresPersonalizados` en `agenda.js` para almacenar los códigos HEX elegidos libremente con el gotero.
   - **Muestras Reutilizables en Paleta**: Renderizado dinámico de los colores personalizados como swatches interactivos (`.custom-saved-swatch`) junto a la paleta estándar de 24 colores, disponibles inmediatamente para agendar citas futuras en 1 clic.
   - **Sincronización en Formulario**: Detección y guardado automático del color al interactuar con el gotero (`onchange`) o al guardar la cita en `app.js`.
+- **2026-08-26 (Sesión 27 - Calibración de Alto Contraste en Distintivos Grupal y Cita Realizada)**:
+  - **Píldoras Sólidas de Alto Contraste**: Rediseño de `.badge-grupal` y `.badge-completada` con base blanca sólida (`#ffffff`), borde fino y sombra de alta definición (`box-shadow`), asegurando máxima legibilidad sobre cualquier tono de fondo (oscuros, saturados o claros).
+  - **Alineación Flex en Tarjeta**: Contenedor `.card-badges-row` para ordenación armónica de múltiples distintivos en la tarjeta semanal.
+
 
 
 
