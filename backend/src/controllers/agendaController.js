@@ -1,5 +1,11 @@
 const prisma = require('../config/db');
 
+// Helper para validar IDs numéricos positivos
+const parseId = (id) => {
+  const parsed = parseInt(id, 10);
+  return (isNaN(parsed) || parsed <= 0) ? null : parsed;
+};
+
 // Obtener todas las citas para la agenda visual
 const obtenerCitas = async (req, res) => {
   try {
@@ -30,18 +36,22 @@ const obtenerCitas = async (req, res) => {
   }
 };
 
-// Actualizar el estado de la cita (Confirmada, Cancelada, etc)
+// Actualizar el estado de la cita (Pendiente, Confirmada, Realizada, Cancelada)
 const actualizarEstadoCita = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { estado_cita } = req.body; // 'PENDIENTE', 'CONFIRMADA', 'CANCELADA'
+    const citaId = parseId(req.params.id);
+    if (!citaId) {
+      return res.status(400).json({ success: false, message: 'ID de cita inválido' });
+    }
 
-    if (!['PENDIENTE', 'CONFIRMADA', 'CANCELADA'].includes(estado_cita)) {
+    const { estado_cita } = req.body; // 'PENDIENTE', 'CONFIRMADA', 'REALIZADA', 'CANCELADA'
+
+    if (!['PENDIENTE', 'CONFIRMADA', 'REALIZADA', 'CANCELADA'].includes(estado_cita)) {
       return res.status(400).json({ success: false, message: 'Estado de cita inválido' });
     }
 
     const citaActualizada = await prisma.cita.update({
-      where: { id: parseInt(id) },
+      where: { id: citaId },
       data: { estado_cita }
     });
 
@@ -55,7 +65,11 @@ const actualizarEstadoCita = async (req, res) => {
 // Actualizar estado de pago (Pendiente, Pagado)
 const actualizarEstadoPago = async (req, res) => {
   try {
-    const { id } = req.params;
+    const citaId = parseId(req.params.id);
+    if (!citaId) {
+      return res.status(400).json({ success: false, message: 'ID de cita inválido' });
+    }
+
     const { estado_pago } = req.body; // 'PENDIENTE', 'PAGADO'
 
     if (!['PENDIENTE', 'PAGADO'].includes(estado_pago)) {
@@ -63,7 +77,7 @@ const actualizarEstadoPago = async (req, res) => {
     }
 
     const citaActualizada = await prisma.cita.update({
-      where: { id: parseInt(id) },
+      where: { id: citaId },
       data: { estado_pago }
     });
 
@@ -149,10 +163,13 @@ const crearCita = async (req, res) => {
 // Cancelar cita (Soft Delete: cambia estado_cita a 'CANCELADA')
 const cancelarCita = async (req, res) => {
   try {
-    const { id } = req.params;
+    const citaId = parseId(req.params.id);
+    if (!citaId) {
+      return res.status(400).json({ success: false, message: 'ID de cita inválido' });
+    }
 
     const citaActualizada = await prisma.cita.update({
-      where: { id: parseInt(id) },
+      where: { id: citaId },
       data: { estado_cita: 'CANCELADA' },
       include: { paciente: true }
     });
@@ -167,15 +184,18 @@ const cancelarCita = async (req, res) => {
 // Eliminar cita permanentemente de la base de datos (Hard Delete)
 const eliminarCita = async (req, res) => {
   try {
-    const { id } = req.params;
+    const citaId = parseId(req.params.id);
+    if (!citaId) {
+      return res.status(400).json({ success: false, message: 'ID de cita inválido' });
+    }
     
     // Primero eliminar registros relacionados (notificaciones si las hay)
     await prisma.logNotificacion.deleteMany({
-      where: { citaId: parseInt(id) }
+      where: { citaId: citaId }
     });
     
     await prisma.cita.delete({
-      where: { id: parseInt(id) }
+      where: { id: citaId }
     });
 
     res.json({ success: true, message: 'Cita eliminada permanentemente' });
@@ -188,11 +208,15 @@ const eliminarCita = async (req, res) => {
 // Actualizar cita completa (editar datos del paciente, fecha/hora, notas y color)
 const editarCita = async (req, res) => {
   try {
-    const { id } = req.params;
+    const citaId = parseId(req.params.id);
+    if (!citaId) {
+      return res.status(400).json({ success: false, message: 'ID de cita inválido' });
+    }
+
     const { nombre, telefono, email, fechaHora, categoria, notas, color } = req.body;
 
     const citaExistente = await prisma.cita.findUnique({
-      where: { id: parseInt(id) },
+      where: { id: citaId },
       include: { paciente: true }
     });
 
@@ -214,7 +238,7 @@ const editarCita = async (req, res) => {
 
     // Actualizar cita
     const citaActualizada = await prisma.cita.update({
-      where: { id: parseInt(id) },
+      where: { id: citaId },
       data: {
         ...(fechaHora && { fechaHora: new Date(fechaHora) }),
         categoria: notas !== undefined ? notas : (categoria !== undefined ? categoria : citaExistente.categoria),

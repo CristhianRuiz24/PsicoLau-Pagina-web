@@ -31,7 +31,7 @@
     </div>
   </div>
 
-  <script src="panel.js"></script>
+  <script src="js/config.js"></script>
   <script>
     // Redirigir si ya hay un token
     if (localStorage.getItem('psicolau_token')) {
@@ -51,11 +51,7 @@
       btn.disabled = true;
 
       try {
-        const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:' || !window.location.hostname)
-          ? 'http://localhost:3000/api'
-          : (window.PSICOLAU_API_URL || 'https://api.psicolau.com/api');
-
-        const response = await fetch(`${API_BASE}/auth/login`, {
+        const response = await fetch(`${API_URL}/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
