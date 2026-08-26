@@ -30,16 +30,20 @@ Es un espacio de salud mental: prioriza la calidez, claridad, ética y confianza
 ---
 
 ### 2. Panel Administrativo & Agenda Clínica (`/panel`)
-* [`panel/index.html`](file:///c:/Users/crist/Documents/Proyectos/Web%20PsicoLau/panel/index.html) — Inicio de sesión seguro para la psicóloga mediante autenticación JWT.
+* [`panel/index.html`](file:///c:/Users/crist/Documents/Proyectos/Web%20PsicoLau/panel/index.html) — Inicio de sesión seguro para la psicóloga mediante autenticación JWT (24h de expiración).
 * [`panel/agenda.html`](file:///c:/Users/crist/Documents/Proyectos/Web%20PsicoLau/panel/agenda.html) — Suite de gestión y calendario semanal tipo Easy Table con:
   - **Matriz Semanal Continua**: Rango horario de 07:00 a.m. a 12:00 a.m.
   - **Citas Recurrentes**: Creación automatizada en lote de 2 a 12 sesiones semanales/quincenales con numeración `(Sesión X/N)`.
+  - **Autocompletado Predictivo Inteligente**: Al ingresar o seleccionar un paciente en `#nc_nombre`, el formulario autocompleta instantáneamente su teléfono (con prefijo internacional), email, enlace de Zoom y color de la paleta, mostrando el indicador `✓ Paciente registrado`.
+  - **Acceso Directo a Zoom en 1 Clic**: Botón de videollamada (`fa-solid fa-video`) en la cápsula flotante de cada tarjeta que abre directamente la reunión personal de Zoom del paciente (`window.open`).
   - **Buscador Global de Pacientes**: Búsqueda en tiempo real con historial (pasado, presente y futuro) y navegación directa a la semana de la cita (`irAFechaDeCita`).
   - **Cita Realizada / Completada**: Botón interactivo con sonido armónico generado por Web Audio API (`reproducirSonidoCompletada`), animación pop (`@keyframes popComplete`) y etiqueta `✓ Realizada`.
   - **Paleta de 24 Colores + Selector Libre**: 24 tonos clínicos/vibrantes organizados por familias más botón con gotero para selección personalizada de cualquier color hexadecimal con cálculo automático de contraste.
-  - **Cápsula Flotante de Acciones**: Botones de WhatsApp, edición, papelera y verificación en fondo translúcido (`.card-actions-capsule`) para 100% de contraste visual.
-  - **Recordatorios por WhatsApp**: Integración directa con `wa.me` y formato internacional (+52).
+  - **Cápsula Flotante de Acciones**: Botones de verificación, expediente, Zoom, WhatsApp, cobranza, edición y papelera en fondo translúcido (`.card-actions-capsule`) para 100% de contraste visual.
+  - **Recordatorios por WhatsApp**: Integración directa con `wa.me`, formato internacional y enlace personal de Zoom integrado en el texto.
   - **Control de Pagos y Métricas en Vivo**: Alternador `[ 💳 Pagado / ⏳ Por Pagar ]` con cálculo instantáneo de ingresos y citas pendientes.
+  - **Suite de Cobranza & Auditoría de Pagos**: Modal `#modalAuditoriaPagos` con filtros por semana/historial y recordatorios cordiales preformateados con datos bancarios.
+  - **Módulo de Expedientes Clínicos Cifrados**: Directorio de pacientes, ficha clínica por paciente, historial cronológico de sesiones y vista ampliada con edición *in situ*, impresión PDF calibrada a 1 sola página y exportación `.txt`.
   - **Bloqueos de Horario**: Marcado de horarios no disponibles con textura rayada distintiva.
   - **Bloc de Notas Semanal**: Espacio para pendientes clínicos con autoguardado en `localStorage`.
   - **Modo de Impresión Limpio**: Reglas `@media print` optimizadas para PDF o papel.
@@ -51,18 +55,22 @@ Es un espacio de salud mental: prioriza la calidez, claridad, ética y confianza
 * **Base de Datos**: PostgreSQL en Supabase (`DATABASE_URL`).
 * **Modelos Prisma** (`backend/prisma/schema.prisma`):
   - `Usuario`: Credenciales administrativas protegidas con bcrypt.
-  - `Paciente`: Directorio de pacientes (nombre, email, teléfono, notas).
-  - `Cita`: Citas programadas (`fechaHora`, `estado_cita`, `estado_pago`, `categoria`, `color`, relación con paciente).
-* **Seguridad & Autenticación**:
-  - Tokens JWT firmados con clave criptográfica de 256 bits (`JWT_SECRET`).
-  - Middleware de protección de rutas `authMiddleware.js`.
+  - `Paciente`: Directorio de pacientes (nombre, email, teléfono, `enlaceZoom`, notas).
+  - `Cita`: Citas programadas (`fechaHora`, `estado_cita` [PENDIENTE, CONFIRMADA, REALIZADA, CANCELADA], `estado_pago` [PENDIENTE, PAGADO], `categoria`, `color`, `onDelete: Cascade` con Paciente).
+  - `Expediente`: Notas clínicas de sesión (`onDelete: Cascade` con Paciente) con 8 campos clínicos cifrados simétricamente con `AES-256-GCM`.
+  - `LogNotificacion`: Historial de recordatorios enviados (`onDelete: Cascade` con Paciente y Cita).
+* **Seguridad, Cifrado & Autenticación**:
+  - Tokens JWT firmados con clave criptográfica de 256 bits (`JWT_SECRET`) y expiración de 24 horas.
+  - Cifrado simétrico de datos clínicos `AES-256-GCM` (`backend/src/utils/crypto.js`) con vector de inicialización único (IV) y tag de autenticación.
+  - Rate limiting defensivo (`120 req / 1 min`) en agenda, pacientes y expedientes.
+  - Sanitización estricta de HTML (`sanitizer.js`) para prevención de inyecciones XSS.
 * **Servicio de Correo Oficial**:
   - Proveedor: Resend API a través de SMTP (`smtp.resend.com`).
   - Dominio Verificado: `psicolau.com`.
   - Remitente Oficial: `PsicoLau <contacto@psicolau.com>` (`REMITENTE` en `.env`).
   - Correo de Destino: `lince_lg@yahoo.com.mx` (`CORREO_LAURA` en `.env`).
   - Encabezado `replyTo`: Configurado con el correo del paciente para respuesta inmediata con un clic.
-  - *Nota*: Ya no se utiliza Formspree; todos los correos se procesan mediante el endpoint propio `POST /api/contacto`.
+  - *Nota*: Todos los correos se procesan mediante el endpoint propio `POST /api/contacto`.
 
 ---
 
@@ -72,11 +80,10 @@ Es un espacio de salud mental: prioriza la calidez, claridad, ética y confianza
 - **Gris Cálido**: `#8C8C8C` / `#5A5A5A` — Texto de cuerpo (nunca negro puro para reducir fatiga visual).
 - **Tipografía**: Sans-serif limpia, moderna y accesible (Google Fonts: *Outfit* para cuerpo y *Lora* para encabezados).
 
-
 ---
 
 ## 🔒 Reglas de Seguridad y Despliegue
-1. **Cloudflare Pages**: Despliegue estático del frontend desde GitHub con headers de seguridad CSP en `_headers`.
+1. **Cloudflare Pages**: Despliegue estático del frontend desde GitHub con headers de seguridad CSP y HSTS en `_headers`.
 2. **Render (Backend API)**: Alojamiento del servicio Node.js (`/backend`) con root directory `backend`, build command `npm install && npx prisma generate`, start command `npm start` y subdominio oficial `api.psicolau.com`.
 3. **📌 Recordatorio para Despliegue en Producción (UptimeRobot)**:
    - En el plan gratuito de Render, el servicio se suspende tras 15 minutos de inactividad.
@@ -167,6 +174,15 @@ Es un espacio de salud mental: prioriza la calidez, claridad, ética y confianza
       - `[ ✏️ Editar ]` (Edición In Situ): Permite editar directamente los 8 campos y la fecha dentro de la misma vista ampliada sin regresar al listado de sesiones, guardando con `PUT /api/expediente/:id` y actualizando la vista inmediatamente en memoria.
       - `[ 🖨️ Imprimir PDF ]`: Genera la nota clínica oficial exclusivamente de esa sesión ajustada y calibrada para encajar en **1 sola página limpia**, con membrete de PSICOLAU, firma y pie legal confidencial sin desbordamientos a una segunda página en blanco.
       - `[ 📄 Guardar .txt ]`: Descarga el archivo de texto estructurado de esa sesión en particular.
+- **2026-08-26 (Sesión 16 - Auditoría Técnica, Cascade Delete y Rate Limiting Defensivo)**:
+  - **Integridad Referencial en Base de Datos**: Configuración de `onDelete: Cascade` en relaciones `Cita` y `LogNotificacion` en Prisma para evitar registros huérfanos al suprimir pacientes no agendados.
+  - **Rate Limiting Defensivo**: Implementación de limitador de tasa (`120 req / 1 min`) en `agenda.js`, `pacientes.js` y `expedientes.js` para proteger la API de sobrecargas o ataques de denegación de servicio.
+  - **Limpieza de Rutas**: Eliminación del alias redundante `/expedientes` en `routes/index.js`, centralizando todas las operaciones de expediente en `/pacientes/:id/expediente`.
+- **2026-08-26 (Sesión 17 - Optimización Integral de SEO, Open Graph y Schema.org)**:
+  - **Open Graph & Twitter Cards**: Implementación completa de metadatos para vistas previas enriquecidas en WhatsApp, Facebook, LinkedIn y Twitter en las 9 páginas públicas.
+  - **Etiquetas Canónicas**: Adición de `<link rel="canonical">` en cada página pública para consolidación de autoridad y prevención de contenido duplicado.
+  - **Datos Estructurados Schema.org (JSON-LD)**: Implementación de esquemas clínicos (`Psychologist`, `MedicalBusiness`, `ProfilePage`, `FAQPage`, `MedicalWebPage`, `Book`, `ContactPage`) para paneles de conocimiento y rich snippets en Google.
+  - **Doble Blindaje de Indexación**: Adición de directiva `<meta name="robots" content="noindex, nofollow">` en `panel/index.html` y `panel/agenda.html` para protección redundante de la suite clínica.
 - **2026-08-26 (Sesión 18 - Enlaces de Zoom por Paciente y Autocompletado Predictivo al Agendar)**:
   - **Campo `enlaceZoom` en Base de Datos**: Modelo `Paciente` ampliado en Prisma con persistencia y sincronización en Supabase PostgreSQL.
   - **Autocompletado Predictivo Inteligente**: Al ingresar o seleccionar el nombre de un paciente existente en `#nc_nombre`, el formulario autocompleta instantáneamente su correo, teléfono (con prefijo de país internacional), enlace de Zoom y color de la paleta, activando el indicador `✓ Paciente registrado`. Si el nombre se borra o cambia, los campos se resetean limpiamente.
@@ -182,6 +198,12 @@ Es un espacio de salud mental: prioriza la calidez, claridad, ética y confianza
   - **Accesibilidad ARIA en Acordeón de FAQs**: Inclusión de `aria-expanded` dinámico y `aria-controls` en `preguntas-frecuentes.html` y `main.js`.
   - **Corrección de Sintaxis y Homogenización Académica**: Cierre del tag `</div>` en `experiencia.html`, homogeneización de leyendas académicas *(Maestría en Psicología Clínica con cédula en trámite, diplomados completados)* y unificación de teléfono oficial en Schema JSON-LD.
   - **Optimización de Despliegue**: Adición de cabecera HSTS `Strict-Transport-Security` en `_headers`, atributo `loading="lazy"` en videos embebidos de testimonios y actualización integral de `sitemap.xml`.
+- **2026-08-26 (Sesión 20 - Persistencia y Sanitización de Enlaces de Zoom)**:
+  - **Flexibilización de Formato de Enlace**: Cambio de `type="url"` a `type="text"` en `#nc_enlace_zoom` para admitir el pegado directo de enlaces (como `zoom.us/j/...` o `meet.google.com/...`) sin que la validación nativa del navegador bloquee el envío.
+  - **Normalización Automática con `https://`**: Inclusión automática del protocolo de seguridad si el usuario ingresó la URL sin él antes de procesar la petición.
+  - **Protección de Datos al Autocompletar**: Corrección del detector reactivo en `manejarInputNombrePaciente` para evitar el reseteo involuntario del enlace de Zoom recién escrito o pegado por la terapeuta.
+  - **Carga Temprana de Directorio**: Invocación de `cargarDirectorioEnSegundoPlano()` al arrancar la aplicación (`iniciarApp()`) para que el `<datalist>` y la memoria caché de pacientes estén disponibles desde el primer milisegundo de navegación.
+
 
 
 
