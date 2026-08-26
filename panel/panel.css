@@ -795,6 +795,22 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
+.color-swatch.custom-saved-swatch {
+  position: relative;
+}
+
+.color-swatch.custom-saved-swatch::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  right: 3px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+}
+
 /* Selector de color personalizado (gotero / paleta libre) */
 .color-swatch-custom {
   position: relative;

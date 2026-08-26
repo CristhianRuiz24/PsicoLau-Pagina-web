@@ -223,6 +223,11 @@ Es un espacio de salud mental: prioriza la calidez, claridad, ética y confianza
 - **2026-08-26 (Sesión 25 - Aislamiento Total de Expedientes y Coincidencia Exacta en Autocompletado Grupal)**:
   - **Coincidencia Exacta en Autocompletado Grupal**: Eliminación de la búsqueda por subcadena parcial para evitar disparos prematuros al escribir palabras genéricas como *"grupal"* o *"taller"*; el autorrellenado de Zoom y color ahora se activa exclusivamente al escribir el nombre completo del grupo (`nom === nombreLimpio`).
   - **Aislamiento Estricto de Expedientes Clínicos**: Blindaje defensivo multidireccional en el buscador global (`app.js`), directorio de expedientes (`expedientes.js`) y API (`expedienteController.js`) para garantizar que ningún registro `[GRUPAL]` o `[BLOQUEO]` se liste o abra bajo la sección de expedientes médicos.
+- **2026-08-26 (Sesión 26 - Guardado Persistente y Reutilización de Colores Personalizados con Gotero)**:
+  - **Persistencia en `localStorage`**: Implementación de `guardarColorPersonalizado` y `getColoresPersonalizados` en `agenda.js` para almacenar los códigos HEX elegidos libremente con el gotero.
+  - **Muestras Reutilizables en Paleta**: Renderizado dinámico de los colores personalizados como swatches interactivos (`.custom-saved-swatch`) junto a la paleta estándar de 24 colores, disponibles inmediatamente para agendar citas futuras en 1 clic.
+  - **Sincronización en Formulario**: Detección y guardado automático del color al interactuar con el gotero (`onchange`) o al guardar la cita en `app.js`.
+
 
 
 

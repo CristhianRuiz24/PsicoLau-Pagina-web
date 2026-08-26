@@ -1,17 +1,54 @@
 // --- Módulo de Agenda Semanal, Matriz Horaria y Gestión de Citas ---
 
+// Obtener colores personalizados guardados en localStorage
+window.getColoresPersonalizados = function() {
+  try {
+    const raw = localStorage.getItem('psicolau_colores_personalizados');
+    if (!raw) return [];
+    const list = JSON.parse(raw);
+    return Array.isArray(list) ? list : [];
+  } catch (e) {
+    return [];
+  }
+};
+
+// Guardar un nuevo color personalizado en localStorage
+window.guardarColorPersonalizado = function(hex) {
+  if (!hex || typeof hex !== 'string') return;
+  const hexNorm = hex.trim().toUpperCase();
+  if (!hexNorm.startsWith('#') || (hexNorm.length !== 4 && hexNorm.length !== 7)) return;
+
+  // Verificar si ya existe en la paleta oficial predefinida
+  const yaEnPaleta = PALETA_COLORES.some(c => c.hex.toUpperCase() === hexNorm);
+  if (yaEnPaleta) return;
+
+  const guardados = window.getColoresPersonalizados();
+  const filtrados = guardados.filter(c => c.toUpperCase() !== hexNorm);
+  filtrados.unshift(hexNorm);
+
+  // Mantener un máximo de 10 colores recientes guardados
+  const maxGuardados = filtrados.slice(0, 10);
+  try {
+    localStorage.setItem('psicolau_colores_personalizados', JSON.stringify(maxGuardados));
+  } catch (e) {
+    console.warn('No se pudo guardar color personalizado en localStorage', e);
+  }
+};
+
 // Renderizado de paleta de colores en el Modal
 function renderSwatches(colorSeleccionado = '#3EB8CC') {
   const container = document.getElementById('swatchesContainer');
   if (!container) return;
   container.innerHTML = '';
 
-  let esColorDePaleta = false;
+  const colorSelNorm = (colorSeleccionado || '#3EB8CC').toUpperCase();
+  let colorEncontrado = false;
 
+  // 1. Renderizar los 24 colores estándar
   PALETA_COLORES.forEach(c => {
     const swatch = document.createElement('div');
-    const esActivo = c.hex.toLowerCase() === colorSeleccionado.toLowerCase();
-    if (esActivo) esColorDePaleta = true;
+    const esActivo = c.hex.toUpperCase() === colorSelNorm;
+    if (esActivo) colorEncontrado = true;
 
     swatch.className = `color-swatch ${esActivo ? 'active' : ''}`;
     swatch.style.backgroundColor = c.hex;
@@ -27,10 +64,31 @@ function renderSwatches(colorSeleccionado = '#3EB8CC') {
     container.appendChild(swatch);
   });
 
-  // Selector de Color Personalizado (Gotero / Paleta Libre)
+  // 2. Renderizar los colores personalizados guardados
+  const personalizados = window.getColoresPersonalizados();
+  personalizados.forEach(hex => {
+    const swatch = document.createElement('div');
+    const esActivo = hex.toUpperCase() === colorSelNorm;
+    if (esActivo) colorEncontrado = true;
+
+    swatch.className = `color-swatch custom-saved-swatch ${esActivo ? 'active' : ''}`;
+    swatch.style.backgroundColor = hex;
+    swatch.title = `Color personalizado guardado (${hex})`;
+
+    swatch.onclick = () => {
+      document.querySelectorAll('.color-swatch, .color-swatch-custom').forEach(s => s.classList.remove('active'));
+      swatch.classList.add('active');
+      document.getElementById('nc_color').value = hex;
+      const cp = document.getElementById('customColorPicker');
+      if (cp) cp.value = hex;
+    };
+    container.appendChild(swatch);
+  });
+
+  // 3. Selector de Color Personalizado (Gotero / Paleta Libre)
   const customWrapper = document.createElement('div');
-  customWrapper.className = `color-swatch-custom ${!esColorDePaleta ? 'active' : ''}`;
-  customWrapper.title = 'Elegir color personalizado...';
+  customWrapper.className = `color-swatch-custom ${!colorEncontrado ? 'active' : ''}`;
+  customWrapper.title = 'Elegir color personalizado con gotero...';
 
   const customPicker = document.createElement('input');
   customPicker.type = 'color';
@@ -44,11 +102,19 @@ function renderSwatches(colorSeleccionado = '#3EB8CC') {
   customWrapper.appendChild(customPicker);
   customWrapper.appendChild(iconPalette);
 
+  // Vista previa al arrastrar el cursor en la paleta
   customPicker.oninput = (e) => {
     const customHex = e.target.value;
     document.querySelectorAll('.color-swatch, .color-swatch-custom').forEach(s => s.classList.remove('active'));
     customWrapper.classList.add('active');
     document.getElementById('nc_color').value = customHex;
+  };
+
+  // Guardado persistente inmediato al seleccionar el color
+  customPicker.onchange = (e) => {
+    const customHex = e.target.value;
+    window.guardarColorPersonalizado(customHex);
+    renderSwatches(customHex);
   };
 
   container.appendChild(customWrapper);

@@ -374,6 +374,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         const resData = await response.json();
         if (resData.success) {
+          if (data.color && window.guardarColorPersonalizado) {
+            window.guardarColorPersonalizado(data.color);
+          }
           window.cerrarModal();
           await initAgenda();
           if (window.cargarDirectorioEnSegundoPlano) {
