@@ -129,5 +129,9 @@ Es un espacio de salud mental: prioriza la calidez, claridad, ética y confianza
   - **Actualización de Seguridad CSP (`_headers`)**: Eliminación definitiva de Formspree y adición de directivas `connect-src` (`http://localhost:3000`, `https://api.psicolau.com`) y `script-src 'unsafe-inline'`.
   - **Optimización de SEO y Rastreo**: Bloqueo del panel administrativo en `robots.txt` (`Disallow: /panel/`), referencia directa a `sitemap.xml` y adición de etiquetas `<lastmod>` en cada URL.
   - **Prevención de Saturación de Conexiones**: Documentación de parámetros de Connection Pooling (`connection_limit=5&pool_timeout=20`) para optimización de Supabase Free Tier en `.env.example`.
-
-
+- **2026-08-25 (Sesión 13 - Blindaje de Seguridad y Limpieza de Entornos)**:
+  - **Restricción Estricta de CORS**: Reemplazo de la política abierta por un arreglo explícito de dominios (`psicolau.com`, `www.psicolau.com` y `FRONTEND_URL` local) en `backend/src/index.js`, bloqueando peticiones no autorizadas.
+  - **Eliminación de Bypass de Desarrollo**: Supresión total del bloque de código que permitía acceso local (y accidentalmente remoto) con la cuenta `admin/admin` sin consultar la base de datos en `authController.js`.
+  - **Credenciales Reales para Desarrollo**: Consolidación del uso exclusivo de `node backend/scripts/seedUser.js <email> <password>` para generar usuarios reales con contraseñas encriptadas mediante bcrypt para pruebas.
+  - **Limpieza Completa de Base de Datos**: Ejecución de script directo para borrar definitivamente 7 citas de prueba generadas por problemas previos de UTC y limpieza de registros de pacientes huérfanos.
+  - **Rotación de Credenciales de Producción**: Reconfiguración de `DATABASE_URL` y rotación del password administrativo en Supabase tras la eliminación del bypass de login de desarrollo.
