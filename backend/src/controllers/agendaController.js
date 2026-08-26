@@ -91,7 +91,7 @@ const actualizarEstadoPago = async (req, res) => {
 // Crear cita manualmente desde el panel (con soporte para citas recurrentes)
 const crearCita = async (req, res) => {
   try {
-    const { nombre, telefono, email, fechaHora, categoria, notas, color, repeticiones = 1, frecuencia = 'SEMANAL' } = req.body;
+    const { nombre, telefono, email, enlaceZoom, fechaHora, categoria, notas, color, repeticiones = 1, frecuencia = 'SEMANAL' } = req.body;
     
     if (!nombre || !fechaHora) {
       return res.status(400).json({ success: false, message: 'Nombre y fecha/hora son obligatorios' });
@@ -101,7 +101,7 @@ const crearCita = async (req, res) => {
     const nombreLimpio = nombre.trim();
     const emailLimpio = email ? email.trim() : null;
     const telefonoLimpio = telefono ? telefono.trim() : null;
-
+    const enlaceZoomLimpio = enlaceZoom !== undefined ? (enlaceZoom ? enlaceZoom.trim() : null) : undefined;
 
     let paciente;
     if (emailLimpio) {
@@ -131,14 +131,16 @@ const crearCita = async (req, res) => {
         data: {
           nombre: nombreLimpio,
           telefono: telefonoLimpio || '',
-          email: emailSeguro
+          email: emailSeguro,
+          enlaceZoom: enlaceZoomLimpio || null
         }
       });
     } else {
-      // Actualizar datos de contacto si cambiaron
+      // Actualizar datos de contacto y Zoom si cambiaron
       const dataUpdate = {};
       if (telefonoLimpio && paciente.telefono !== telefonoLimpio) dataUpdate.telefono = telefonoLimpio;
       if (emailLimpio && (!paciente.email || paciente.email.startsWith('sin-email-'))) dataUpdate.email = emailLimpio;
+      if (enlaceZoomLimpio !== undefined && paciente.enlaceZoom !== enlaceZoomLimpio) dataUpdate.enlaceZoom = enlaceZoomLimpio;
       if (Object.keys(dataUpdate).length > 0) {
         await prisma.paciente.update({
           where: { id: paciente.id },
@@ -256,7 +258,7 @@ const editarCita = async (req, res) => {
       return res.status(400).json({ success: false, message: 'ID de cita inválido' });
     }
 
-    const { nombre, telefono, email, fechaHora, categoria, notas, color } = req.body;
+    const { nombre, telefono, email, enlaceZoom, fechaHora, categoria, notas, color } = req.body;
 
     const citaExistente = await prisma.cita.findUnique({
       where: { id: citaId },
@@ -268,13 +270,14 @@ const editarCita = async (req, res) => {
     }
 
     // Actualizar datos del paciente
-    if (nombre || telefono || email) {
+    if (nombre || telefono !== undefined || email !== undefined || enlaceZoom !== undefined) {
       await prisma.paciente.update({
         where: { id: citaExistente.pacienteId },
         data: {
           ...(nombre && { nombre }),
           ...(telefono !== undefined && { telefono }),
-          ...(email && { email })
+          ...(email !== undefined && { email }),
+          ...(enlaceZoom !== undefined && { enlaceZoom: enlaceZoom ? enlaceZoom.trim() : null })
         }
       });
     }

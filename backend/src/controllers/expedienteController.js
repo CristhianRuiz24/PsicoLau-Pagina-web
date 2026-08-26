@@ -68,6 +68,7 @@ const obtenerExpedientePaciente = async (req, res) => {
         nombre: true,
         telefono: true,
         email: true,
+        enlaceZoom: true,
         createdAt: true
       }
     });
@@ -332,6 +333,7 @@ const listarDirectorioPacientes = async (req, res) => {
         nombre: true,
         telefono: true,
         email: true,
+        enlaceZoom: true,
         createdAt: true,
         _count: {
           select: {

@@ -98,6 +98,11 @@ window.enviarWhatsAppRecordatorio = function(id, e) {
 
   const nombrePaciente = cita.paciente ? cita.paciente.nombre.replace('[BLOQUEO]', '').trim() : 'Paciente';
   
+  let bloqueZoom = '';
+  if (cita.paciente && cita.paciente.enlaceZoom) {
+    bloqueZoom = `\n\n📹 *Enlace para conectarte (Zoom):*\n${cita.paciente.enlaceZoom.trim()}`;
+  }
+
   const datosPago = getDatosPago();
   let bloquePagoRecordatorio = '';
   if (datosPago.incluirEnRecordatorio && (datosPago.banco || datosPago.clabe || datosPago.enlace)) {
@@ -109,7 +114,7 @@ window.enviarWhatsAppRecordatorio = function(id, e) {
     bloquePagoRecordatorio += '\n_Te agradeceré mucho compartirme tu comprobante previo a la sesión._';
   }
 
-  const mensaje = encodeURIComponent(`Hola ${nombrePaciente}, te recuerdo con gusto nuestra sesión de terapia agendada para este ${diaTexto} ${diaNum} de ${mesTexto} a las ${horaTexto}.${bloquePagoRecordatorio}\n\nNos vemos pronto.\n\n- PsicoLau (Laura Gómez)`);
+  const mensaje = encodeURIComponent(`Hola ${nombrePaciente}, te recuerdo con gusto nuestra sesión de terapia agendada para este ${diaTexto} ${diaNum} de ${mesTexto} a las ${horaTexto}.${bloqueZoom}${bloquePagoRecordatorio}\n\nNos vemos pronto.\n\n- PsicoLau (Laura Gómez)`);
 
   window.open(`https://wa.me/${telLimpio}?text=${mensaje}`, '_blank');
 };

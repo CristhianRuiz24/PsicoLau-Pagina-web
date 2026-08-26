@@ -139,6 +139,7 @@ function renderDirectorioPacientes(pacientes, query = '') {
               ${p.telefono ? `<span><i class="fa-brands fa-whatsapp" style="color: #16a34a; margin-right: 3px;"></i> ${p.telefono}</span>` : ''}
               ${tieneEmail ? `<span><i class="fa-regular fa-envelope" style="color: var(--turquesa); margin-right: 3px;"></i> ${p.email}</span>` : ''}
               <span><i class="fa-solid fa-calendar-check" style="color: #6366f1; margin-right: 3px;"></i> ${numCitas} citas agendadas</span>
+              ${p.enlaceZoom ? `<span style="color: #2563eb; font-weight: 600;"><i class="fa-solid fa-video" style="margin-right: 3px;"></i> Zoom vinculado</span>` : ''}
             </div>
 
             ${ultimaSesion ? `
@@ -289,6 +290,9 @@ function actualizarCabeceraExpediente(paciente, totalNotas) {
       infoHtml += `<span style="margin-left: 1rem;"><i class="fa-regular fa-envelope" style="color: var(--turquesa); margin-right: 4px;"></i> ${paciente.email}</span>`;
     }
     infoHtml += `<span style="margin-left: 1rem;"><i class="fa-solid fa-calendar-check" style="color: #6366f1; margin-right: 4px;"></i> ${totalCitas} citas</span>`;
+    if (paciente.enlaceZoom) {
+      infoHtml += `<span style="margin-left: 1rem;"><a href="${paciente.enlaceZoom.startsWith('http') ? paciente.enlaceZoom : 'https://' + paciente.enlaceZoom}" target="_blank" style="color: #2563eb; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;"><i class="fa-solid fa-video"></i> Sala Zoom</a></span>`;
+    }
     infoEl.innerHTML = infoHtml;
   }
 

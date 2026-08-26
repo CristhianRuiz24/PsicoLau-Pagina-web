@@ -303,10 +303,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
+      const zoomInput = document.getElementById('nc_enlace_zoom');
+      const enlaceZoomVal = (zoomInput && tipoRegistroActual !== 'BLOQUEO') ? zoomInput.value.trim() : '';
+
       const data = {
         nombre: nombre,
         email: tipoRegistroActual === 'BLOQUEO' ? '' : document.getElementById('nc_email').value.trim(),
         telefono: telefonoFinal,
+        enlaceZoom: enlaceZoomVal,
         fechaHora: fechaHora,
         categoria: notas,
         notas: notas,
@@ -334,6 +338,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (resData.success) {
           window.cerrarModal();
           await initAgenda();
+          if (window.cargarDirectorioEnSegundoPlano) {
+            window.cargarDirectorioEnSegundoPlano();
+          }
           
           if (data.repeticiones && data.repeticiones > 1) {
             alert(`✅ Se han programado con éxito las ${data.repeticiones} sesiones recurrentes (${data.frecuencia === 'QUINCENAL' ? 'quincenales' : 'semanales'}).`);

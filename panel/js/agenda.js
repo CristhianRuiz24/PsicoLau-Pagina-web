@@ -54,6 +54,76 @@ function renderSwatches(colorSeleccionado = '#3EB8CC') {
   container.appendChild(customWrapper);
 }
 
+// Actualizar lista predictiva de pacientes para el datalist del formulario
+window.actualizarDatalistPacientes = function() {
+  const datalist = document.getElementById('listaPacientesAutocompletar');
+  if (!datalist) return;
+  const lista = window.directorioPacientesCache || [];
+  let html = '';
+  lista.forEach(p => {
+    if (!p.nombre.startsWith('[BLOQUEO]')) {
+      html += `<option value="${p.nombre}">`;
+    }
+  });
+  datalist.innerHTML = html;
+};
+
+// Manejo reactivo de autocompletado inteligente al escribir o seleccionar nombre
+window.manejarInputNombrePaciente = function(valor) {
+  if (tipoRegistroActual === 'BLOQUEO') return;
+  const badge = document.getElementById('badgePacienteDetectado');
+  const nombreLimpio = (valor || '').trim().toLowerCase();
+  
+  if (!nombreLimpio) {
+    if (badge) badge.style.display = 'none';
+    const idInput = document.getElementById('nc_id');
+    if (!idInput || !idInput.value) {
+      const emailEl = document.getElementById('nc_email');
+      const telEl = document.getElementById('nc_telefono');
+      const zoomEl = document.getElementById('nc_enlace_zoom');
+      if (emailEl) emailEl.value = '';
+      if (telEl) telEl.value = '';
+      if (zoomEl) zoomEl.value = '';
+    }
+    return;
+  }
+
+  // Buscar coincidencia en directorio de pacientes
+  const lista = window.directorioPacientesCache || [];
+  const coincidencia = lista.find(p => p.nombre.toLowerCase().trim() === nombreLimpio);
+
+  if (coincidencia) {
+    if (badge) badge.style.display = 'inline-flex';
+    
+    // Autocompletar Correo (si no es generado automáticamente)
+    const emailEl = document.getElementById('nc_email');
+    if (emailEl) {
+      emailEl.value = (coincidencia.email && !coincidencia.email.startsWith('sin-email-')) ? coincidencia.email : '';
+    }
+
+    // Autocompletar Teléfono con prefijo internacional
+    if (coincidencia.telefono) {
+      const parsedTel = parsearTelefono(coincidencia.telefono);
+      const prefijoEl = document.getElementById('nc_prefijo');
+      const telEl = document.getElementById('nc_telefono');
+      if (prefijoEl) prefijoEl.value = parsedTel.prefijo || '+52';
+      if (telEl) telEl.value = parsedTel.numero || '';
+    }
+
+    // Autocompletar Enlace de Zoom
+    const zoomEl = document.getElementById('nc_enlace_zoom');
+    if (zoomEl) {
+      zoomEl.value = coincidencia.enlaceZoom || '';
+    }
+
+    // Autocompletar Color de la paleta
+    window.autoDetectarColorPaciente(coincidencia.nombre);
+  } else {
+    if (badge) badge.style.display = 'none';
+    window.autoDetectarColorPaciente(valor);
+  }
+};
+
 // Auto-detectar color usado previamente para el mismo paciente
 window.autoDetectarColorPaciente = function(nombre) {
   if (!nombre || tipoRegistroActual === 'BLOQUEO') return;
@@ -64,6 +134,29 @@ window.autoDetectarColorPaciente = function(nombre) {
   if (previa && previa.color) {
     document.getElementById('nc_color').value = previa.color;
     renderSwatches(previa.color);
+  }
+};
+
+// Abrir sala de Zoom de la cita
+window.abrirZoomSesion = function(citaId, event) {
+  if (event) event.stopPropagation();
+  const cita = citasCache.find(c => c.id === citaId);
+  if (!cita) return;
+
+  const link = cita.paciente && cita.paciente.enlaceZoom ? cita.paciente.enlaceZoom.trim() : null;
+  if (link) {
+    let urlFinal = link;
+    if (!urlFinal.startsWith('http://') && !urlFinal.startsWith('https://')) {
+      urlFinal = `https://${urlFinal}`;
+    }
+    window.open(urlFinal, '_blank');
+  } else {
+    alert(`El paciente "${cita.paciente.nombre}" aún no tiene configurado su enlace de Zoom.\n\nA continuación se abrirá el formulario para que puedas pegarlo en un segundo.`);
+    window.editarCita(cita.id);
+    setTimeout(() => {
+      const zoomInput = document.getElementById('nc_enlace_zoom');
+      if (zoomInput) zoomInput.focus();
+    }, 150);
   }
 };
 
@@ -216,6 +309,9 @@ function renderEasyTable() {
                     </button>
                     <button type="button" class="card-btn" onclick="abrirExpedientePorCita(${cita.id}, event)" title="Expediente clínico del paciente (notas y sesiones)" style="color: var(--rosa-coral);">
                       <i class="fa-solid fa-folder-open"></i>
+                    </button>
+                    <button type="button" class="card-btn btn-zoom" onclick="abrirZoomSesion(${cita.id}, event)" title="${cita.paciente && cita.paciente.enlaceZoom ? 'Entrar a la sesión de Zoom (' + nombreLimpio + ')' : 'Configurar enlace de Zoom (' + nombreLimpio + ')'}" style="color: ${cita.paciente && cita.paciente.enlaceZoom ? '#2563eb' : '#94a3b8'};">
+                      <i class="fa-solid fa-video"></i>
                     </button>
                     <button type="button" class="card-btn" onclick="enviarWhatsAppRecordatorio(${cita.id}, event)" title="Recordatorio de cita por WhatsApp" style="color: #16a34a;">
                       <i class="fa-brands fa-whatsapp"></i>
@@ -506,6 +602,16 @@ window.abrirModal = function() {
   const idInput = document.getElementById('nc_id');
   if (idInput) idInput.value = '';
 
+  const zoomInput = document.getElementById('nc_enlace_zoom');
+  if (zoomInput) zoomInput.value = '';
+
+  const badge = document.getElementById('badgePacienteDetectado');
+  if (badge) badge.style.display = 'none';
+
+  if (window.actualizarDatalistPacientes) {
+    window.actualizarDatalistPacientes();
+  }
+
   const titulo = document.getElementById('modalTitulo');
   if (titulo) titulo.innerHTML = '<i class="fa-solid fa-calendar-plus"></i> <span>Agendar Cita</span>';
 
@@ -546,6 +652,12 @@ window.cerrarModal = function() {
   const idInput = document.getElementById('nc_id');
   if (idInput) idInput.value = '';
 
+  const zoomInput = document.getElementById('nc_enlace_zoom');
+  if (zoomInput) zoomInput.value = '';
+
+  const badge = document.getElementById('badgePacienteDetectado');
+  if (badge) badge.style.display = 'none';
+
   const titulo = document.getElementById('modalTitulo');
   if (titulo) titulo.innerHTML = '<i class="fa-solid fa-calendar-plus"></i> <span>Agendar Cita</span>';
 
@@ -585,6 +697,10 @@ window.editarCita = function(id) {
   const cita = citasCache.find(c => c.id === id);
   if (!cita) return;
 
+  if (window.actualizarDatalistPacientes) {
+    window.actualizarDatalistPacientes();
+  }
+
   setModoFormulario('EDITABLE');
 
   const idInput = document.getElementById('nc_id');
@@ -615,13 +731,24 @@ window.editarCita = function(id) {
   const seccionRec = document.getElementById('seccionRecurrencia');
   if (seccionRec) seccionRec.style.display = 'none';
 
-  document.getElementById('nc_nombre').value = cita.paciente.nombre.replace('[BLOQUEO]', '').trim() || '';
+  const nombreLimpio = cita.paciente.nombre.replace('[BLOQUEO]', '').trim() || '';
+  document.getElementById('nc_nombre').value = nombreLimpio;
   document.getElementById('nc_email').value = cita.paciente.email && !cita.paciente.email.startsWith('sin-email-') ? cita.paciente.email : '';
   
   const parsedTel = parsearTelefono(cita.paciente.telefono);
   const prefijoEl = document.getElementById('nc_prefijo');
   if (prefijoEl) prefijoEl.value = parsedTel.prefijo;
   document.getElementById('nc_telefono').value = parsedTel.numero;
+
+  const zoomEl = document.getElementById('nc_enlace_zoom');
+  if (zoomEl) {
+    zoomEl.value = (cita.paciente && cita.paciente.enlaceZoom) ? cita.paciente.enlaceZoom : '';
+  }
+
+  const badge = document.getElementById('badgePacienteDetectado');
+  if (badge) {
+    badge.style.display = !esBloqueo ? 'inline-flex' : 'none';
+  }
 
   document.getElementById('nc_notas').value = (cita.categoria || '').replace('[BLOQUEO]', '').trim();
 
@@ -706,6 +833,11 @@ window.revisarCitaCancelada = function(id) {
   const prefijoEl = document.getElementById('nc_prefijo');
   if (prefijoEl) prefijoEl.value = parsedTel.prefijo;
   document.getElementById('nc_telefono').value = parsedTel.numero;
+
+  const zoomEl = document.getElementById('nc_enlace_zoom');
+  if (zoomEl) {
+    zoomEl.value = (cita.paciente && cita.paciente.enlaceZoom) ? cita.paciente.enlaceZoom : '';
+  }
 
   document.getElementById('nc_notas').value = (cita.categoria || '').replace('[BLOQUEO]', '').trim();
 

@@ -20,6 +20,7 @@ model Paciente {
   nombre      String
   telefono    String
   email       String       @unique
+  enlaceZoom  String?
   citas       Cita[]
   expedientes Expediente[]
   createdAt   DateTime     @default(now())

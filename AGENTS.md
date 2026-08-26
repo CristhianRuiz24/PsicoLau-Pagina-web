@@ -165,9 +165,11 @@ Es un espacio de salud mental: prioriza la calidez, claridad, ética y confianza
       - `[ ✏️ Editar ]` (Edición In Situ): Permite editar directamente los 8 campos y la fecha dentro de la misma vista ampliada sin regresar al listado de sesiones, guardando con `PUT /api/expediente/:id` y actualizando la vista inmediatamente en memoria.
       - `[ 🖨️ Imprimir PDF ]`: Genera la nota clínica oficial exclusivamente de esa sesión ajustada y calibrada para encajar en **1 sola página limpia**, con membrete de PSICOLAU, firma y pie legal confidencial sin desbordamientos a una segunda página en blanco.
       - `[ 📄 Guardar .txt ]`: Descarga el archivo de texto estructurado de esa sesión en particular.
-- **2026-08-26 (Sesión 17 - Optimización Integral de SEO, Open Graph y Schema.org)**:
-  - **Open Graph & Twitter Cards**: Implementación completa de metadatos para vistas previas enriquecidas en WhatsApp, Facebook, LinkedIn y Twitter en las 9 páginas públicas.
-  - **Etiquetas Canónicas**: Adición de `<link rel="canonical">` en cada página pública para consolidación de autoridad y prevención de contenido duplicado.
-  - **Datos Estructurados Schema.org (JSON-LD)**: Implementación de esquemas clínicos (`Psychologist`, `MedicalBusiness`, `ProfilePage`, `FAQPage`, `MedicalWebPage`, `Book`, `ContactPage`) para paneles de conocimiento y rich snippets en Google.
-  - **Doble Blindaje de Indexación**: Adición de directiva `<meta name="robots" content="noindex, nofollow">` en `panel/index.html` y `panel/agenda.html` para protección redundante de la suite clínica.
+- **2026-08-26 (Sesión 18 - Enlaces de Zoom por Paciente y Autocompletado Predictivo al Agendar)**:
+  - **Campo `enlaceZoom` en Base de Datos**: Modelo `Paciente` ampliado en Prisma con persistencia y sincronización en Supabase PostgreSQL.
+  - **Autocompletado Predictivo Inteligente**: Al ingresar o seleccionar el nombre de un paciente existente en `#nc_nombre`, el formulario autocompleta instantáneamente su correo, teléfono (con prefijo de país internacional), enlace de Zoom y color de la paleta, activando el indicador `✓ Paciente registrado`. Si el nombre se borra o cambia, los campos se resetean limpiamente.
+  - **Acceso Directo a Zoom en la Matriz Semanal**: Botón con icono de videollamada (`fa-solid fa-video`) dentro de la cápsula flotante `.card-actions-capsule` de cada cita. Con 1 solo clic abre la reunión del paciente en nueva pestaña (`window.open`), o abre el modal de edición si el enlace aún no ha sido configurado.
+  - **Integración con WhatsApp**: Inclusión automática del enlace personalizado de Zoom en el mensaje preformateado de recordatorio de cita.
+  - **Visibilidad en Directorio y Ficha de Expediente**: Indicador de sala de Zoom vinculada en la tarjeta del paciente en el directorio y enlace directo en la cabecera de su expediente clínico.
+
 

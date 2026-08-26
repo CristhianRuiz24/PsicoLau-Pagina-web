@@ -620,6 +620,11 @@ body {
   transform: scale(1.22);
 }
 
+.card-btn.btn-zoom:hover {
+  color: #1d4ed8 !important;
+  transform: scale(1.25);
+}
+
 /* Animación y estado para Cita Realizada / Completada */
 @keyframes popComplete {
   0% {
