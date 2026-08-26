@@ -288,13 +288,27 @@ document.addEventListener('DOMContentLoaded', () => {
       const fechaLocal = new Date(yyyy, mm - 1, dd, hh, min, 0);
       const fechaHora = fechaLocal.toISOString();
 
+      let tipoEfectivo = tipoRegistroActual;
+      if (esEdicion && typeof citasCache !== 'undefined') {
+        const citaOriginal = citasCache.find(c => c.id === parseInt(id));
+        if (citaOriginal) {
+          const eraBloqueo = (citaOriginal.categoria && citaOriginal.categoria.startsWith('[BLOQUEO]')) || (citaOriginal.paciente && citaOriginal.paciente.nombre.startsWith('[BLOQUEO]'));
+          const eraGrupal = (citaOriginal.categoria && citaOriginal.categoria.startsWith('[GRUPAL]')) || (citaOriginal.paciente && citaOriginal.paciente.nombre.startsWith('[GRUPAL]'));
+          tipoEfectivo = eraBloqueo ? 'BLOQUEO' : (eraGrupal ? 'GRUPAL' : 'CITA');
+        }
+      }
+
       let nombre = document.getElementById('nc_nombre').value.trim();
       let notas = document.getElementById('nc_notas').value.trim();
 
-      if (tipoRegistroActual === 'BLOQUEO') {
+      // Limpiar prefijos antes de asignar estrictamente según el tipo efectivo
+      nombre = nombre.replace(/^\[(BLOQUEO|GRUPAL)\]\s*/i, '').trim();
+      notas = notas.replace(/^\[(BLOQUEO|GRUPAL)\]\s*/i, '').trim();
+
+      if (tipoEfectivo === 'BLOQUEO') {
         nombre = `[BLOQUEO] ${nombre}`;
         notas = `[BLOQUEO] ${notas}`.trim();
-      } else if (tipoRegistroActual === 'GRUPAL') {
+      } else if (tipoEfectivo === 'GRUPAL') {
         nombre = `[GRUPAL] ${nombre}`;
         notas = `[GRUPAL] ${notas}`.trim();
       }
@@ -302,7 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const prefijo = document.getElementById('nc_prefijo')?.value || '';
       const telInput = document.getElementById('nc_telefono')?.value.trim() || '';
       let telefonoFinal = '';
-      if (telInput && tipoRegistroActual !== 'BLOQUEO' && tipoRegistroActual !== 'GRUPAL') {
+      if (telInput && tipoEfectivo !== 'BLOQUEO' && tipoEfectivo !== 'GRUPAL') {
         if (telInput.startsWith('+')) {
           telefonoFinal = telInput;
         } else if (prefijo) {
@@ -313,15 +327,15 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const zoomInput = document.getElementById('nc_enlace_zoom');
-      let enlaceZoomVal = (zoomInput && tipoRegistroActual !== 'BLOQUEO') ? zoomInput.value.trim() : '';
+      let enlaceZoomVal = (zoomInput && tipoEfectivo !== 'BLOQUEO') ? zoomInput.value.trim() : '';
       if (enlaceZoomVal && !enlaceZoomVal.startsWith('http://') && !enlaceZoomVal.startsWith('https://')) {
         enlaceZoomVal = `https://${enlaceZoomVal}`;
       }
 
       let emailFinal = '';
-      if (tipoRegistroActual === 'BLOQUEO') {
+      if (tipoEfectivo === 'BLOQUEO') {
         emailFinal = '';
-      } else if (tipoRegistroActual === 'GRUPAL') {
+      } else if (tipoEfectivo === 'GRUPAL') {
         emailFinal = `grupal-${Date.now()}@psicolau.com`;
       } else {
         emailFinal = document.getElementById('nc_email').value.trim();

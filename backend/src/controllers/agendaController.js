@@ -269,15 +269,43 @@ const editarCita = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Cita no encontrada' });
     }
 
-    // Actualizar datos del paciente
-    if (nombre || telefono !== undefined || email !== undefined || enlaceZoom !== undefined) {
+    const eraBloqueo = (citaExistente.categoria && citaExistente.categoria.startsWith('[BLOQUEO]')) || (citaExistente.paciente && citaExistente.paciente.nombre.startsWith('[BLOQUEO]'));
+    const eraGrupal = (citaExistente.categoria && citaExistente.categoria.startsWith('[GRUPAL]')) || (citaExistente.paciente && citaExistente.paciente.nombre.startsWith('[GRUPAL]'));
+
+    let nombreFinal = nombre;
+    let categoriaFinal = notas !== undefined ? notas : (categoria !== undefined ? categoria : citaExistente.categoria);
+
+    if (nombreFinal) {
+      const nomLimpio = nombreFinal.replace(/^\[(BLOQUEO|GRUPAL)\]\s*/i, '').trim();
+      if (eraBloqueo) {
+        nombreFinal = `[BLOQUEO] ${nomLimpio}`;
+      } else if (eraGrupal) {
+        nombreFinal = `[GRUPAL] ${nomLimpio}`;
+      } else {
+        nombreFinal = nomLimpio;
+      }
+    }
+
+    if (categoriaFinal) {
+      const catLimpia = categoriaFinal.replace(/^\[(BLOQUEO|GRUPAL)\]\s*/i, '').trim();
+      if (eraBloqueo) {
+        categoriaFinal = `[BLOQUEO] ${catLimpia}`.trim();
+      } else if (eraGrupal) {
+        categoriaFinal = `[GRUPAL] ${catLimpia}`.trim();
+      } else {
+        categoriaFinal = catLimpia;
+      }
+    }
+
+    // Actualizar datos del paciente preservando naturaleza de origen
+    if (nombreFinal || telefono !== undefined || email !== undefined || enlaceZoom !== undefined) {
       await prisma.paciente.update({
         where: { id: citaExistente.pacienteId },
         data: {
-          ...(nombre && { nombre }),
-          ...(telefono !== undefined && { telefono }),
-          ...(email !== undefined && { email }),
-          ...(enlaceZoom !== undefined && { enlaceZoom: enlaceZoom ? enlaceZoom.trim() : null })
+          ...(nombreFinal && { nombre: nombreFinal }),
+          ...(telefono !== undefined && { telefono: (eraBloqueo || eraGrupal) ? '' : telefono }),
+          ...(email !== undefined && { email: eraBloqueo ? '' : (eraGrupal ? citaExistente.paciente.email : email) }),
+          ...(enlaceZoom !== undefined && { enlaceZoom: eraBloqueo ? null : (enlaceZoom ? enlaceZoom.trim() : null) })
         }
       });
     }
@@ -287,7 +315,7 @@ const editarCita = async (req, res) => {
       where: { id: citaId },
       data: {
         ...(fechaHora && { fechaHora: new Date(fechaHora) }),
-        categoria: notas !== undefined ? notas : (categoria !== undefined ? categoria : citaExistente.categoria),
+        categoria: categoriaFinal,
         ...(color && { color })
       },
       include: { paciente: true }

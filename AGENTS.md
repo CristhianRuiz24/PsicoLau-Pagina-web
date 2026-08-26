@@ -205,10 +205,15 @@ Es un espacio de salud mental: prioriza la calidez, claridad, ética y confianza
   - **Carga Temprana de Directorio**: Invocación de `cargarDirectorioEnSegundoPlano()` al arrancar la aplicación (`iniciarApp()`) para que el `<datalist>` y la memoria caché de pacientes estén disponibles desde el primer milisegundo de navegación.
 - **2026-08-26 (Sesión 21 - Sistema de Terapias Grupales en Suite Clínica)**:
   - **Selector de Tipo de Registro Tripartito**: Integración del botón `[ 👥 Terapia Grupal ]` junto a `[ 👤 Cita Individual ]` y `[ 🚫 Bloquear Horario ]` en el modal de agendamiento (`#modalNuevaCita`).
-  - **Datalist de Programas Clínicos Sugeridos**: `<datalist id="listaGruposSugeridos">` con los talleres y programas terapéuticos de Laura (*Terapia Grupal para Autistas Adultos*, *Taller de Habilidades Sociales y Comunicación*, *Círculo Terapéutico Neuroafirmativo*, *Taller de Regulación Emocional y Sensorial*, *Grupo de Apoyo y Resiliencia* y texto libre).
+  - **Sugerencias de Programas y Talleres**: Soporte asistido para programas terapéuticos (*Terapia Grupal para Autistas Adultos*, *Habilidades Sociales*, etc.) y campos específicos de tema y Zoom grupal.
   - **Enlace de Zoom Grupal & Recurrencia de Módulos**: Campo de videollamada adaptado a salas grupales y soporte para agendamiento en lote de 2 a 12 sesiones con numeración automática `(Sesión X/N)`.
   - **Diseño Visual Distintivo en Matriz Semanal**: Tarjetas con identificador `.is-group`, icono de grupo (`fa-solid fa-users`), badge temático `👥 Grupal` (`.badge-grupal`), color distintivo por defecto (`#8b5cf6`), botón de Zoom en 1 clic y botón de compartir enlace por WhatsApp con mensaje preformateado para grupos.
   - **Aislamiento de Expedientes**: Filtrado estricto en `listarDirectorioPacientes` para excluir registros `[GRUPAL]` del directorio clínico individual, manteniendo los expedientes médicos 100% enfocados en consultas personales.
+- **2026-08-26 (Sesión 22 - Inmutabilidad y Bloqueo de Mutación de Tipos en Edición de Citas)**:
+  - **Ocultamiento de Selector de Pestañas en Edición**: Bloqueo del contenedor `#seccionTabsTipo` (`display: none`) al invocar `editarCita(id)`, impidiendo que una cita individual se convierta por error en grupo o bloqueo, o viceversa.
+  - **Badges Informativos Inmutables**: Renderizado de badge visual en `#modalSubtitulo` (`.badge-tipo-info`) indicando de forma explícita y de solo lectura la naturaleza de la sesión (`👤 Cita Individual`, `👥 Terapia Grupal` o `🚫 Bloqueo de Horario`).
+  - **Blindaje en Frontend y Backend**: Normalización del `tipoEfectivo` en el submit de `app.js` basado en la cita original en memoria y validación estricta en el controlador `editarCita` de `agendaController.js` para asegurar la persistencia invariable de prefijos y relaciones en PostgreSQL.
+
 
 
 

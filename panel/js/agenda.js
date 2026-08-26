@@ -704,6 +704,9 @@ window.abrirModal = function() {
   const seccionRec = document.getElementById('seccionRecurrencia');
   if (seccionRec) seccionRec.style.display = 'block';
 
+  const tabs = document.getElementById('seccionTabsTipo');
+  if (tabs) tabs.style.display = 'flex';
+
   const checkRepetir = document.getElementById('nc_repetir');
   if (checkRepetir) checkRepetir.checked = false;
   window.toggleOpcionesRecurrencia(false);
@@ -757,6 +760,9 @@ window.cerrarModal = function() {
   const seccionRec = document.getElementById('seccionRecurrencia');
   if (seccionRec) seccionRec.style.display = 'block';
 
+  const tabs = document.getElementById('seccionTabsTipo');
+  if (tabs) tabs.style.display = 'flex';
+
   const checkRepetir = document.getElementById('nc_repetir');
   if (checkRepetir) checkRepetir.checked = false;
   window.toggleOpcionesRecurrencia(false);
@@ -793,7 +799,16 @@ window.editarCita = function(id) {
   }
 
   const subtitulo = document.getElementById('modalSubtitulo');
-  if (subtitulo) subtitulo.style.display = 'none';
+  if (subtitulo) {
+    if (esGrupal) {
+      subtitulo.innerHTML = '<span class="badge-tipo-info info-grupal"><i class="fa-solid fa-people-group"></i> Terapia Grupal</span>';
+    } else if (esBloqueo) {
+      subtitulo.innerHTML = '<span class="badge-tipo-info info-bloqueo"><i class="fa-solid fa-ban"></i> Bloqueo de Horario</span>';
+    } else {
+      subtitulo.innerHTML = '<span class="badge-tipo-info info-cita"><i class="fa-solid fa-user-doctor"></i> Cita Individual</span>';
+    }
+    subtitulo.style.display = 'block';
+  }
 
   const footer = document.getElementById('modalFooterActions');
   if (footer) {
@@ -810,6 +825,10 @@ window.editarCita = function(id) {
   } else {
     window.seleccionarTipoRegistro('CITA');
   }
+
+  // Ocultar pestañas de tipo para evitar cambiar la naturaleza de la cita al editarla
+  const tabs = document.getElementById('seccionTabsTipo');
+  if (tabs) tabs.style.display = 'none';
 
   const seccionRec = document.getElementById('seccionRecurrencia');
   if (seccionRec) seccionRec.style.display = 'none';

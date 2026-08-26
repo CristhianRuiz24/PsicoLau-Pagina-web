@@ -689,6 +689,33 @@ body {
   border: 1px solid rgba(124, 58, 237, 0.4);
 }
 
+/* Badges informativos fijos para subtítulo del modal en modo edición */
+.badge-tipo-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 3px 12px;
+  border-radius: 999px;
+  letter-spacing: 0.2px;
+}
+.badge-tipo-info.info-cita {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+.badge-tipo-info.info-grupal {
+  background: #f3e8ff;
+  color: #6b21a8;
+  border: 1px solid #e9d5ff;
+}
+.badge-tipo-info.info-bloqueo {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
 .btn-check-completada {
   cursor: pointer;
   background: none;
