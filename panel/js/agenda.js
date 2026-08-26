@@ -88,7 +88,7 @@ window.actualizarDatalistPacientes = function() {
 window.manejarInputNombrePaciente = function(valor) {
   if (tipoRegistroActual === 'BLOQUEO') return;
   const badge = document.getElementById('badgePacienteDetectado');
-  const nombreLimpio = (valor || '').trim().toLowerCase();
+  const nombreLimpio = (valor || '').trim().toLowerCase().replace(/^\[(bloqueo|grupal)\]\s*/i, '');
   
   if (!nombreLimpio) {
     if (badge) badge.style.display = 'none';
@@ -104,23 +104,77 @@ window.manejarInputNombrePaciente = function(valor) {
     return;
   }
 
-  // Buscar coincidencia en directorio de pacientes O en citasCache
+  // Si estamos en modo TERAPIA GRUPAL
+  if (tipoRegistroActual === 'GRUPAL') {
+    let citaGrupalPrevia = null;
+    if (typeof citasCache !== 'undefined' && Array.isArray(citasCache)) {
+      citaGrupalPrevia = citasCache.find(c => {
+        if (!c.paciente || !c.paciente.nombre) return false;
+        const esGrup = (c.categoria && c.categoria.startsWith('[GRUPAL]')) || (c.paciente.nombre.startsWith('[GRUPAL]'));
+        if (!esGrup) return false;
+        const nom = c.paciente.nombre.toLowerCase().replace(/^\[(bloqueo|grupal)\]\s*/i, '').trim();
+        return nom === nombreLimpio || (nombreLimpio.length >= 4 && nom.includes(nombreLimpio));
+      });
+    }
+
+    if (citaGrupalPrevia && citaGrupalPrevia.paciente) {
+      if (badge) {
+        badge.innerHTML = '<i class="fa-solid fa-circle-check"></i> Grupo detectado';
+        badge.style.background = '#f3e8ff';
+        badge.style.color = '#7c3aed';
+        badge.style.display = 'inline-flex';
+      }
+
+      // Autocompletar Enlace de Zoom grupal si la cita previa lo tenía
+      const zoomEl = document.getElementById('nc_enlace_zoom');
+      if (zoomEl && citaGrupalPrevia.paciente.enlaceZoom) {
+        zoomEl.value = citaGrupalPrevia.paciente.enlaceZoom;
+      }
+
+      // Autocompletar Color de la sesión grupal
+      if (citaGrupalPrevia.color) {
+        document.getElementById('nc_color').value = citaGrupalPrevia.color;
+        renderSwatches(citaGrupalPrevia.color);
+      }
+    } else {
+      if (badge) badge.style.display = 'none';
+    }
+    return;
+  }
+
+  // Modo CITA INDIVIDUAL: Buscar coincidencia en directorio de pacientes O en citasCache
   const lista = window.directorioPacientesCache || [];
-  let coincidencia = lista.find(p => p.nombre && p.nombre.toLowerCase().trim() === nombreLimpio);
+  let coincidencia = lista.find(p => {
+    if (!p.nombre) return false;
+    const nom = p.nombre.toLowerCase().replace(/^\[(bloqueo|grupal)\]\s*/i, '').trim();
+    return nom === nombreLimpio;
+  });
 
   if (!coincidencia && typeof citasCache !== 'undefined' && Array.isArray(citasCache)) {
-    const citaPrevia = citasCache.find(c => c.paciente && c.paciente.nombre && c.paciente.nombre.toLowerCase().trim() === nombreLimpio);
+    const citaPrevia = citasCache.find(c => {
+      if (!c.paciente || !c.paciente.nombre) return false;
+      const esBloq = (c.categoria && c.categoria.startsWith('[BLOQUEO]')) || (c.paciente.nombre.startsWith('[BLOQUEO]'));
+      const esGrup = (c.categoria && c.categoria.startsWith('[GRUPAL]')) || (c.paciente.nombre.startsWith('[GRUPAL]'));
+      if (esBloq || esGrup) return false;
+      const nom = c.paciente.nombre.toLowerCase().replace(/^\[(bloqueo|grupal)\]\s*/i, '').trim();
+      return nom === nombreLimpio;
+    });
     if (citaPrevia && citaPrevia.paciente) {
       coincidencia = citaPrevia.paciente;
     }
   }
 
   if (coincidencia) {
-    if (badge) badge.style.display = 'inline-flex';
+    if (badge) {
+      badge.innerHTML = '<i class="fa-solid fa-circle-check"></i> Paciente registrado';
+      badge.style.background = '#dcfce7';
+      badge.style.color = '#15803d';
+      badge.style.display = 'inline-flex';
+    }
     
     // Autocompletar Correo (si no es generado automáticamente)
     const emailEl = document.getElementById('nc_email');
-    if (emailEl && coincidencia.email && !coincidencia.email.startsWith('sin-email-')) {
+    if (emailEl && coincidencia.email && !coincidencia.email.startsWith('sin-email-') && !coincidencia.email.startsWith('grupal-')) {
       emailEl.value = coincidencia.email;
     }
 
@@ -147,13 +201,17 @@ window.manejarInputNombrePaciente = function(valor) {
   }
 };
 
-// Auto-detectar color usado previamente para el mismo paciente
+// Auto-detectar color usado previamente para el mismo paciente o grupo
 window.autoDetectarColorPaciente = function(nombre) {
   if (!nombre || tipoRegistroActual === 'BLOQUEO') return;
-  const nombreLimpio = nombre.toLowerCase().trim();
+  const nombreLimpio = nombre.toLowerCase().replace(/^\[(bloqueo|grupal)\]\s*/i, '').trim();
   if (nombreLimpio.length < 3) return;
 
-  const previa = citasCache.find(c => c.paciente && c.paciente.nombre.toLowerCase().trim() === nombreLimpio && c.color);
+  const previa = citasCache.find(c => {
+    if (!c.paciente || !c.paciente.nombre || !c.color) return false;
+    const nom = c.paciente.nombre.toLowerCase().replace(/^\[(bloqueo|grupal)\]\s*/i, '').trim();
+    return nom === nombreLimpio;
+  });
   if (previa && previa.color) {
     document.getElementById('nc_color').value = previa.color;
     renderSwatches(previa.color);

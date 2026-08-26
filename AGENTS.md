@@ -217,6 +217,10 @@ Es un espacio de salud mental: prioriza la calidez, claridad, ética y confianza
   - **Depuración de Cápsula en Tarjetas Grupales**: Ocultamiento del botón de WhatsApp en tarjetas con `esGrupal` en la matriz semanal, conservando exclusivamente `[ ✓ Realizada ]`, `[ 📹 Zoom ]`, `[ ✏️ Editar ]` y `[ 🗑️ Eliminar ]`.
   - **Exclusión de Grupos en Auditoría de Pagos**: Filtrado estricto en `renderAuditoriaPagos` de `pagos.js` para ignorar registros `[GRUPAL]`, manteniendo el modal `#modalAuditoriaPagos` 100% focalizado en cobranza y cuentas por cobrar de pacientes individuales.
   - **Calibración de Métricas Semanales**: Ajuste del contador de citas `pagadas / por pagar` en la cabecera para excluir terapias grupales y bloqueos, calculando ingresos de sesiones individuales.
+- **2026-08-26 (Sesión 24 - Autocompletado Predictivo para Terapias Grupales)**:
+  - **Normalización de Prefijos de Búsqueda**: Ajuste en `manejarInputNombrePaciente` y `autoDetectarColorPaciente` para ignorar prefijos `[GRUPAL]` al comparar nombres de grupos.
+  - **Autocompletado de Sala y Color Grupal**: Al escribir el nombre de un grupo registrado, el sistema muestra el badge `✓ Grupo detectado` en tono violeta (`#f3e8ff` / `#7c3aed`), rellenando instantáneamente el enlace de Zoom de la sala grupal y su color asignado.
+
 
 
 
