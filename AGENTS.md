@@ -24,7 +24,8 @@ Es un espacio de salud mental: prioriza la calidez, claridad, ética y confianza
 * [`preguntas-frecuentes.html`](file:///c:/Users/crist/Documents/Proyectos/Web%20PsicoLau/preguntas-frecuentes.html) — Acordeón interactivo con 15 preguntas frecuentes sobre el proceso terapéutico.
 * [`terapias-grupales.html`](file:///c:/Users/crist/Documents/Proyectos/Web%20PsicoLau/terapias-grupales.html) — Convocatoria y detalles para módulos de terapia grupal (Autismo en adultos).
 * [`testimonios.html`](file:///c:/Users/crist/Documents/Proyectos/Web%20PsicoLau/testimonios.html) — Muro de testimonios (tarjetas, videos integrados y audios reales).
-* [`contacto.html`](file:///c:/Users/crist/Documents/Proyectos/Web%20PsicoLau/contacto.html) — Formulario de contacto directo conectado al backend.
+* [`contacto.html`](file:///c:/Users/crist/Documents/Proyectos/Web%20PsicoLau/contacto.html) — Formulario de contacto directo conectado al backend con Crisis Disclaimer y consentimiento de privacidad.
+* [`privacidad.html`](file:///c:/Users/crist/Documents/Proyectos/Web%20PsicoLau/privacidad.html) — Aviso de Privacidad Integral conforme a la LFPDPPP para psicología clínica y telepsicología, con detalle de cifrado AES-256-GCM y derechos ARCO.
 
 ---
 
@@ -67,9 +68,10 @@ Es un espacio de salud mental: prioriza la calidez, claridad, ética y confianza
 
 ## 🎨 Identidad Visual y Paleta Oficial
 - **Rosa/Coral Marca**: `#EC5E86` — Títulos, elementos de marca y acentos cálidos.
-- **Turquesa Oficial**: `#3EB8CC` — Botones de acción, enlaces principales y estados activos.
-- **Gris Cálido**: `#8C8C8C` — Texto de cuerpo (nunca negro puro para reducir fatiga visual).
-- **Tipografía**: Sans-serif limpia, moderna y accesible (Google Fonts).
+- **Turquesa Oficial**: `#1E94A8` (calibrado WCAG 2.1 AA con ratio $\ge 4.5:1$ sobre blanco) — Botones de acción, enlaces principales y estados activos.
+- **Gris Cálido**: `#8C8C8C` / `#5A5A5A` — Texto de cuerpo (nunca negro puro para reducir fatiga visual).
+- **Tipografía**: Sans-serif limpia, moderna y accesible (Google Fonts: *Outfit* para cuerpo y *Lora* para encabezados).
+
 
 ---
 
