@@ -203,6 +203,12 @@ Es un espacio de salud mental: prioriza la calidez, claridad, ética y confianza
   - **Normalización Automática con `https://`**: Inclusión automática del protocolo de seguridad si el usuario ingresó la URL sin él antes de procesar la petición.
   - **Protección de Datos al Autocompletar**: Corrección del detector reactivo en `manejarInputNombrePaciente` para evitar el reseteo involuntario del enlace de Zoom recién escrito o pegado por la terapeuta.
   - **Carga Temprana de Directorio**: Invocación de `cargarDirectorioEnSegundoPlano()` al arrancar la aplicación (`iniciarApp()`) para que el `<datalist>` y la memoria caché de pacientes estén disponibles desde el primer milisegundo de navegación.
+- **2026-08-26 (Sesión 21 - Sistema de Terapias Grupales en Suite Clínica)**:
+  - **Selector de Tipo de Registro Tripartito**: Integración del botón `[ 👥 Terapia Grupal ]` junto a `[ 👤 Cita Individual ]` y `[ 🚫 Bloquear Horario ]` en el modal de agendamiento (`#modalNuevaCita`).
+  - **Datalist de Programas Clínicos Sugeridos**: `<datalist id="listaGruposSugeridos">` con los talleres y programas terapéuticos de Laura (*Terapia Grupal para Autistas Adultos*, *Taller de Habilidades Sociales y Comunicación*, *Círculo Terapéutico Neuroafirmativo*, *Taller de Regulación Emocional y Sensorial*, *Grupo de Apoyo y Resiliencia* y texto libre).
+  - **Enlace de Zoom Grupal & Recurrencia de Módulos**: Campo de videollamada adaptado a salas grupales y soporte para agendamiento en lote de 2 a 12 sesiones con numeración automática `(Sesión X/N)`.
+  - **Diseño Visual Distintivo en Matriz Semanal**: Tarjetas con identificador `.is-group`, icono de grupo (`fa-solid fa-users`), badge temático `👥 Grupal` (`.badge-grupal`), color distintivo por defecto (`#8b5cf6`), botón de Zoom en 1 clic y botón de compartir enlace por WhatsApp con mensaje preformateado para grupos.
+  - **Aislamiento de Expedientes**: Filtrado estricto en `listarDirectorioPacientes` para excluir registros `[GRUPAL]` del directorio clínico individual, manteniendo los expedientes médicos 100% enfocados en consultas personales.
 
 
 

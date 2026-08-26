@@ -132,20 +132,23 @@
         </button>
       </div>
 
-      <!-- Selector de Tipo de Registro: Cita vs Bloqueo Personal -->
-      <div id="seccionTabsTipo" class="event-type-tabs" style="display: flex; gap: 0.5rem; margin-bottom: 1.2rem;">
-        <button type="button" id="tabTipoCita" class="tab-btn active" onclick="seleccionarTipoRegistro('CITA')">
-          <i class="fa-solid fa-user-doctor"></i> Cita Paciente
+      <!-- Selector de Tipo de Registro: Cita Individual vs Terapia Grupal vs Bloqueo Personal -->
+      <div id="seccionTabsTipo" class="event-type-tabs" style="display: flex; gap: 0.5rem; margin-bottom: 1.2rem; flex-wrap: wrap;">
+        <button type="button" id="tabTipoCita" class="tab-btn active" onclick="seleccionarTipoRegistro('CITA')" style="flex: 1; min-width: 130px;">
+          <i class="fa-solid fa-user-doctor"></i> Cita Individual
         </button>
-        <button type="button" id="tabTipoBloqueo" class="tab-btn" onclick="seleccionarTipoRegistro('BLOQUEO')">
-          <i class="fa-solid fa-ban"></i> Bloqueo / Personal
+        <button type="button" id="tabTipoGrupal" class="tab-btn" onclick="seleccionarTipoRegistro('GRUPAL')" style="flex: 1; min-width: 130px;">
+          <i class="fa-solid fa-people-group"></i> Terapia Grupal
+        </button>
+        <button type="button" id="tabTipoBloqueo" class="tab-btn" onclick="seleccionarTipoRegistro('BLOQUEO')" style="flex: 1; min-width: 130px;">
+          <i class="fa-solid fa-ban"></i> Bloquear Horario
         </button>
       </div>
 
       <form id="formNuevaCita">
         <input type="hidden" id="nc_id">
 
-        <!-- Campo de Nombre / Motivo de Bloqueo -->
+        <!-- Campo de Nombre / Motivo / Tipo de Grupo -->
         <div class="form-group">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
             <label id="lblNombre" for="nc_nombre" style="margin: 0; font-weight: 500;">
@@ -157,52 +160,57 @@
           </div>
           <input type="text" id="nc_nombre" list="listaPacientesAutocompletar" required placeholder="Escribe o selecciona paciente..." oninput="manejarInputNombrePaciente(this.value)" onchange="manejarInputNombrePaciente(this.value)" autocomplete="off">
           <datalist id="listaPacientesAutocompletar"></datalist>
+          <datalist id="listaGruposSugeridos">
+            <option value="Terapia Grupal para Autistas Adultos"></option>
+            <option value="Taller de Habilidades Sociales y Comunicación"></option>
+            <option value="Círculo Terapéutico Neuroafirmativo"></option>
+            <option value="Taller de Regulación Emocional y Sensorial"></option>
+            <option value="Grupo de Acompañamiento y Resiliencia"></option>
+          </datalist>
         </div>
 
-        <!-- Campos de Contacto y Zoom (Ocultos si es Bloqueo) -->
-        <div id="camposContactoPaciente">
-          <div style="display: grid; grid-template-columns: 1fr 1.25fr; gap: 0.8rem;">
-            <div class="form-group">
-              <label for="nc_email"><i class="fa-solid fa-envelope" style="color: var(--turquesa); margin-right: 4px;"></i> Correo Electrónico</label>
-              <input type="email" id="nc_email" placeholder="correo@ejemplo.com" style="width: 100%; text-overflow: ellipsis;">
-            </div>
-            <div class="form-group">
-              <label for="nc_telefono"><i class="fa-brands fa-whatsapp" style="color: #16a34a; margin-right: 4px;"></i> WhatsApp / Teléfono</label>
-              <div style="display: flex; gap: 0.35rem;">
-                <select id="nc_prefijo" onchange="actualizarPlaceholderTelefono(this.value)" style="width: 95px; padding: 0.72rem 0.3rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.84rem; background: #f8fafc; font-weight: 600; cursor: pointer; flex-shrink: 0;">
-                  <option value="+52" selected>🇲🇽 +52</option>
-                  <option value="+1">🇺🇸/🇨🇦 +1</option>
-                  <option value="+34">🇪🇸 +34</option>
-                  <option value="+57">🇨🇴 +57</option>
-                  <option value="+54">🇦🇷 +54</option>
-                  <option value="+56">🇨🇱 +56</option>
-                  <option value="+51">🇵🇪 +51</option>
-                  <option value="+593">🇪🇨 +593</option>
-                  <option value="+502">🇬🇹 +502</option>
-                  <option value="+506">🇨🇷 +506</option>
-                  <option value="+503">🇸🇻 +503</option>
-                  <option value="+504">🇭🇳 +504</option>
-                  <option value="+505">🇳🇮 +505</option>
-                  <option value="+507">🇵🇦 +507</option>
-                  <option value="+598">🇺🇾 +598</option>
-                  <option value="+58">🇻🇪 +58</option>
-                  <option value="+49">🇩🇪 +49</option>
-                  <option value="+33">🇫🇷 +33</option>
-                  <option value="+44">🇬🇧 +44</option>
-                  <option value="+39">🇮🇹 +39</option>
-                  <option value="+41">🇨🇭 +41</option>
-                  <option value="">🌐 Otro</option>
-                </select>
-                <input type="tel" id="nc_telefono" placeholder="Número de WhatsApp" style="flex: 1; min-width: 0; padding: 0.72rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.92rem;">
-              </div>
+        <!-- Campos de Contacto Individual (Ocultos si es Grupal o Bloqueo) -->
+        <div id="camposContactoIndividual" style="display: grid; grid-template-columns: 1fr 1.25fr; gap: 0.8rem; margin-bottom: 0.4rem;">
+          <div class="form-group">
+            <label for="nc_email"><i class="fa-solid fa-envelope" style="color: var(--turquesa); margin-right: 4px;"></i> Correo Electrónico</label>
+            <input type="email" id="nc_email" placeholder="correo@ejemplo.com" style="width: 100%; text-overflow: ellipsis;">
+          </div>
+          <div class="form-group">
+            <label for="nc_telefono"><i class="fa-brands fa-whatsapp" style="color: #16a34a; margin-right: 4px;"></i> WhatsApp / Teléfono</label>
+            <div style="display: flex; gap: 0.35rem;">
+              <select id="nc_prefijo" onchange="actualizarPlaceholderTelefono(this.value)" style="width: 95px; padding: 0.72rem 0.3rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.84rem; background: #f8fafc; font-weight: 600; cursor: pointer; flex-shrink: 0;">
+                <option value="+52" selected>🇲🇽 +52</option>
+                <option value="+1">🇺🇸/🇨🇦 +1</option>
+                <option value="+34">🇪🇸 +34</option>
+                <option value="+57">🇨🇴 +57</option>
+                <option value="+54">🇦🇷 +54</option>
+                <option value="+56">🇨🇱 +56</option>
+                <option value="+51">🇵🇪 +51</option>
+                <option value="+593">🇪🇨 +593</option>
+                <option value="+502">🇬🇹 +502</option>
+                <option value="+506">🇨🇷 +506</option>
+                <option value="+503">🇸🇻 +503</option>
+                <option value="+504">🇭🇳 +504</option>
+                <option value="+505">🇳🇮 +505</option>
+                <option value="+507">🇵🇦 +507</option>
+                <option value="+598">🇺🇾 +598</option>
+                <option value="+58">🇻🇪 +58</option>
+                <option value="+49">🇩🇪 +49</option>
+                <option value="+33">🇫🇷 +33</option>
+                <option value="+44">🇬🇧 +44</option>
+                <option value="+39">🇮🇹 +39</option>
+                <option value="+41">🇨🇭 +41</option>
+                <option value="">🌐 Otro</option>
+              </select>
+              <input type="tel" id="nc_telefono" placeholder="Número de WhatsApp" style="flex: 1; min-width: 0; padding: 0.72rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.92rem;">
             </div>
           </div>
+        </div>
 
-          <!-- Enlace de Zoom / Videollamada individual -->
-          <div class="form-group" style="margin-top: 0.6rem;">
-            <label for="nc_enlace_zoom"><i class="fa-solid fa-video" style="color: #2563eb; margin-right: 4px;"></i> Enlace personal de Zoom / Videollamada (opcional)</label>
-            <input type="text" id="nc_enlace_zoom" placeholder="https://zoom.us/j/... o Google Meet" style="width: 100%;">
-          </div>
+        <!-- Enlace de Zoom (Visible para Citas Individuales y Terapias Grupales) -->
+        <div id="campoZoomContainer" class="form-group" style="margin-top: 0.2rem; margin-bottom: 0.8rem;">
+          <label id="lblZoom" for="nc_enlace_zoom"><i class="fa-solid fa-video" style="color: #2563eb; margin-right: 4px;"></i> Enlace personal de Zoom / Videollamada (opcional)</label>
+          <input type="text" id="nc_enlace_zoom" placeholder="https://zoom.us/j/... o Google Meet" style="width: 100%;">
         </div>
 
         <!-- Fecha y Hora -->

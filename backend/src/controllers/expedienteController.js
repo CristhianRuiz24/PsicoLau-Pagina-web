@@ -352,8 +352,8 @@ const listarDirectorioPacientes = async (req, res) => {
       orderBy: { nombre: 'asc' }
     });
 
-    // Excluir registros automáticos que sean de bloqueos personales (e.g. "[BLOQUEO]")
-    const filtrados = pacientes.filter(p => !p.nombre.startsWith('[BLOQUEO]'));
+    // Excluir registros automáticos que sean de bloqueos personales o terapias grupales
+    const filtrados = pacientes.filter(p => !p.nombre.startsWith('[BLOQUEO]') && !p.nombre.startsWith('[GRUPAL]'));
 
     res.json({
       success: true,

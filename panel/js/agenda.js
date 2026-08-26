@@ -304,15 +304,17 @@ function renderEasyTable() {
           const payClass = esPagado ? 'paid' : 'unpaid';
 
           const esBloqueo = (cita.categoria && cita.categoria.startsWith('[BLOQUEO]')) || (cita.paciente && cita.paciente.nombre.startsWith('[BLOQUEO]'));
-          const nombreLimpio = cita.paciente.nombre.replace('[BLOQUEO]', '').trim();
-          const notasLimpias = (cita.categoria || '').replace('[BLOQUEO]', '').trim();
+          const esGrupal = (cita.categoria && cita.categoria.startsWith('[GRUPAL]')) || (cita.paciente && cita.paciente.nombre.startsWith('[GRUPAL]'));
+          const nombreLimpio = cita.paciente.nombre.replace('[BLOQUEO]', '').replace('[GRUPAL]', '').trim();
+          const notasLimpias = (cita.categoria || '').replace('[BLOQUEO]', '').replace('[GRUPAL]', '').trim();
           const esCompletada = cita.estado_cita === 'REALIZADA' || cita.estado_cita === 'CONFIRMADA';
 
           let matchesBusqueda = true;
-          let blockClass = esBloqueo ? 'appointment-block is-blocked' : (esCompletada ? 'appointment-block is-completed' : 'appointment-block');
+          let blockClass = esBloqueo ? 'appointment-block is-blocked' : (esGrupal ? 'appointment-block is-group' : (esCompletada ? 'appointment-block is-completed' : 'appointment-block'));
+          if (esGrupal && esCompletada) blockClass += ' is-completed';
 
           if (terminoBusqueda) {
-            const textoCompleto = `${nombreLimpio} ${notasLimpias} ${cita.paciente.telefono || ''}`.toLowerCase();
+            const textoCompleto = `${nombreLimpio} ${notasLimpias} ${cita.paciente.telefono || ''} ${esGrupal ? 'grupal grupo taller' : ''}`.toLowerCase();
             matchesBusqueda = textoCompleto.includes(terminoBusqueda);
             if (matchesBusqueda) {
               blockClass += ' is-highlighted';
@@ -327,39 +329,42 @@ function renderEasyTable() {
                 <span class="time-badge">${cTime}</span>
                 <div class="card-actions-capsule">
                   ${!esBloqueo ? `
-                    <button type="button" class="btn-check-completada ${esCompletada ? 'completed' : 'pending'}" onclick="toggleCompletarCita(${cita.id}, event)" title="${esCompletada ? 'Sesión realizada (clic para desmarcar)' : 'Marcar sesión como realizada / completada'}">
+                    <button type="button" class="btn-check-completada ${esCompletada ? 'completed' : 'pending'}" onclick="toggleCompletarCita(${cita.id}, event)" title="${esCompletada ? (esGrupal ? 'Sesión grupal realizada (clic para desmarcar)' : 'Sesión realizada (clic para desmarcar)') : (esGrupal ? 'Marcar sesión grupal como realizada' : 'Marcar sesión como realizada / completada')}">
                       <i class="${esCompletada ? 'fa-solid fa-circle-check' : 'fa-regular fa-circle'}"></i>
                     </button>
-                    <button type="button" class="card-btn" onclick="abrirExpedientePorCita(${cita.id}, event)" title="Expediente clínico del paciente (notas y sesiones)" style="color: var(--rosa-coral);">
-                      <i class="fa-solid fa-folder-open"></i>
-                    </button>
-                    <button type="button" class="card-btn btn-zoom" onclick="abrirZoomSesion(${cita.id}, event)" title="${cita.paciente && cita.paciente.enlaceZoom ? 'Entrar a la sesión de Zoom (' + nombreLimpio + ')' : 'Configurar enlace de Zoom (' + nombreLimpio + ')'}" style="color: ${cita.paciente && cita.paciente.enlaceZoom ? '#2563eb' : '#94a3b8'};">
+                    ${!esGrupal ? `
+                      <button type="button" class="card-btn" onclick="abrirExpedientePorCita(${cita.id}, event)" title="Expediente clínico del paciente (notas y sesiones)" style="color: var(--rosa-coral);">
+                        <i class="fa-solid fa-folder-open"></i>
+                      </button>
+                    ` : ''}
+                    <button type="button" class="card-btn btn-zoom" onclick="abrirZoomSesion(${cita.id}, event)" title="${cita.paciente && cita.paciente.enlaceZoom ? (esGrupal ? 'Entrar a la sala grupal de Zoom' : 'Entrar a la sesión de Zoom (' + nombreLimpio + ')') : 'Configurar enlace de Zoom'}" style="color: ${cita.paciente && cita.paciente.enlaceZoom ? '#2563eb' : '#94a3b8'};">
                       <i class="fa-solid fa-video"></i>
                     </button>
-                    <button type="button" class="card-btn" onclick="enviarWhatsAppRecordatorio(${cita.id}, event)" title="Recordatorio de cita por WhatsApp" style="color: #16a34a;">
+                    <button type="button" class="card-btn" onclick="enviarWhatsAppRecordatorio(${cita.id}, event)" title="${esGrupal ? 'Compartir enlace de Zoom por WhatsApp' : 'Recordatorio de cita por WhatsApp'}" style="color: #16a34a;">
                       <i class="fa-brands fa-whatsapp"></i>
                     </button>
-                    ${!esPagado ? `
+                    ${!esPagado && !esGrupal ? `
                       <button type="button" class="card-btn" onclick="enviarWhatsAppCobro(${cita.id}, event)" title="Recordar pago y enviar datos bancarios por WhatsApp" style="color: #ea580c;">
                         <i class="fa-solid fa-file-invoice-dollar"></i>
                       </button>
                     ` : ''}
                   ` : ''}
 
-                  <button type="button" class="card-btn" onclick="editarCita(${cita.id})" style="color: #334155;" title="Editar cita">
+                  <button type="button" class="card-btn" onclick="editarCita(${cita.id})" style="color: #334155;" title="${esGrupal ? 'Editar sesión grupal' : 'Editar cita'}">
                     <i class="fa-solid fa-pen"></i>
                   </button>
-                  <button type="button" class="card-btn" onclick="eliminarCita(${cita.id})" style="color: #dc2626;" title="Eliminar cita">
+                  <button type="button" class="card-btn" onclick="eliminarCita(${cita.id})" style="color: #dc2626;" title="${esGrupal ? 'Eliminar sesión grupal' : 'Eliminar cita'}">
                     <i class="fa-solid fa-trash-can"></i>
                   </button>
                 </div>
               </div>
 
-              <div class="patient-name">${esBloqueo ? `<i class="fa-solid fa-ban" style="margin-right: 3px;"></i>${nombreLimpio}` : nombreLimpio}</div>
+              <div class="patient-name">${esBloqueo ? `<i class="fa-solid fa-ban" style="margin-right: 3px;"></i>${nombreLimpio}` : (esGrupal ? `<i class="fa-solid fa-users" style="margin-right: 4px;"></i>${nombreLimpio}` : nombreLimpio)}</div>
               ${notasLimpias ? `<div class="appointment-note">${notasLimpias}</div>` : ''}
+              ${esGrupal ? `<div class="badge-grupal"><i class="fa-solid fa-people-group"></i> Grupal</div>` : ''}
               ${esCompletada && !esBloqueo ? `<div class="badge-completada"><i class="fa-solid fa-check"></i> Realizada</div>` : ''}
               
-              ${!esBloqueo ? `
+              ${!esBloqueo && !esGrupal ? `
                 <div style="margin-top: 4px;">
                   <button type="button" class="mini-pay-btn ${payClass}" onclick="togglePagoDirecto(${cita.id}, event)" title="Clic para alternar estado de pago">
                     <i class="fa-solid ${esPagado ? 'fa-circle-check' : 'fa-clock'}"></i> ${payLabel}
@@ -516,34 +521,79 @@ function mostrarModalDirecto() {
 window.seleccionarTipoRegistro = function(tipo) {
   tipoRegistroActual = tipo;
   const tabCita = document.getElementById('tabTipoCita');
+  const tabGrupal = document.getElementById('tabTipoGrupal');
   const tabBloqueo = document.getElementById('tabTipoBloqueo');
-  const camposContacto = document.getElementById('camposContactoPaciente');
+  const camposContacto = document.getElementById('camposContactoIndividual');
+  const campoZoomContainer = document.getElementById('campoZoomContainer');
   const seccionRecurrencia = document.getElementById('seccionRecurrencia');
   const lblNombre = document.getElementById('lblNombre');
+  const lblZoom = document.getElementById('lblZoom');
   const inputNombre = document.getElementById('nc_nombre');
+  const inputZoom = document.getElementById('nc_enlace_zoom');
+  const badge = document.getElementById('badgePacienteDetectado');
+
+  if (tabCita) tabCita.classList.remove('active');
+  if (tabGrupal) tabGrupal.classList.remove('active');
+  if (tabBloqueo) tabBloqueo.classList.remove('active');
 
   if (tipo === 'BLOQUEO') {
-    tabCita.classList.remove('active');
-    tabBloqueo.classList.add('active');
+    if (tabBloqueo) tabBloqueo.classList.add('active');
     if (camposContacto) camposContacto.style.display = 'none';
+    if (campoZoomContainer) campoZoomContainer.style.display = 'none';
     if (seccionRecurrencia) seccionRecurrencia.style.display = 'none';
+    if (badge) badge.style.display = 'none';
     if (lblNombre) lblNombre.innerHTML = '<i class="fa-solid fa-ban" style="color: #ef4444; margin-right: 4px;"></i> Motivo del Bloqueo / Horario No Disponible *';
-    if (inputNombre) inputNombre.placeholder = 'Ej: Comida, Supervisión, Asunto personal...';
+    if (inputNombre) {
+      inputNombre.placeholder = 'Ej: Comida, Supervisión, Asunto personal...';
+      inputNombre.removeAttribute('list');
+    }
     document.getElementById('nc_color').value = '#94a3b8';
     renderSwatches('#94a3b8');
+  } else if (tipo === 'GRUPAL') {
+    if (tabGrupal) tabGrupal.classList.add('active');
+    if (camposContacto) camposContacto.style.display = 'none';
+    if (campoZoomContainer) campoZoomContainer.style.display = 'block';
+    if (seccionRecurrencia) seccionRecurrencia.style.display = 'block';
+    if (badge) badge.style.display = 'none';
+    if (lblNombre) lblNombre.innerHTML = '<i class="fa-solid fa-users" style="color: #8b5cf6; margin-right: 4px;"></i> Tipo / Nombre del Grupo o Programa *';
+    if (lblZoom) lblZoom.innerHTML = '<i class="fa-solid fa-video" style="color: #8b5cf6; margin-right: 4px;"></i> Enlace de Zoom de la Sala Grupal (opcional)';
+    if (inputZoom) inputZoom.placeholder = 'https://zoom.us/j/... (Enlace para todos los participantes)';
+    if (inputNombre) {
+      inputNombre.placeholder = 'Ej: Terapia Grupal para Autistas Adultos...';
+      inputNombre.setAttribute('list', 'listaGruposSugeridos');
+    }
+    
+    const idInput = document.getElementById('nc_id');
+    if (!idInput || !idInput.value) {
+      document.getElementById('nc_color').value = '#8b5cf6';
+      renderSwatches('#8b5cf6');
+      const repInput = document.getElementById('nc_repeticiones');
+      if (repInput) repInput.value = '12';
+    } else {
+      const colorExistente = document.getElementById('nc_color').value || '#8b5cf6';
+      renderSwatches(colorExistente);
+    }
   } else {
-    tabBloqueo.classList.remove('active');
-    tabCita.classList.add('active');
+    // CITA individual
+    if (tabCita) tabCita.classList.add('active');
     if (camposContacto) camposContacto.style.display = 'grid';
+    if (campoZoomContainer) campoZoomContainer.style.display = 'block';
     if (seccionRecurrencia) seccionRecurrencia.style.display = 'block';
     if (lblNombre) lblNombre.innerHTML = '<i class="fa-solid fa-user" style="color: var(--turquesa); margin-right: 4px;"></i> Nombre del paciente / Asunto *';
-    if (inputNombre) inputNombre.placeholder = 'Ej: Mariana López, Carlos Ruiz...';
+    if (lblZoom) lblZoom.innerHTML = '<i class="fa-solid fa-video" style="color: #2563eb; margin-right: 4px;"></i> Enlace personal de Zoom / Videollamada (opcional)';
+    if (inputZoom) inputZoom.placeholder = 'https://zoom.us/j/... o Google Meet';
+    if (inputNombre) {
+      inputNombre.placeholder = 'Escribe o selecciona paciente...';
+      inputNombre.setAttribute('list', 'listaPacientesAutocompletar');
+    }
     
     const idInput = document.getElementById('nc_id');
     if (!idInput || !idInput.value) {
       const colorNuevo = obtenerSiguienteColorDisponible();
       document.getElementById('nc_color').value = colorNuevo;
       renderSwatches(colorNuevo);
+      const repInput = document.getElementById('nc_repeticiones');
+      if (repInput) repInput.value = '4';
     } else {
       const colorExistente = document.getElementById('nc_color').value || '#3EB8CC';
       renderSwatches(colorExistente);
@@ -557,11 +607,12 @@ window.toggleOpcionesRecurrencia = function(checked) {
 };
 
 function setModoFormulario(modo) {
-  const campos = ['nc_nombre', 'nc_email', 'nc_telefono', 'nc_fecha', 'nc_hora', 'nc_notas'];
+  const campos = ['nc_nombre', 'nc_email', 'nc_telefono', 'nc_fecha', 'nc_hora', 'nc_notas', 'nc_enlace_zoom'];
   const tabs = document.getElementById('seccionTabsTipo');
   const seccionRec = document.getElementById('seccionRecurrencia');
   const seccionColor = document.getElementById('seccionColorBloque');
-  const camposContacto = document.getElementById('camposContactoPaciente');
+  const camposContacto = document.getElementById('camposContactoIndividual');
+  const campoZoomContainer = document.getElementById('campoZoomContainer');
   const prefijoEl = document.getElementById('nc_prefijo');
 
   if (modo === 'READONLY_CANCELADA') {
@@ -569,6 +620,7 @@ function setModoFormulario(modo) {
     if (seccionRec) seccionRec.style.display = 'none';
     if (seccionColor) seccionColor.style.display = 'none';
     if (camposContacto) camposContacto.style.display = 'grid';
+    if (campoZoomContainer) campoZoomContainer.style.display = 'block';
     if (prefijoEl) {
       prefijoEl.disabled = true;
       prefijoEl.style.backgroundColor = '#f8fafc';
@@ -593,7 +645,7 @@ function setModoFormulario(modo) {
     if (seccionColor) seccionColor.style.display = 'block';
     if (prefijoEl) {
       prefijoEl.disabled = false;
-      prefijoEl.style.backgroundColor = '#f8fafc';
+      prefijoEl.style.backgroundColor = '';
     }
 
     campos.forEach(id => {
@@ -729,8 +781,19 @@ window.editarCita = function(id) {
   const idInput = document.getElementById('nc_id');
   if (idInput) idInput.value = cita.id;
 
+  const esBloqueo = (cita.categoria && cita.categoria.startsWith('[BLOQUEO]')) || (cita.paciente && cita.paciente.nombre.startsWith('[BLOQUEO]'));
+  const esGrupal = (cita.categoria && cita.categoria.startsWith('[GRUPAL]')) || (cita.paciente && cita.paciente.nombre.startsWith('[GRUPAL]'));
+
   const titulo = document.getElementById('modalTitulo');
-  if (titulo) titulo.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> <span>Editar Cita</span>';
+  if (titulo) {
+    if (esGrupal) {
+      titulo.innerHTML = '<i class="fa-solid fa-pen-to-square" style="color: #8b5cf6;"></i> <span>Editar Sesión Grupal</span>';
+    } else if (esBloqueo) {
+      titulo.innerHTML = '<i class="fa-solid fa-pen-to-square" style="color: #ef4444;"></i> <span>Editar Bloqueo</span>';
+    } else {
+      titulo.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> <span>Editar Cita</span>';
+    }
+  }
 
   const subtitulo = document.getElementById('modalSubtitulo');
   if (subtitulo) subtitulo.style.display = 'none';
@@ -742,11 +805,11 @@ window.editarCita = function(id) {
       <button type="button" id="btnCancelarModal" class="btn" style="flex: 1; background: var(--gris-calido);" onclick="cerrarModal()">Cancelar</button>
     `;
   }
-
-  const esBloqueo = (cita.categoria && cita.categoria.startsWith('[BLOQUEO]')) || (cita.paciente && cita.paciente.nombre.startsWith('[BLOQUEO]'));
   
   if (esBloqueo) {
     window.seleccionarTipoRegistro('BLOQUEO');
+  } else if (esGrupal) {
+    window.seleccionarTipoRegistro('GRUPAL');
   } else {
     window.seleccionarTipoRegistro('CITA');
   }
@@ -754,9 +817,9 @@ window.editarCita = function(id) {
   const seccionRec = document.getElementById('seccionRecurrencia');
   if (seccionRec) seccionRec.style.display = 'none';
 
-  const nombreLimpio = cita.paciente.nombre.replace('[BLOQUEO]', '').trim() || '';
+  const nombreLimpio = cita.paciente.nombre.replace('[BLOQUEO]', '').replace('[GRUPAL]', '').trim() || '';
   document.getElementById('nc_nombre').value = nombreLimpio;
-  document.getElementById('nc_email').value = cita.paciente.email && !cita.paciente.email.startsWith('sin-email-') ? cita.paciente.email : '';
+  document.getElementById('nc_email').value = cita.paciente.email && !cita.paciente.email.startsWith('sin-email-') && !cita.paciente.email.startsWith('grupal-') ? cita.paciente.email : '';
   
   const parsedTel = parsearTelefono(cita.paciente.telefono);
   const prefijoEl = document.getElementById('nc_prefijo');
@@ -770,12 +833,12 @@ window.editarCita = function(id) {
 
   const badge = document.getElementById('badgePacienteDetectado');
   if (badge) {
-    badge.style.display = !esBloqueo ? 'inline-flex' : 'none';
+    badge.style.display = (!esBloqueo && !esGrupal) ? 'inline-flex' : 'none';
   }
 
-  document.getElementById('nc_notas').value = (cita.categoria || '').replace('[BLOQUEO]', '').trim();
+  document.getElementById('nc_notas').value = (cita.categoria || '').replace('[BLOQUEO]', '').replace('[GRUPAL]', '').trim();
 
-  const colorCita = cita.color || (esBloqueo ? '#94a3b8' : '#3EB8CC');
+  const colorCita = cita.color || (esBloqueo ? '#94a3b8' : (esGrupal ? '#8b5cf6' : '#3EB8CC'));
   document.getElementById('nc_color').value = colorCita;
   renderSwatches(colorCita);
 

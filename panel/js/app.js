@@ -294,12 +294,15 @@ document.addEventListener('DOMContentLoaded', () => {
       if (tipoRegistroActual === 'BLOQUEO') {
         nombre = `[BLOQUEO] ${nombre}`;
         notas = `[BLOQUEO] ${notas}`.trim();
+      } else if (tipoRegistroActual === 'GRUPAL') {
+        nombre = `[GRUPAL] ${nombre}`;
+        notas = `[GRUPAL] ${notas}`.trim();
       }
 
       const prefijo = document.getElementById('nc_prefijo')?.value || '';
       const telInput = document.getElementById('nc_telefono')?.value.trim() || '';
       let telefonoFinal = '';
-      if (telInput && tipoRegistroActual !== 'BLOQUEO') {
+      if (telInput && tipoRegistroActual !== 'BLOQUEO' && tipoRegistroActual !== 'GRUPAL') {
         if (telInput.startsWith('+')) {
           telefonoFinal = telInput;
         } else if (prefijo) {
@@ -315,9 +318,18 @@ document.addEventListener('DOMContentLoaded', () => {
         enlaceZoomVal = `https://${enlaceZoomVal}`;
       }
 
+      let emailFinal = '';
+      if (tipoRegistroActual === 'BLOQUEO') {
+        emailFinal = '';
+      } else if (tipoRegistroActual === 'GRUPAL') {
+        emailFinal = `grupal-${Date.now()}@psicolau.com`;
+      } else {
+        emailFinal = document.getElementById('nc_email').value.trim();
+      }
+
       const data = {
         nombre: nombre,
-        email: tipoRegistroActual === 'BLOQUEO' ? '' : document.getElementById('nc_email').value.trim(),
+        email: emailFinal,
         telefono: telefonoFinal,
         enlaceZoom: enlaceZoomVal,
         fechaHora: fechaHora,

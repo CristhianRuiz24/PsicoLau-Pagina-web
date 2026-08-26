@@ -96,8 +96,24 @@ window.enviarWhatsAppRecordatorio = function(id, e) {
   const mesTexto = meses[d.getMonth()];
   const horaTexto = d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true });
 
-  const nombrePaciente = cita.paciente ? cita.paciente.nombre.replace('[BLOQUEO]', '').trim() : 'Paciente';
-  
+  const esGrupal = (cita.categoria && cita.categoria.startsWith('[GRUPAL]')) || (cita.paciente && cita.paciente.nombre.startsWith('[GRUPAL]'));
+  const nombrePaciente = cita.paciente ? cita.paciente.nombre.replace('[BLOQUEO]', '').replace('[GRUPAL]', '').trim() : (esGrupal ? 'Grupo' : 'Paciente');
+  const temaSesion = (cita.categoria || '').replace('[BLOQUEO]', '').replace('[GRUPAL]', '').trim();
+
+  if (esGrupal) {
+    let bloqueTema = temaSesion ? `\n📌 *Tema / Módulo:* ${temaSesion}` : '';
+    let bloqueZoomGrupal = (cita.paciente && cita.paciente.enlaceZoom) ? `\n\n📹 *Enlace de Zoom para la sesión:*\n${cita.paciente.enlaceZoom.trim()}` : '';
+    
+    const mensaje = encodeURIComponent(`Hola a todos, les saludo con gusto. Les comparto los detalles para nuestra sesión de *${nombrePaciente}* de este *${diaTexto} ${diaNum} de ${mesTexto} a las ${horaTexto}*:${bloqueTema}${bloqueZoomGrupal}\n\n¡Nos vemos en la sesión grupal!\n\n- PsicoLau (Laura Gómez)`);
+    
+    if (telLimpio) {
+      window.open(`https://wa.me/${telLimpio}?text=${mensaje}`, '_blank');
+    } else {
+      window.open(`https://wa.me/?text=${mensaje}`, '_blank');
+    }
+    return;
+  }
+
   let bloqueZoom = '';
   if (cita.paciente && cita.paciente.enlaceZoom) {
     bloqueZoom = `\n\n📹 *Enlace para conectarte (Zoom):*\n${cita.paciente.enlaceZoom.trim()}`;
