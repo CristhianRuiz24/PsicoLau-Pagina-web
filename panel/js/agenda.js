@@ -140,7 +140,7 @@ window.actualizarDatalistPacientes = function() {
   listaDirectorio.forEach(p => {
     if (p.nombre && !p.nombre.startsWith('[BLOQUEO]') && !nombresVistos.has(p.nombre.toLowerCase().trim())) {
       nombresVistos.add(p.nombre.toLowerCase().trim());
-      html += `<option value="${p.nombre}">`;
+      html += `<option value="${escapeHtml(p.nombre)}">`;
     }
   });
 
@@ -150,7 +150,7 @@ window.actualizarDatalistPacientes = function() {
         const nomLimpio = c.paciente.nombre.toLowerCase().trim();
         if (!nombresVistos.has(nomLimpio)) {
           nombresVistos.add(nomLimpio);
-          html += `<option value="${c.paciente.nombre}">`;
+          html += `<option value="${escapeHtml(c.paciente.nombre)}">`;
         }
       }
     });

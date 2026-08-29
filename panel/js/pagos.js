@@ -122,13 +122,13 @@ function renderAuditoriaPagos() {
       <div class="audit-card">
         <div class="audit-card-info">
           <div class="audit-card-title">
-            <span>${nombre}</span>
+            <span>${escapeHtml(nombre)}</span>
             ${esCompletada ? `<span style="font-size: 0.65rem; padding: 1px 6px; border-radius: 4px; background: #dcfce7; color: #15803d; font-weight: 700;">✓ Realizada</span>` : `<span style="font-size: 0.65rem; padding: 1px 6px; border-radius: 4px; background: #fef9c3; color: #854d0e; font-weight: 700;">Por realizar</span>`}
           </div>
           <div class="audit-card-meta">
             <span><i class="fa-solid fa-calendar-day" style="color: var(--turquesa); margin-right: 3px;"></i> ${fechaTxt}</span>
-            ${notas ? `<span>· <i class="fa-solid fa-tag" style="margin-right: 2px;"></i> ${notas}</span>` : ''}
-            ${c.paciente && c.paciente.telefono ? `<span>· <i class="fa-brands fa-whatsapp" style="color: #16a34a; margin-right: 2px;"></i> ${c.paciente.telefono}</span>` : ''}
+            ${notas ? `<span>· <i class="fa-solid fa-tag" style="margin-right: 2px;"></i> ${escapeHtml(notas)}</span>` : ''}
+            ${c.paciente && c.paciente.telefono ? `<span>· <i class="fa-brands fa-whatsapp" style="color: #16a34a; margin-right: 2px;"></i> ${escapeHtml(c.paciente.telefono)}</span>` : ''}
           </div>
         </div>
         <div class="audit-card-actions">
@@ -366,7 +366,7 @@ function renderReporteMensual() {
           <span>${fechaTxt}</span> <span style="font-size: 0.8rem; color: #64748b; font-weight: 500;">· ${horaTxt}</span>
         </td>
         <td style="padding: 0.65rem 0.8rem; font-weight: 600; color: #334155;">
-          ${nombre}
+          ${escapeHtml(nombre)}
         </td>
         <td style="padding: 0.65rem 0.8rem; text-align: right; font-weight: 800; color: ${monto === 0 ? '#64748b' : '#0f172a'};">
           ${monto === 0 ? '<span style="background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 4px; font-size: 0.78rem;">$0 Cortesía</span>' : formatter.format(monto)}

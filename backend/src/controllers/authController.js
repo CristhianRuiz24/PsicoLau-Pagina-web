@@ -27,11 +27,11 @@ const login = async (req, res) => {
       return res.status(401).json({ success: false, message: 'Credenciales inválidas' });
     }
 
-    // Generar el token JWT
+    // Generar el token JWT (Vigencia ajustada a 8 horas por seguridad clínica)
     const token = jwt.sign(
       { id: usuario.id, email: usuario.email },
       process.env.JWT_SECRET,
-      { expiresIn: '24h' } // Token válido por 24 horas
+      { expiresIn: '8h' }
     );
 
     res.json({

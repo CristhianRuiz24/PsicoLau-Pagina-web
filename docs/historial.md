@@ -156,5 +156,12 @@ Este documento recopila la bitácora histórica completa de sesiones, cambios ar
   - **Protección de Restricción `@unique` en Bloqueos**: Corrección de bug en `editarCita` de `agendaController.js` para preservar identificadores únicos en eventos `[BLOQUEO]` y `[GRUPAL]` en lugar de asignar cadena vacía (`''`), previniendo errores de colisión en PostgreSQL.
   - **Refinamiento de Búsqueda de Pacientes**: Aislamiento de coincidencias homónimas para no vincular pacientes a eventos de bloqueo en `crearCita`.
   - **Sanitización de Datos Clínicos**: Aplicación de `.trim()` en `notaExpedienteSchema` de `validators.js` para garantizar limpieza de datos antes del cifrado AES-256-GCM.
-  - **Optimización de Base de Datos**: Creación de índice `@@index([fechaHora])` en el modelo `Cita` de Prisma y sincronización en PostgreSQL (Supabase) para acelerar las consultas de la agenda semanal.
+- **2026-08-28 (Sesión 31 - Auditoría de Ciberseguridad Integral y Reducción de Exposición JWT)**:
+  - **Auditoría de Ciberseguridad**: Revisión integral de cifrado AES-256-GCM (`crypto.js`), autenticación (`authMiddleware.js`), esquemas Zod (`validators.js`), cabeceras de seguridad CSP/HSTS (`_headers`) y protección de rutas.
+  - **Verificación de Rate Limiting**: Comprobación de que todos los endpoints clave (`/api/auth/login`, `/api/contacto`, `/api/citas/public`, `/api/agenda/*`, `/api/pacientes/*`, `/api/expediente/*`) cuentan con limitadores de tasa activos contra fuerza bruta y DDoS.
+  - **Reducción de Ventana de Exposición JWT**: Ajuste del tiempo de expiración del token administrativo a **8 horas** (`expiresIn: '8h'`) en `backend/src/controllers/authController.js` para alinear la sesión con una jornada clínica y mitigar el impacto de accesos desatendidos.
+  - **Blindaje de Sanitización Preventiva (Defensa en Profundidad)**:
+    - Aplicación de `escapeHtml()` en el buscador global de la suite (`panel/js/app.js`) para términos de búsqueda, títulos de expedientes y enlaces telefónicos dinámicos.
+    - Aplicación de `escapeHtml()` en el módulo de contabilidad y auditoría de pagos (`panel/js/pagos.js`) para tarjetas de cobro pendiente y tabla mensual detallada.
+    - Sanitización de opciones del `<datalist>` dinámico de pacientes en la agenda (`panel/js/agenda.js`).
 

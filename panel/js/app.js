@@ -116,7 +116,7 @@ window.filtrarCitasEnTabla = function(query) {
     panel.style.display = 'block';
 
     if (pacientesCoincidentes.length === 0 && citasCoincidentes.length === 0) {
-      panel.innerHTML = `<div class="no-results-msg"><i class="fa-solid fa-circle-question" style="margin-right: 4px;"></i> No se encontraron pacientes ni citas con "<strong>${queryLimpia}</strong>"</div>`;
+      panel.innerHTML = `<div class="no-results-msg"><i class="fa-solid fa-circle-question" style="margin-right: 4px;"></i> No se encontraron pacientes ni citas con "<strong>${escapeHtml(queryLimpia)}</strong>"</div>`;
       return;
     }
 
@@ -135,17 +135,17 @@ window.filtrarCitasEnTabla = function(query) {
         const numNotas = p._count ? p._count.expedientes : 0;
         const numCitas = p._count ? p._count.citas : 0;
         html += `
-          <div class="search-result-item" onclick="abrirExpedientePorId(${p.id})" title="Abrir expediente clínico de ${p.nombre}">
+          <div class="search-result-item" onclick="abrirExpedientePorId(${p.id})" title="Abrir expediente clínico de ${escapeHtml(p.nombre)}">
             <div style="flex: 1; min-width: 0; padding-right: 8px;">
               <div class="item-title">
                 <i class="fa-solid fa-user-check" style="color: var(--turquesa); font-size: 0.85rem;"></i>
-                <span style="font-weight: 700; color: #0f172a;">${p.nombre}</span>
+                <span style="font-weight: 700; color: #0f172a;">${escapeHtml(p.nombre)}</span>
                 <span style="font-size: 0.68rem; padding: 1px 6px; border-radius: 4px; background: #fdf2f8; color: var(--rosa-coral); font-weight: 700; border: 1px solid #fbcfe8;">
                   <i class="fa-solid fa-notes-medical"></i> ${numNotas} ${numNotas === 1 ? 'nota' : 'notas'}
                 </span>
               </div>
               <div class="item-meta">
-                ${p.telefono ? `<i class="fa-brands fa-whatsapp" style="color: #16a34a; margin-right: 2px;"></i> ${p.telefono} · ` : ''}
+                ${p.telefono ? `<i class="fa-brands fa-whatsapp" style="color: #16a34a; margin-right: 2px;"></i> ${escapeHtml(p.telefono)} · ` : ''}
                 <span><i class="fa-solid fa-calendar-check" style="color: #6366f1; margin-right: 2px;"></i> ${numCitas} citas</span>
               </div>
             </div>
@@ -182,7 +182,7 @@ window.filtrarCitasEnTabla = function(query) {
 
         const clickAccion = esCancelada ? `revisarCitaCancelada(${c.id})` : `irAFechaDeCita('${c.fechaHora}')`;
         const btnExpediente = (!esBloqueo && c.paciente && c.paciente.id)
-          ? `<button type="button" class="btn-jump" onclick="event.stopPropagation(); abrirExpedientePorId(${c.paciente.id});" style="background: #fdf2f8; color: var(--rosa-coral); border-color: #fbcfe8;" title="Ver expediente clínico de ${nombre}"><i class="fa-solid fa-folder-open"></i></button>`
+          ? `<button type="button" class="btn-jump" onclick="event.stopPropagation(); abrirExpedientePorId(${c.paciente.id});" style="background: #fdf2f8; color: var(--rosa-coral); border-color: #fbcfe8;" title="Ver expediente clínico de ${escapeHtml(nombre)}"><i class="fa-solid fa-folder-open"></i></button>`
           : '';
 
         const btnTexto = esCancelada 

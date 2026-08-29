@@ -108,7 +108,7 @@ Este proyecto sigue un flujo SDD para toda funcionalidad nueva o cambio signific
    | `DATABASE_URL` | Supabase Dev Pooler | Supabase Prod Pooler | Proyectos separados con connection pooler port 5432 / 6543. |
    | `PORT` | `3000` | `10000` (o asignado por Render) | Render asigna `PORT` automáticamente si no se define. |
    | `ENCRYPTION_KEY` | 32 bytes hex (64 caracteres) | 32 bytes hex de producción | Cifrado AES-256-GCM para datos clínicos de expedientes. |
-   | `JWT_SECRET` | Clave secreta dev | Clave secreta criptográfica prod | Firma de tokens administrativos (24h de validez). |
+   | `JWT_SECRET` | Clave secreta dev | Clave secreta criptográfica prod | Firma de tokens administrativos (8h de validez por seguridad). |
    | `RESEND_API_KEY` | API Key Resend | API Key Resend | Envío transaccional vía `smtp.resend.com`. |
    | `REMITENTE` | `PsicoLau <contacto@psicolau.com>` | `PsicoLau <contacto@psicolau.com>` | Dominio verificado `psicolau.com`. |
    | `CORREO_LAURA` | `lince_lg@yahoo.com.mx` | `lince_lg@yahoo.com.mx` | Destino de notificaciones y avisos clínicos. |
