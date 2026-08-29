@@ -1,6 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const { obtenerCitas, actualizarEstadoCita, actualizarEstadoPago, crearCita, editarCita, cancelarCita, eliminarCita } = require('../controllers/agendaController');
+const { 
+  obtenerCitas, 
+  actualizarEstadoCita, 
+  actualizarEstadoPago, 
+  actualizarMontoCita,
+  crearCita, 
+  editarCita, 
+  cancelarCita, 
+  eliminarCita 
+} = require('../controllers/agendaController');
 const { verificarToken } = require('../middlewares/authMiddleware');
 const rateLimit = require('express-rate-limit');
 
@@ -25,8 +34,9 @@ router.put('/citas/:id', editarCita);
 router.patch('/citas/:id/cancelar', cancelarCita);
 router.delete('/citas/:id', eliminarCita);
 
-// Actualizar estados
+// Actualizar estados y montos
 router.patch('/citas/:id/estado', actualizarEstadoCita);
 router.patch('/citas/:id/pago', actualizarEstadoPago);
+router.patch('/citas/:id/monto', actualizarMontoCita);
 
 module.exports = router;

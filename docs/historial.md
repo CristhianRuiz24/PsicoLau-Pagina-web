@@ -130,3 +130,31 @@ Este documento recopila la bitácora histórica completa de sesiones, cambios ar
   - **Estructura y Plantillas SDD**: Creación de la carpeta `specs/_templates/` con plantillas para especificaciones EARS (`spec.md`), arquitectura y decisiones justificadas (`plan.md`) y desglose de tareas atómicas con criterios verificables (`tasks.md`).
   - **Skill Nativa para Antigravity**: Creación de `.agents/skills/spec-generator/` para guiar al modelo en entrevistas de requisitos de una en una, clarificación QA y desglose ordenado.
   - **Optimización de Contexto de Instrucciones**: Migración de la bitácora histórica completa a `docs/historial.md`, aligerando `AGENTS.md` para reducir consumo de tokens y maximizar la precisión operativa del asistente de IA.
+- **2026-08-28 (Sesión 29 - Reporte Contable Mensual, Control de Tarifas y Auditoría Integral en Vivo)**:
+  - **Spec 001 — Reporte Contable Mensual y Control de Ingresos**: Implementación completa bajo flujo SDD (`specs/001-reporte-contable-ingresos/`).
+  - **Modelo de Datos en Prisma**: Campos `tarifaDefecto Float? @default(500)` en `Paciente` y `monto Float @default(500)` en `Cita` aplicados en PostgreSQL (Supabase).
+  - **Controladores y Rutas API**: Procesamiento y validación de montos ($\ge 0$) en `crearCita` y `editarCita`, actualización de tarifa predeterminada del paciente y nuevo endpoint `PATCH /api/agenda/citas/:id/monto`.
+  - **Pruebas Automatizadas de Backend**: Creación y validación exitosa de `backend/scripts/testContabilidad.js` (100% OK).
+  - **Formulario de Agendar / Editar Cita**: Integración del campo de monto ($ MXN), autocompletado reactivo de tarifa habitual según paciente y botón rápido `$0 (Cortesía)`. Ocultamiento automático de monto en pestañas `Terapia Grupal` y `Bloqueo de Horario`.
+  - **Suite de Reporte Contable Mensual (`#modalReporteMensual`)**:
+    - Selector dinámico de año y mes con autoexpansión temporal a futuro.
+    - 4 tarjetas de KPIs calculadas en tiempo real: *Total Cobrado*, *Sesiones Realizadas* (con costo vs cortesía $0), *Por Cobrar* y *Tarifa Promedio*.
+    - Exclusión estricta de citas canceladas, bloqueos de horario y sesiones grupales (`[GRUPAL]`).
+    - Tabla contable de 5 columnas limpia y optimizada (sin exposición de notas clínicas).
+  - **Exportación en 1 Clic**:
+    - *Copiar para WhatsApp*: resumen estructurado al portapapeles con confirmación visual verde (`¡Copiado!`).
+    - *Descargar Excel (CSV)*: archivo `.csv` codificado en UTF-8 con BOM (`\uFEFF`) para visualización perfecta de acentos y caracteres especiales en Excel.
+    - *Imprimir / PDF*: regla `@media print` exclusiva (`body.printing-reporte-mensual`) para estado de cuenta membretado formal.
+  - **Saneamiento de Mensajería WhatsApp & Datos de Cobro**:
+    - Mensajes de cobro integran automáticamente la aportación individual del paciente (`cita.monto` / `paciente.tarifaDefecto`).
+    - Eliminación del bloque de datos bancarios de los recordatorios de sesión previa.
+    - Sustitución de emojis problemáticos de cámara por formato de texto limpio compatible (`*Enlace para conectarte (Zoom):*`) y corrección de puntuación en horas.
+    - Simplificación de `#modalDatosPago` removiendo campos redundantes de cuota sugerida y checkbox de recordatorio.
+- **2026-08-28 (Sesión 30 - Auditoría Técnica de Seguridad, Consistencia de Datos y Optimización)**:
+  - **CORS Estricto**: Eliminación de subdominios wildcard (`endsWith('.psicolau.com')`) en producción, restringiendo el acceso exclusivamente a los orígenes oficiales explícitos (`https://psicolau.com`, `https://www.psicolau.com`, `https://api.psicolau.com` y `FRONTEND_URL`).
+  - **Validación Fail-Fast al Inicio**: Implementación de `checkCriticalEnv()` en `backend/src/index.js` para asegurar la presencia y validez de `JWT_SECRET` y `ENCRYPTION_KEY` antes de atender peticiones, evitando arranques con configuraciones vulnerables.
+  - **Protección de Restricción `@unique` en Bloqueos**: Corrección de bug en `editarCita` de `agendaController.js` para preservar identificadores únicos en eventos `[BLOQUEO]` y `[GRUPAL]` en lugar de asignar cadena vacía (`''`), previniendo errores de colisión en PostgreSQL.
+  - **Refinamiento de Búsqueda de Pacientes**: Aislamiento de coincidencias homónimas para no vincular pacientes a eventos de bloqueo en `crearCita`.
+  - **Sanitización de Datos Clínicos**: Aplicación de `.trim()` en `notaExpedienteSchema` de `validators.js` para garantizar limpieza de datos antes del cifrado AES-256-GCM.
+  - **Optimización de Base de Datos**: Creación de índice `@@index([fechaHora])` en el modelo `Cita` de Prisma y sincronización en PostgreSQL (Supabase) para acelerar las consultas de la agenda semanal.
+

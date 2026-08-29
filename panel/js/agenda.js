@@ -120,6 +120,15 @@ function renderSwatches(colorSeleccionado = '#3EB8CC') {
   container.appendChild(customWrapper);
 }
 
+// Establecer monto rápido de cortesía ($0)
+window.establecerMontoCortesia = function() {
+  const montoInput = document.getElementById('nc_monto');
+  if (montoInput) {
+    montoInput.value = '0';
+    montoInput.focus();
+  }
+};
+
 // Actualizar lista predictiva de pacientes para el datalist del formulario
 window.actualizarDatalistPacientes = function() {
   const datalist = document.getElementById('listaPacientesAutocompletar');
@@ -226,7 +235,10 @@ window.manejarInputNombrePaciente = function(valor) {
       return nom === nombreLimpio;
     });
     if (citaPrevia && citaPrevia.paciente) {
-      coincidencia = citaPrevia.paciente;
+      coincidencia = {
+        ...citaPrevia.paciente,
+        monto: citaPrevia.monto
+      };
     }
   }
 
@@ -257,6 +269,16 @@ window.manejarInputNombrePaciente = function(valor) {
     const zoomEl = document.getElementById('nc_enlace_zoom');
     if (zoomEl && coincidencia.enlaceZoom) {
       zoomEl.value = coincidencia.enlaceZoom;
+    }
+
+    // Autocompletar Tarifa / Monto de sesión
+    const montoEl = document.getElementById('nc_monto');
+    if (montoEl) {
+      if (coincidencia.tarifaDefecto !== undefined && coincidencia.tarifaDefecto !== null) {
+        montoEl.value = coincidencia.tarifaDefecto;
+      } else if (coincidencia.monto !== undefined && coincidencia.monto !== null) {
+        montoEl.value = coincidencia.monto;
+      }
     }
 
     // Autocompletar Color de la paleta
@@ -486,8 +508,8 @@ function renderEasyTable() {
                 </div>
               </div>
 
-              <div class="patient-name">${esBloqueo ? `<i class="fa-solid fa-ban" style="margin-right: 3px;"></i>${nombreLimpio}` : (esGrupal ? `<i class="fa-solid fa-users" style="margin-right: 4px;"></i>${nombreLimpio}` : nombreLimpio)}</div>
-              ${notasLimpias ? `<div class="appointment-note">${notasLimpias}</div>` : ''}
+              <div class="patient-name">${esBloqueo ? `<i class="fa-solid fa-ban" style="margin-right: 3px;"></i>${escapeHtml(nombreLimpio)}` : (esGrupal ? `<i class="fa-solid fa-users" style="margin-right: 4px;"></i>${escapeHtml(nombreLimpio)}` : escapeHtml(nombreLimpio))}</div>
+              ${notasLimpias ? `<div class="appointment-note">${escapeHtml(notasLimpias)}</div>` : ''}
               ${(esGrupal || (esCompletada && !esBloqueo)) ? `
                 <div class="card-badges-row">
                   ${esGrupal ? `<div class="badge-grupal"><i class="fa-solid fa-people-group"></i> Grupal</div>` : ''}
@@ -657,10 +679,12 @@ window.seleccionarTipoRegistro = function(tipo) {
   const camposContacto = document.getElementById('camposContactoIndividual');
   const campoZoomContainer = document.getElementById('campoZoomContainer');
   const seccionRecurrencia = document.getElementById('seccionRecurrencia');
+  const seccionMonto = document.getElementById('seccionMontoSesion');
   const lblNombre = document.getElementById('lblNombre');
   const lblZoom = document.getElementById('lblZoom');
   const inputNombre = document.getElementById('nc_nombre');
   const inputZoom = document.getElementById('nc_enlace_zoom');
+  const inputMonto = document.getElementById('nc_monto');
   const badge = document.getElementById('badgePacienteDetectado');
 
   if (tabCita) tabCita.classList.remove('active');
@@ -672,6 +696,8 @@ window.seleccionarTipoRegistro = function(tipo) {
     if (camposContacto) camposContacto.style.display = 'none';
     if (campoZoomContainer) campoZoomContainer.style.display = 'none';
     if (seccionRecurrencia) seccionRecurrencia.style.display = 'none';
+    if (seccionMonto) seccionMonto.style.display = 'none';
+    if (inputMonto) inputMonto.value = '0';
     if (badge) badge.style.display = 'none';
     if (lblNombre) lblNombre.innerHTML = '<i class="fa-solid fa-ban" style="color: #ef4444; margin-right: 4px;"></i> Motivo del Bloqueo / Horario No Disponible *';
     if (inputNombre) {
@@ -684,6 +710,8 @@ window.seleccionarTipoRegistro = function(tipo) {
     if (camposContacto) camposContacto.style.display = 'none';
     if (campoZoomContainer) campoZoomContainer.style.display = 'block';
     if (seccionRecurrencia) seccionRecurrencia.style.display = 'block';
+    if (seccionMonto) seccionMonto.style.display = 'none';
+    if (inputMonto) inputMonto.value = '0';
     if (badge) badge.style.display = 'none';
     if (lblNombre) lblNombre.innerHTML = '<i class="fa-solid fa-users" style="color: #8b5cf6; margin-right: 4px;"></i> Tipo / Nombre del Grupo o Programa *';
     if (lblZoom) lblZoom.innerHTML = '<i class="fa-solid fa-video" style="color: #8b5cf6; margin-right: 4px;"></i> Enlace de Zoom de la Sala Grupal (opcional)';
@@ -708,6 +736,7 @@ window.seleccionarTipoRegistro = function(tipo) {
     if (camposContacto) camposContacto.style.display = 'grid';
     if (campoZoomContainer) campoZoomContainer.style.display = 'block';
     if (seccionRecurrencia) seccionRecurrencia.style.display = 'block';
+    if (seccionMonto) seccionMonto.style.display = 'block';
     if (lblNombre) lblNombre.innerHTML = '<i class="fa-solid fa-user" style="color: var(--turquesa); margin-right: 4px;"></i> Nombre del paciente / Asunto *';
     if (lblZoom) lblZoom.innerHTML = '<i class="fa-solid fa-video" style="color: #2563eb; margin-right: 4px;"></i> Enlace personal de Zoom / Videollamada (opcional)';
     if (inputZoom) inputZoom.placeholder = 'https://zoom.us/j/... o Google Meet';
@@ -804,6 +833,9 @@ window.abrirModal = function() {
 
   const idInput = document.getElementById('nc_id');
   if (idInput) idInput.value = '';
+
+  const montoInput = document.getElementById('nc_monto');
+  if (montoInput) montoInput.value = '500';
 
   const zoomInput = document.getElementById('nc_enlace_zoom');
   if (zoomInput) zoomInput.value = '';
@@ -976,6 +1008,13 @@ window.editarCita = function(id) {
   const zoomEl = document.getElementById('nc_enlace_zoom');
   if (zoomEl) {
     zoomEl.value = (cita.paciente && cita.paciente.enlaceZoom) ? cita.paciente.enlaceZoom : '';
+  }
+
+  const montoEl = document.getElementById('nc_monto');
+  if (montoEl) {
+    montoEl.value = (cita.monto !== undefined && cita.monto !== null) 
+      ? cita.monto 
+      : (cita.paciente && cita.paciente.tarifaDefecto !== null && cita.paciente.tarifaDefecto !== undefined ? cita.paciente.tarifaDefecto : 500);
   }
 
   const badge = document.getElementById('badgePacienteDetectado');

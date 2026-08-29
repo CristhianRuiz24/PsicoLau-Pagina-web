@@ -100,16 +100,28 @@ Este proyecto sigue un flujo SDD para toda funcionalidad nueva o cambio signific
 ## 🔒 Reglas de Seguridad y Despliegue
 1. **Cloudflare Pages**: Despliegue estático del frontend desde GitHub con headers de seguridad CSP en `_headers`.
 2. **Render (Backend API)**: Alojamiento del servicio Node.js (`/backend`) con root directory `backend`, build command `npm install && npx prisma generate`, start command `npm start` y subdominio oficial `api.psicolau.com`.
-3. **Recordatorio para Despliegue en Producción (UptimeRobot)**:
+3. **Matriz de Variables de Entorno (Local vs Producción)**:
+   | Variable | Local (`backend/.env`) | Producción (Render Dashboard) | Notas |
+   |---|---|---|---|
+   | `NODE_ENV` | `development` | `production` | **Crítico**: activa modo estricto CORS y oculta stack traces. |
+   | `FRONTEND_URL` | `http://localhost:5500` | `https://psicolau.com` | **Recordatorio**: En Render debe apuntar a la URL pública oficial. |
+   | `DATABASE_URL` | Supabase Dev Pooler | Supabase Prod Pooler | Proyectos separados con connection pooler port 5432 / 6543. |
+   | `PORT` | `3000` | `10000` (o asignado por Render) | Render asigna `PORT` automáticamente si no se define. |
+   | `ENCRYPTION_KEY` | 32 bytes hex (64 caracteres) | 32 bytes hex de producción | Cifrado AES-256-GCM para datos clínicos de expedientes. |
+   | `JWT_SECRET` | Clave secreta dev | Clave secreta criptográfica prod | Firma de tokens administrativos (24h de validez). |
+   | `RESEND_API_KEY` | API Key Resend | API Key Resend | Envío transaccional vía `smtp.resend.com`. |
+   | `REMITENTE` | `PsicoLau <contacto@psicolau.com>` | `PsicoLau <contacto@psicolau.com>` | Dominio verificado `psicolau.com`. |
+   | `CORREO_LAURA` | `lince_lg@yahoo.com.mx` | `lince_lg@yahoo.com.mx` | Destino de notificaciones y avisos clínicos. |
+4. **Recordatorio para Despliegue en Producción (UptimeRobot)**:
    - En el plan gratuito de Render, el servicio se suspende tras 15 minutos de inactividad.
    - **Acción requerida al desplegar**: Configurar un monitor gratuito en [UptimeRobot](https://uptimerobot.com/) o [cron-job.org](https://cron-job.org/) que envíe una petición HTTP cada 10 minutos a `https://api.psicolau.com/api/health`.
-4. **Blindaje `.gitignore`**:
+5. **Blindaje `.gitignore`**:
    - Variables de entorno (`.env`, `.env.*`, `**/.env`).
    - Dependencias (`node_modules/`, `**/node_modules/`).
    - Documentos privados (`Recursos para que use la IA/`, `caso-estudio/`).
    - Archivos de sistema y logs (`*.log`, `.DS_Store`, `Thumbs.db`).
    - Plantilla de configuración pública: `backend/.env.example`.
-5. **Protocolo de Pruebas Locales Obligatorias antes de Despliegue**:
+6. **Protocolo de Pruebas Locales Obligatorias antes de Despliegue**:
    - Todo cambio nuevo, refactorización o funcionalidad grande debe desarrollarse y probarse **únicamente en el entorno local** (`http://127.0.0.1:5500` con la base de datos de pruebas en Supabase).
    - **No ejecutar `git push origin main`** de forma prematura: solo realizar el push a producción cuando el usuario haya revisado, probado y aprobado explícitamente el resultado en su navegador local.
 

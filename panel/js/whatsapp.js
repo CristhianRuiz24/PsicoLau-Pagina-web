@@ -43,26 +43,33 @@ window.enviarWhatsAppCobro = function(id, e) {
   const diaNum = d.getDate();
   const mesTexto = meses[d.getMonth()];
   const horaTexto = d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true });
+  const horaLimpia = horaTexto.endsWith('.') ? horaTexto.slice(0, -1) : horaTexto;
   const nombrePaciente = cita.paciente ? cita.paciente.nombre.replace('[BLOQUEO]', '').trim() : 'Paciente';
 
   const datosPago = getDatosPago();
+  const montoCita = (cita.monto !== undefined && cita.monto !== null) 
+    ? cita.monto 
+    : (cita.paciente && cita.paciente.tarifaDefecto !== undefined && cita.paciente.tarifaDefecto !== null ? cita.paciente.tarifaDefecto : null);
+
   let bloqueDatos = '';
-  if (datosPago.banco || datosPago.clabe || datosPago.titular || datosPago.monto) {
+  if (datosPago.banco || datosPago.clabe || datosPago.titular || (montoCita !== null && montoCita > 0)) {
     bloqueDatos += '\n\n*Datos de transferencia:*';
+    if (montoCita !== null && montoCita > 0) {
+      bloqueDatos += `\n• *Aportación:* $${montoCita.toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN`;
+    }
     if (datosPago.banco) bloqueDatos += `\n• *Banco:* ${datosPago.banco}`;
     if (datosPago.clabe) bloqueDatos += `\n• *CLABE:* ${datosPago.clabe}`;
     if (datosPago.titular) bloqueDatos += `\n• *Titular:* ${datosPago.titular}`;
-    if (datosPago.monto) bloqueDatos += `\n• *Cuota:* ${datosPago.monto}`;
   }
   if (datosPago.enlace) {
     bloqueDatos += `\n• *Pago internacional (PayPal/Tarjeta):* ${datosPago.enlace}`;
   }
 
   if (!bloqueDatos) {
-    bloqueDatos = '\n\n*(Recuerda ingresar a "Datos de Cobro" en el panel para configurar tus datos bancarios automáticos)*';
+    bloqueDatos = '\n\n*(Recuerda ingresar a "Datos de Cobro" en el panel para configurar tus datos bancarios)*';
   }
 
-  const mensaje = encodeURIComponent(`Hola ${nombrePaciente}, te saludo con gusto. Te comparto este mensaje respecto a tu sesión de terapia del ${diaTexto} ${diaNum} de ${mesTexto} a las ${horaTexto}.\n\nPara confirmar y mantener al día tu registro de sesiones, te dejo los datos para tu aportación:${bloqueDatos}\n\nUna vez realizado, te agradecería mucho compartirme tu comprobante por este medio. Si ya lo enviaste, haz caso omiso a este mensaje. ¡Muchas gracias!\n\n- PsicoLau (Laura Gómez)`);
+  const mensaje = encodeURIComponent(`Hola ${nombrePaciente}, te saludo con gusto. Te comparto este mensaje respecto a tu sesión de terapia del ${diaTexto} ${diaNum} de ${mesTexto} a las ${horaLimpia}.\n\nPara confirmar y mantener al día tu registro de sesiones, te dejo los datos para tu aportación:${bloqueDatos}\n\nUna vez realizado, te agradecería mucho compartirme tu comprobante por este medio. Si ya lo enviaste, haz caso omiso a este mensaje. ¡Muchas gracias!\n\n- PsicoLau (Laura Gómez)`);
 
   window.open(`https://wa.me/${telLimpio}?text=${mensaje}`, '_blank');
 };
@@ -95,16 +102,17 @@ window.enviarWhatsAppRecordatorio = function(id, e) {
   const diaNum = d.getDate();
   const mesTexto = meses[d.getMonth()];
   const horaTexto = d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true });
+  const horaLimpia = horaTexto.endsWith('.') ? horaTexto.slice(0, -1) : horaTexto;
 
   const esGrupal = (cita.categoria && cita.categoria.startsWith('[GRUPAL]')) || (cita.paciente && cita.paciente.nombre.startsWith('[GRUPAL]'));
   const nombrePaciente = cita.paciente ? cita.paciente.nombre.replace('[BLOQUEO]', '').replace('[GRUPAL]', '').trim() : (esGrupal ? 'Grupo' : 'Paciente');
   const temaSesion = (cita.categoria || '').replace('[BLOQUEO]', '').replace('[GRUPAL]', '').trim();
 
   if (esGrupal) {
-    let bloqueTema = temaSesion ? `\n📌 *Tema / Módulo:* ${temaSesion}` : '';
-    let bloqueZoomGrupal = (cita.paciente && cita.paciente.enlaceZoom) ? `\n\n📹 *Enlace de Zoom para la sesión:*\n${cita.paciente.enlaceZoom.trim()}` : '';
+    let bloqueTema = temaSesion ? `\n• *Tema / Módulo:* ${temaSesion}` : '';
+    let bloqueZoomGrupal = (cita.paciente && cita.paciente.enlaceZoom) ? `\n\n*Enlace de Zoom para la sesión:*\n${cita.paciente.enlaceZoom.trim()}` : '';
     
-    const mensaje = encodeURIComponent(`Hola a todos, les saludo con gusto. Les comparto los detalles para nuestra sesión de *${nombrePaciente}* de este *${diaTexto} ${diaNum} de ${mesTexto} a las ${horaTexto}*:${bloqueTema}${bloqueZoomGrupal}\n\n¡Nos vemos en la sesión grupal!\n\n- PsicoLau (Laura Gómez)`);
+    const mensaje = encodeURIComponent(`Hola a todos, les saludo con gusto. Les comparto los detalles para nuestra sesión de *${nombrePaciente}* de este *${diaTexto} ${diaNum} de ${mesTexto} a las ${horaLimpia}*:${bloqueTema}${bloqueZoomGrupal}\n\n¡Nos vemos en la sesión grupal!\n\n- PsicoLau (Laura Gómez)`);
     
     if (telLimpio) {
       window.open(`https://wa.me/${telLimpio}?text=${mensaje}`, '_blank');
@@ -116,21 +124,10 @@ window.enviarWhatsAppRecordatorio = function(id, e) {
 
   let bloqueZoom = '';
   if (cita.paciente && cita.paciente.enlaceZoom) {
-    bloqueZoom = `\n\n📹 *Enlace para conectarte (Zoom):*\n${cita.paciente.enlaceZoom.trim()}`;
+    bloqueZoom = `\n\n*Enlace para conectarte (Zoom):*\n${cita.paciente.enlaceZoom.trim()}`;
   }
 
-  const datosPago = getDatosPago();
-  let bloquePagoRecordatorio = '';
-  if (datosPago.incluirEnRecordatorio && (datosPago.banco || datosPago.clabe || datosPago.enlace)) {
-    bloquePagoRecordatorio += '\n\n*Datos para tu aportación:*';
-    if (datosPago.banco) bloquePagoRecordatorio += `\n• *Banco:* ${datosPago.banco}`;
-    if (datosPago.clabe) bloquePagoRecordatorio += `\n• *CLABE:* ${datosPago.clabe}`;
-    if (datosPago.titular) bloquePagoRecordatorio += `\n• *Titular:* ${datosPago.titular}`;
-    if (datosPago.enlace) bloquePagoRecordatorio += `\n• *Pago internacional:* ${datosPago.enlace}`;
-    bloquePagoRecordatorio += '\n_Te agradeceré mucho compartirme tu comprobante previo a la sesión._';
-  }
-
-  const mensaje = encodeURIComponent(`Hola ${nombrePaciente}, te recuerdo con gusto nuestra sesión de terapia agendada para este ${diaTexto} ${diaNum} de ${mesTexto} a las ${horaTexto}.${bloqueZoom}${bloquePagoRecordatorio}\n\nNos vemos pronto.\n\n- PsicoLau (Laura Gómez)`);
+  const mensaje = encodeURIComponent(`Hola ${nombrePaciente}, te recuerdo con gusto nuestra sesión de terapia agendada para este ${diaTexto} ${diaNum} de ${mesTexto} a las ${horaLimpia}.${bloqueZoom}\n\nNos vemos pronto.\n\n- PsicoLau (Laura Gómez)`);
 
   window.open(`https://wa.me/${telLimpio}?text=${mensaje}`, '_blank');
 };

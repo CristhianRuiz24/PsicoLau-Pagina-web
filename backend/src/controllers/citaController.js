@@ -41,8 +41,7 @@ const crearCitaPublica = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: 'Cita solicitada exitosamente. Nos pondremos en contacto pronto.',
-      data: nuevaCita
+      message: 'Cita solicitada exitosamente. Nos pondremos en contacto pronto.'
     });
 
   } catch (error) {

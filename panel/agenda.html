@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <title>Agenda Semanal - PsicoLau</title>
-  <link rel="stylesheet" href="panel.css">
+  <link rel="stylesheet" href="/panel/panel.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
@@ -33,6 +33,10 @@
       <button class="btn btn-header-action" onclick="abrirDirectorioExpedientes()" title="Directorio y búsqueda de Expedientes Clínicos">
         <i class="fa-solid fa-folder-open" style="color: var(--rosa-coral);"></i>
         <span class="btn-text">Expedientes</span>
+      </button>
+      <button class="btn btn-header-action" onclick="abrirModalReporteMensual()" title="Reporte contable mensual de sesiones e ingresos">
+        <i class="fa-solid fa-chart-pie" style="color: #8b5cf6;"></i>
+        <span class="btn-text">Reporte Mensual</span>
       </button>
       <button class="btn btn-header-action" onclick="abrirModalAuditoriaPagos()" title="Auditar citas pendientes de cobro">
         <i class="fa-solid fa-clock-rotate-left" style="color: #ea580c;"></i>
@@ -253,6 +257,25 @@
           </div>
         </div>
 
+        <!-- Monto / Tarifa por Sesión -->
+        <div id="seccionMontoSesion" class="form-group" style="margin-bottom: 0.8rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+            <label for="nc_monto" style="margin: 0; font-weight: 500;">
+              <i class="fa-solid fa-coins" style="color: #eab308; margin-right: 4px;"></i> Tarifa / Monto de la sesión ($ MXN) *
+            </label>
+            <button type="button" class="btn-quick-cortesia" onclick="establecerMontoCortesia()" style="font-size: 0.75rem; padding: 2px 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; color: #475569; font-weight: 600;">
+              <i class="fa-solid fa-gift" style="color: var(--rosa-coral);"></i> $0 Cortesía
+            </button>
+          </div>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <div style="position: relative; flex: 1;">
+              <span style="position: absolute; left: 0.8rem; top: 50%; transform: translateY(-50%); font-weight: 600; color: #64748b;">$</span>
+              <input type="number" id="nc_monto" step="any" min="0" required placeholder="500.00" style="width: 100%; padding: 0.75rem 0.75rem 0.75rem 1.8rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem; font-weight: 600; color: #0f172a;">
+            </div>
+            <span style="font-size: 0.82rem; color: #64748b; font-weight: 600;">MXN</span>
+          </div>
+        </div>
+
         <!-- Notas / Observaciones -->
         <div class="form-group">
           <label for="nc_notas"><i class="fa-solid fa-comment-dots" style="color: var(--turquesa); margin-right: 4px;"></i> Notas / Observaciones (opcional)</label>
@@ -406,18 +429,6 @@
         <div class="form-group">
           <label for="dp_enlace"><i class="fa-brands fa-paypal" style="color: #0284c7; margin-right: 4px;"></i> Enlace Internacional (PayPal / Stripe / Wise)</label>
           <input type="text" id="dp_enlace" placeholder="Ej: paypal.me/PsicoLau o https://buy.stripe.com/..." style="width: 100%;">
-        </div>
-
-        <div class="form-group">
-          <label for="dp_monto"><i class="fa-solid fa-tag" style="color: var(--turquesa); margin-right: 4px;"></i> Cuota sugerida por sesión (Opcional)</label>
-          <input type="text" id="dp_monto" placeholder="Ej: $700 MXN o $45 USD" style="width: 100%;">
-        </div>
-
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.8rem; margin: 1rem 0;">
-          <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.86rem; color: #334155; cursor: pointer; font-weight: 500;">
-            <input type="checkbox" id="dp_incluir_recordatorio" style="margin-top: 3px;">
-            <span><strong>Incluir datos bancarios automáticamente</strong> al final del recordatorio de cita previo a la sesión.</span>
-          </label>
         </div>
 
         <div style="display: flex; gap: 0.8rem; margin-top: 1.2rem;">
@@ -676,6 +687,131 @@
     </div>
   </div>
 
+  <!-- Modal de Reporte Contable Mensual -->
+  <div id="modalReporteMensual" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.65); z-index: 1010; justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(4px);">
+    <div class="modal-dialog-reporte" id="dialogoReporteMensual" style="background: #ffffff; padding: 1.8rem; border-radius: 16px; width: 100%; max-width: 960px; max-height: 92vh; display: flex; flex-direction: column; box-shadow: 0 25px 60px rgba(0,0,0,0.3); transition: all 0.25s ease;">
+      
+      <!-- Cabecera del Modal -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #f1f5f9; padding-bottom: 0.8rem; margin-bottom: 1rem; gap: 1rem;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <i class="fa-solid fa-chart-pie" style="font-size: 1.4rem; color: #8b5cf6;"></i>
+            <h3 style="margin: 0; color: #0f172a; font-size: 1.25rem; font-weight: 800;">Reporte Contable Mensual</h3>
+          </div>
+          <p style="margin: 0.2rem 0 0 0; font-size: 0.84rem; color: #64748b;">Consolidado de sesiones brindadas e ingresos cobrados para contabilidad.</p>
+        </div>
+        <button type="button" class="btn-close-modal" onclick="cerrarModalReporteMensual()" title="Cerrar">&times;</button>
+      </div>
+
+      <!-- Selector de Periodo (Navegación Mensual) y Botones de Exportación -->
+      <div class="reporte-periodo-bar">
+        <div class="reporte-periodo-nav">
+          <button type="button" class="btn-periodo-nav" onclick="cambiarMesReporte(-1)" title="Mes anterior">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          <select id="reporteSelectMes" onchange="actualizarPeriodoReporte()" class="reporte-select">
+            <option value="0">Enero</option>
+            <option value="1">Febrero</option>
+            <option value="2">Marzo</option>
+            <option value="3">Abril</option>
+            <option value="4">Mayo</option>
+            <option value="5">Junio</option>
+            <option value="6">Julio</option>
+            <option value="7">Agosto</option>
+            <option value="8">Septiembre</option>
+            <option value="9">Octubre</option>
+            <option value="10">Noviembre</option>
+            <option value="11">Diciembre</option>
+          </select>
+          <select id="reporteSelectAnio" onchange="actualizarPeriodoReporte()" class="reporte-select">
+            <!-- Generado dinámicamente por JS -->
+          </select>
+          <button type="button" class="btn-periodo-nav" onclick="cambiarMesReporte(1)" title="Mes siguiente">
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+          <button type="button" class="btn-periodo-hoy" onclick="irMesActualReporte()" title="Ir al mes actual">
+            <i class="fa-solid fa-calendar-day"></i> Hoy
+          </button>
+        </div>
+
+        <!-- Acciones de Exportación (Alineadas a la derecha) -->
+        <div class="reporte-export-actions">
+          <button type="button" class="btn-export-wa" id="btnCopiarReporteWA" onclick="copiarReporteParaWhatsApp()" title="Copiar resumen estructurado para WhatsApp">
+            <i class="fa-brands fa-whatsapp"></i> <span>Copiar para WhatsApp</span>
+          </button>
+          <button type="button" class="btn-export-csv" onclick="descargarReporteCSV()" title="Descargar archivo CSV compatible con Excel">
+            <i class="fa-solid fa-file-excel"></i> <span>Descargar Excel (CSV)</span>
+          </button>
+          <button type="button" class="btn-export-print" onclick="imprimirReporteMensual()" title="Imprimir o guardar como PDF formal">
+            <i class="fa-solid fa-print"></i> <span>Imprimir / PDF</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tarjetas Resumen KPIs -->
+      <div class="reporte-kpi-grid">
+        <div class="kpi-card" style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 0.85rem 1rem; border-radius: 10px;">
+          <div style="font-size: 0.78rem; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.2rem;">
+            <i class="fa-solid fa-sack-dollar" style="margin-right: 4px;"></i> Total Cobrado
+          </div>
+          <div id="kpiTotalCobrado" style="font-size: 1.4rem; font-weight: 800; color: #15803d;">$0.00</div>
+          <div id="kpiSubCobrado" style="font-size: 0.75rem; color: #166534; margin-top: 2px;">0 sesiones pagadas</div>
+        </div>
+
+        <div class="kpi-card" style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 0.85rem 1rem; border-radius: 10px;">
+          <div style="font-size: 0.78rem; font-weight: 700; color: #334155; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.2rem;">
+            <i class="fa-solid fa-clipboard-check" style="color: var(--turquesa); margin-right: 4px;"></i> Sesiones Realizadas
+          </div>
+          <div id="kpiTotalSesiones" style="font-size: 1.4rem; font-weight: 800; color: #0f172a;">0</div>
+          <div id="kpiSubSesiones" style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">0 con costo · 0 cortesía ($0)</div>
+        </div>
+
+        <div class="kpi-card" style="background: #fff7ed; border: 1px solid #fed7aa; padding: 0.85rem 1rem; border-radius: 10px;">
+          <div style="font-size: 0.78rem; font-weight: 700; color: #9a3412; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.2rem;">
+            <i class="fa-solid fa-clock-rotate-left" style="color: #ea580c; margin-right: 4px;"></i> Por Cobrar
+          </div>
+          <div id="kpiTotalPorCobrar" style="font-size: 1.4rem; font-weight: 800; color: #ea580c;">$0.00</div>
+          <div id="kpiSubPorCobrar" style="font-size: 0.75rem; color: #9a3412; margin-top: 2px;">0 sesiones pendientes</div>
+        </div>
+
+        <div class="kpi-card" style="background: #faf5ff; border: 1px solid #f3e8ff; padding: 0.85rem 1rem; border-radius: 10px;">
+          <div style="font-size: 0.78rem; font-weight: 700; color: #6b21a8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.2rem;">
+            <i class="fa-solid fa-tag" style="color: #a855f7; margin-right: 4px;"></i> Tarifa Promedio
+          </div>
+          <div id="kpiTarifaPromedio" style="font-size: 1.4rem; font-weight: 800; color: #7e22ce;">$0.00</div>
+          <div style="font-size: 0.75rem; color: #6b21a8; margin-top: 2px;">por sesión con costo</div>
+        </div>
+      </div>
+
+      <!-- Tabla Detallada Desplazable -->
+      <div id="reporteTablaWrapper" class="reporte-table-wrapper">
+        <table class="reporte-table" style="width: 100%; border-collapse: collapse; font-size: 0.86rem; text-align: left;">
+          <thead style="background: #f8fafc; position: sticky; top: 0; z-index: 2; border-bottom: 2px solid #e2e8f0;">
+            <tr>
+              <th style="padding: 0.65rem 0.8rem; font-weight: 700; color: #475569; white-space: nowrap;">Fecha / Hora</th>
+              <th style="padding: 0.65rem 0.8rem; font-weight: 700; color: #475569;">Paciente</th>
+              <th style="padding: 0.65rem 0.8rem; font-weight: 700; color: #475569; text-align: right;">Monto</th>
+              <th style="padding: 0.65rem 0.8rem; font-weight: 700; color: #475569; text-align: center;">Estado Sesión</th>
+              <th style="padding: 0.65rem 0.8rem; font-weight: 700; color: #475569; text-align: center;">Estado Pago</th>
+            </tr>
+          </thead>
+          <tbody id="reporteTablaBody">
+            <!-- Generado dinámicamente por JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pie del Modal -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.8rem; border-top: 1px solid #f1f5f9; margin-top: 0.8rem; flex-wrap: wrap; gap: 0.5rem;">
+        <span style="font-size: 0.8rem; color: #64748b;">
+          <i class="fa-solid fa-shield-halved" style="color: var(--turquesa);"></i> Datos clínicos confidenciales no expuestos · Uso contable oficial
+        </span>
+        <button type="button" class="btn" style="background: var(--gris-calido); width: auto; padding: 0.45rem 1.4rem;" onclick="cerrarModalReporteMensual()">Cerrar</button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- Contenedor Principal de la Agenda -->
 
   <main class="agenda-container">
@@ -694,13 +830,13 @@
   </main>
 
   <!-- Módulos de la Suite Clínica PsicoLau -->
-  <script src="js/config.js"></script>
-  <script src="js/audio.js"></script>
-  <script src="js/whatsapp.js"></script>
-  <script src="js/pagos.js"></script>
-  <script src="js/expedientes.js"></script>
-  <script src="js/agenda.js"></script>
-  <script src="js/app.js"></script>
+  <script src="/panel/js/config.js"></script>
+  <script src="/panel/js/audio.js"></script>
+  <script src="/panel/js/whatsapp.js"></script>
+  <script src="/panel/js/pagos.js"></script>
+  <script src="/panel/js/expedientes.js"></script>
+  <script src="/panel/js/agenda.js"></script>
+  <script src="/panel/js/app.js"></script>
 </body>
 </html>
 

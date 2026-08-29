@@ -130,11 +130,21 @@ function getDatosPago() {
       banco: '',
       titular: '',
       clabe: '',
-      enlace: '',
-      monto: '',
-      incluirEnRecordatorio: false
+      enlace: ''
     };
   } catch (e) {
-    return { banco: '', titular: '', clabe: '', enlace: '', monto: '', incluirEnRecordatorio: false };
+    return { banco: '', titular: '', clabe: '', enlace: '' };
   }
 }
+
+// Helper global de sanitización para prevenir XSS en renderizado dinámico
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+

@@ -62,7 +62,8 @@ const descifrar = (textoCifrado) => {
   try {
     const partes = String(textoCifrado).split(':');
     if (partes.length !== 3) {
-      // Si no tiene el formato esperado, se devuelve el texto original
+      // Si no tiene el formato esperado (p.ej. datos preexistentes en texto plano), devolver texto original con advertencia
+      console.warn('[Crypto] El registro clínico no tiene formato cifrado estándar (iv:tag:cipher). Devolviendo valor original.');
       return textoCifrado;
     }
 

@@ -1,11 +1,7 @@
 const prisma = require('../config/db');
 const { cifrar, descifrar } = require('../utils/crypto');
+const { parseId, notaExpedienteSchema } = require('../utils/validators');
 
-// Helper para validar IDs numéricos enteros positivos
-const parseId = (id) => {
-  const parsed = parseInt(id, 10);
-  return (isNaN(parsed) || parsed <= 0) ? null : parsed;
-};
 
 // Lista de los 8 campos clínicos confidenciales que deben ser cifrados/descifrados
 const CAMPOS_CLINICOS = [
@@ -116,15 +112,8 @@ const crearNotaExpediente = async (req, res) => {
       return res.status(400).json({ success: false, message: 'ID de paciente inválido' });
     }
 
-    const { fechaSesion } = req.body;
-    if (!fechaSesion) {
-      return res.status(400).json({ success: false, message: 'La fecha de la sesión es obligatoria' });
-    }
-
-    const fechaValida = new Date(fechaSesion);
-    if (isNaN(fechaValida.getTime())) {
-      return res.status(400).json({ success: false, message: 'Formato de fecha inválido' });
-    }
+    const validData = notaExpedienteSchema.parse(req.body);
+    const fechaValida = new Date(validData.fechaSesion);
 
     // Verificar que el paciente exista
     const paciente = await prisma.paciente.findUnique({
@@ -136,7 +125,7 @@ const crearNotaExpediente = async (req, res) => {
     }
 
     // Cifrar los 8 campos clínicos
-    const datosCifrados = cifrarPayloadExpediente(req.body);
+    const datosCifrados = cifrarPayloadExpediente(validData);
 
     const nuevaNota = await prisma.expediente.create({
       data: {
@@ -155,6 +144,10 @@ const crearNotaExpediente = async (req, res) => {
       data: notaDescifrada
     });
   } catch (error) {
+    if (error.name === 'ZodError') {
+      const msg = error.errors.map(e => e.message).join(', ');
+      return res.status(400).json({ success: false, message: msg, errors: error.errors });
+    }
     console.error('Error al crear nota de expediente:', error);
     res.status(500).json({ success: false, message: 'Error interno al guardar nota clínica' });
   }
@@ -171,6 +164,8 @@ const editarNotaExpediente = async (req, res) => {
       return res.status(400).json({ success: false, message: 'ID de nota clínica inválido' });
     }
 
+    const validData = notaExpedienteSchema.partial().parse(req.body);
+
     const notaExistente = await prisma.expediente.findUnique({
       where: { id: expedienteId }
     });
@@ -181,16 +176,12 @@ const editarNotaExpediente = async (req, res) => {
 
     const dataToUpdate = {};
 
-    if (req.body.fechaSesion) {
-      const fechaValida = new Date(req.body.fechaSesion);
-      if (isNaN(fechaValida.getTime())) {
-        return res.status(400).json({ success: false, message: 'Formato de fecha inválido' });
-      }
-      dataToUpdate.fechaSesion = fechaValida;
+    if (validData.fechaSesion) {
+      dataToUpdate.fechaSesion = new Date(validData.fechaSesion);
     }
 
     // Cifrar los campos actualizados
-    const datosCifrados = cifrarPayloadExpediente(req.body);
+    const datosCifrados = cifrarPayloadExpediente(validData);
     Object.assign(dataToUpdate, datosCifrados);
 
     const notaActualizada = await prisma.expediente.update({
@@ -206,6 +197,10 @@ const editarNotaExpediente = async (req, res) => {
       data: notaDescifrada
     });
   } catch (error) {
+    if (error.name === 'ZodError') {
+      const msg = error.errors.map(e => e.message).join(', ');
+      return res.status(400).json({ success: false, message: msg, errors: error.errors });
+    }
     console.error('Error al actualizar nota de expediente:', error);
     res.status(500).json({ success: false, message: 'Error interno al actualizar nota clínica' });
   }
@@ -339,6 +334,7 @@ const listarDirectorioPacientes = async (req, res) => {
         telefono: true,
         email: true,
         enlaceZoom: true,
+        tarifaDefecto: true,
         createdAt: true,
         _count: {
           select: {

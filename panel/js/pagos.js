@@ -7,8 +7,6 @@ window.abrirModalDatosPago = function() {
   document.getElementById('dp_titular').value = datos.titular || '';
   document.getElementById('dp_clabe').value = datos.clabe || '';
   document.getElementById('dp_enlace').value = datos.enlace || '';
-  document.getElementById('dp_monto').value = datos.monto || '';
-  document.getElementById('dp_incluir_recordatorio').checked = Boolean(datos.incluirEnRecordatorio);
   
   const modal = document.getElementById('modalDatosPago');
   if (modal) modal.style.display = 'flex';
@@ -25,9 +23,7 @@ window.guardarDatosPago = function(e) {
     banco: document.getElementById('dp_banco').value.trim(),
     titular: document.getElementById('dp_titular').value.trim(),
     clabe: document.getElementById('dp_clabe').value.trim(),
-    enlace: document.getElementById('dp_enlace').value.trim(),
-    monto: document.getElementById('dp_monto').value.trim(),
-    incluirEnRecordatorio: document.getElementById('dp_incluir_recordatorio').checked
+    enlace: document.getElementById('dp_enlace').value.trim()
   };
   localStorage.setItem('psicolau_datos_pago', JSON.stringify(datos));
   window.cerrarModalDatosPago();
@@ -179,4 +175,330 @@ window.togglePagoDirecto = async function(id, e) {
   if (!cita) return;
   const nuevoPago = cita.estado_pago === 'PAGADO' ? 'PENDIENTE' : 'PAGADO';
   await window.cambiarPagoDirecto(id, nuevoPago);
+};
+
+// --- MÓDULO DE REPORTE CONTABLE MENSUAL Y CONTROL DE INGRESOS ---
+
+let mesReporteSeleccionado = new Date().getMonth();
+let anioReporteSeleccionado = new Date().getFullYear();
+
+function actualizarSelectorAnios() {
+  const anioSelect = document.getElementById('reporteSelectAnio');
+  if (!anioSelect) return;
+  const anioActual = new Date().getFullYear();
+  const minAnio = Math.min(2024, anioReporteSeleccionado);
+  const maxAnio = Math.max(anioActual + 1, anioReporteSeleccionado);
+  
+  anioSelect.innerHTML = '';
+  for (let a = minAnio; a <= maxAnio; a++) {
+    const opt = document.createElement('option');
+    opt.value = a;
+    opt.textContent = a;
+    if (a === anioReporteSeleccionado) opt.selected = true;
+    anioSelect.appendChild(opt);
+  }
+}
+
+window.abrirModalReporteMensual = function() {
+  const modal = document.getElementById('modalReporteMensual');
+  if (modal) modal.style.display = 'flex';
+
+  actualizarSelectorAnios();
+
+  const mesSelect = document.getElementById('reporteSelectMes');
+  if (mesSelect) {
+    mesSelect.value = String(mesReporteSeleccionado);
+  }
+
+  renderReporteMensual();
+};
+
+window.cerrarModalReporteMensual = function() {
+  const modal = document.getElementById('modalReporteMensual');
+  if (modal) modal.style.display = 'none';
+};
+
+window.cambiarMesReporte = function(delta) {
+  mesReporteSeleccionado += delta;
+  if (mesReporteSeleccionado < 0) {
+    mesReporteSeleccionado = 11;
+    anioReporteSeleccionado -= 1;
+  } else if (mesReporteSeleccionado > 11) {
+    mesReporteSeleccionado = 0;
+    anioReporteSeleccionado += 1;
+  }
+
+  actualizarSelectorAnios();
+
+  const mesSelect = document.getElementById('reporteSelectMes');
+  const anioSelect = document.getElementById('reporteSelectAnio');
+  if (mesSelect) mesSelect.value = String(mesReporteSeleccionado);
+  if (anioSelect) anioSelect.value = String(anioReporteSeleccionado);
+
+  renderReporteMensual();
+};
+
+window.actualizarPeriodoReporte = function() {
+  const mesSelect = document.getElementById('reporteSelectMes');
+  const anioSelect = document.getElementById('reporteSelectAnio');
+  if (mesSelect) mesReporteSeleccionado = parseInt(mesSelect.value, 10);
+  if (anioSelect) anioReporteSeleccionado = parseInt(anioSelect.value, 10);
+  renderReporteMensual();
+};
+
+window.irMesActualReporte = function() {
+  const hoy = new Date();
+  mesReporteSeleccionado = hoy.getMonth();
+  anioReporteSeleccionado = hoy.getFullYear();
+
+  actualizarSelectorAnios();
+
+  const mesSelect = document.getElementById('reporteSelectMes');
+  const anioSelect = document.getElementById('reporteSelectAnio');
+  if (mesSelect) mesSelect.value = String(mesReporteSeleccionado);
+  if (anioSelect) anioSelect.value = String(anioReporteSeleccionado);
+
+  renderReporteMensual();
+};
+
+function obtenerCitasReportePeriodo() {
+  if (!Array.isArray(citasCache)) return [];
+
+  return citasCache.filter(c => {
+    if (c.estado_cita === 'CANCELADA') return false;
+    const esBloqueo = (c.categoria && c.categoria.startsWith('[BLOQUEO]')) || (c.paciente && c.paciente.nombre && c.paciente.nombre.startsWith('[BLOQUEO]'));
+    if (esBloqueo) return false;
+
+    const esGrupal = (c.categoria && c.categoria.startsWith('[GRUPAL]')) || (c.paciente && c.paciente.nombre && c.paciente.nombre.startsWith('[GRUPAL]')) || (c.paciente && c.paciente.email && c.paciente.email.startsWith('grupal-'));
+    if (esGrupal) return false;
+
+    const d = new Date(c.fechaHora);
+    return d.getMonth() === mesReporteSeleccionado && d.getFullYear() === anioReporteSeleccionado;
+  }).sort((a, b) => new Date(a.fechaHora) - new Date(b.fechaHora));
+}
+
+function renderReporteMensual() {
+  const citasMes = obtenerCitasReportePeriodo();
+  const tbody = document.getElementById('reporteTablaBody');
+
+  let totalSesiones = citasMes.length;
+  let sesionesConCosto = 0;
+  let sesionesCortesia = 0;
+  let totalCobrado = 0;
+  let totalPorPagar = 0;
+  let sumaMontosConCosto = 0;
+  let countPendientes = 0;
+  let countPagadas = 0;
+
+  citasMes.forEach(c => {
+    const monto = typeof c.monto === 'number' ? c.monto : 500;
+    if (monto === 0) {
+      sesionesCortesia++;
+    } else {
+      sesionesConCosto++;
+      sumaMontosConCosto += monto;
+    }
+
+    if (c.estado_pago === 'PAGADO') {
+      totalCobrado += monto;
+      countPagadas++;
+    } else {
+      totalPorPagar += monto;
+      countPendientes++;
+    }
+  });
+
+  const tarifaPromedio = sesionesConCosto > 0 ? (sumaMontosConCosto / sesionesConCosto) : 0;
+
+  // Actualizar Tarjetas KPIs
+  const kpiCobrado = document.getElementById('kpiTotalCobrado');
+  const kpiSubCobrado = document.getElementById('kpiSubCobrado');
+  const kpiSesiones = document.getElementById('kpiTotalSesiones');
+  const kpiSubSesiones = document.getElementById('kpiSubSesiones');
+  const kpiPorCobrar = document.getElementById('kpiTotalPorCobrar');
+  const kpiSubPorCobrar = document.getElementById('kpiSubPorCobrar');
+  const kpiPromedio = document.getElementById('kpiTarifaPromedio');
+
+  const formatter = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
+
+  if (kpiCobrado) kpiCobrado.textContent = formatter.format(totalCobrado);
+  if (kpiSubCobrado) kpiSubCobrado.textContent = `${countPagadas} sesión${countPagadas === 1 ? '' : 'es'} pagada${countPagadas === 1 ? '' : 's'}`;
+  
+  if (kpiSesiones) kpiSesiones.textContent = totalSesiones;
+  if (kpiSubSesiones) kpiSubSesiones.textContent = `${sesionesConCosto} con costo · ${sesionesCortesia} cortesía ($0)`;
+
+  if (kpiPorCobrar) kpiPorCobrar.textContent = formatter.format(totalPorPagar);
+  if (kpiSubPorCobrar) kpiSubPorCobrar.textContent = `${countPendientes} sesión${countPendientes === 1 ? '' : 'es'} pendiente${countPendientes === 1 ? '' : 's'}`;
+
+  if (kpiPromedio) kpiPromedio.textContent = formatter.format(tarifaPromedio);
+
+  if (!tbody) return;
+
+  if (citasMes.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align: center; padding: 3rem 1rem; color: #64748b;">
+          <i class="fa-solid fa-calendar-xmark" style="font-size: 2rem; color: #cbd5e1; margin-bottom: 0.5rem; display: block;"></i>
+          <strong style="color: #334155; font-size: 1rem;">No hay sesiones registradas en este periodo</strong>
+          <p style="font-size: 0.85rem; margin: 0.3rem 0 0 0;">Las citas agendadas y realizadas aparecerán automáticamente aquí.</p>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+  let html = '';
+  citasMes.forEach(c => {
+    const d = new Date(c.fechaHora);
+    const fechaTxt = `${diasSemana[d.getDay()]} ${d.getDate()} ${meses[d.getMonth()]}`;
+    const horaTxt = d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true });
+    const nombre = c.paciente ? c.paciente.nombre.replace('[GRUPAL]', '').trim() : 'Paciente';
+    const monto = typeof c.monto === 'number' ? c.monto : 500;
+    const esPagado = c.estado_pago === 'PAGADO';
+    const esRealizada = c.estado_cita === 'REALIZADA' || c.estado_cita === 'CONFIRMADA';
+
+    html += `
+      <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s;">
+        <td style="padding: 0.65rem 0.8rem; font-weight: 600; color: #0f172a; white-space: nowrap;">
+          <span>${fechaTxt}</span> <span style="font-size: 0.8rem; color: #64748b; font-weight: 500;">· ${horaTxt}</span>
+        </td>
+        <td style="padding: 0.65rem 0.8rem; font-weight: 600; color: #334155;">
+          ${nombre}
+        </td>
+        <td style="padding: 0.65rem 0.8rem; text-align: right; font-weight: 800; color: ${monto === 0 ? '#64748b' : '#0f172a'};">
+          ${monto === 0 ? '<span style="background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 4px; font-size: 0.78rem;">$0 Cortesía</span>' : formatter.format(monto)}
+        </td>
+        <td style="padding: 0.65rem 0.8rem; text-align: center;">
+          ${esRealizada 
+            ? `<span style="font-size: 0.72rem; padding: 2px 7px; border-radius: 4px; background: #dcfce7; color: #15803d; font-weight: 700;">✓ Realizada</span>`
+            : `<span style="font-size: 0.72rem; padding: 2px 7px; border-radius: 4px; background: #fef9c3; color: #854d0e; font-weight: 700;">Agendada</span>`
+          }
+        </td>
+        <td style="padding: 0.65rem 0.8rem; text-align: center;">
+          <button type="button" onclick="togglePagoDesdeReporte(${c.id})" title="Clic para alternar estado de pago" style="cursor: pointer; border: none; background: none; padding: 0;">
+            ${esPagado 
+              ? `<span style="font-size: 0.72rem; padding: 3px 8px; border-radius: 4px; background: #dcfce7; color: #166534; font-weight: 700; display: inline-flex; align-items: center; gap: 3px;"><i class="fa-solid fa-circle-check"></i> Pagado</span>`
+              : `<span style="font-size: 0.72rem; padding: 3px 8px; border-radius: 4px; background: #fee2e2; color: #991b1b; font-weight: 700; display: inline-flex; align-items: center; gap: 3px;"><i class="fa-solid fa-clock"></i> Por pagar</span>`
+            }
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+
+  tbody.innerHTML = html;
+}
+
+window.togglePagoDesdeReporte = async function(id) {
+  const cita = citasCache.find(c => c.id === id);
+  if (!cita) return;
+  const nuevoPago = cita.estado_pago === 'PAGADO' ? 'PENDIENTE' : 'PAGADO';
+  await window.cambiarPagoDirecto(id, nuevoPago);
+  renderReporteMensual();
+};
+
+// Exportador a WhatsApp / Mensaje de texto estructurado
+window.copiarReporteParaWhatsApp = function() {
+  const citasMes = obtenerCitasReportePeriodo();
+  const mesesNombres = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  const mesNombre = mesesNombres[mesReporteSeleccionado];
+  const anio = anioReporteSeleccionado;
+
+  let totalSesiones = citasMes.length;
+  let sesionesConCosto = 0;
+  let sesionesCortesia = 0;
+  let totalCobrado = 0;
+  let totalPorPagar = 0;
+  let countPagadas = 0;
+  let countPendientes = 0;
+
+  const lineasSesiones = [];
+  const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
+  citasMes.forEach(c => {
+    const d = new Date(c.fechaHora);
+    const fechaTxt = `${diasSemana[d.getDay()]} ${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')} ${d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true })}`;
+    const nombre = c.paciente ? c.paciente.nombre.replace('[GRUPAL]', '').trim() : 'Paciente';
+    const monto = typeof c.monto === 'number' ? c.monto : 500;
+    const esPagado = c.estado_pago === 'PAGADO';
+
+    if (monto === 0) sesionesCortesia++; else sesionesConCosto++;
+    if (esPagado) { totalCobrado += monto; countPagadas++; } else { totalPorPagar += monto; countPendientes++; }
+
+    const estadoPagoTxt = esPagado ? 'Pagado' : '⏳ Por Pagar';
+    const montoTxt = monto === 0 ? '$0 (Cortesía)' : `$${monto.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
+    lineasSesiones.push(`• ${fechaTxt} — ${nombre}: ${montoTxt} [${estadoPagoTxt}]`);
+  });
+
+  const texto = `📊 *REPORTE CONTABLE PSICOLAU — ${mesNombre.toUpperCase()} ${anio}*
+Psicóloga: Ana Laura Gómez Díaz
+
+*RESUMEN DEL PERIODO:*
+• Total de sesiones brindadas: ${totalSesiones} (${sesionesConCosto} con costo · ${sesionesCortesia} de cortesía)
+• Total de ingresos cobrados: $${totalCobrado.toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN (${countPagadas} sesiones pagadas)
+• Total pendiente por cobrar: $${totalPorPagar.toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN (${countPendientes} sesiones pendientes)
+
+*DESGLOSE DE SESIONES:*
+${lineasSesiones.length > 0 ? lineasSesiones.join('\n') : 'No se registraron sesiones en este mes.'}
+`;
+
+  navigator.clipboard.writeText(texto).then(() => {
+    const btn = document.getElementById('btnCopiarReporteWA');
+    if (btn) {
+      const orig = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>¡Copiado!</span>';
+      btn.style.background = '#059669';
+      setTimeout(() => {
+        btn.innerHTML = orig;
+        btn.style.background = '#16a34a';
+      }, 2500);
+    }
+  }).catch(() => {
+    alert('No se pudo copiar automáticamente. Por favor copia el texto manualmente.');
+  });
+};
+
+// Exportador a archivo CSV para Excel
+window.descargarReporteCSV = function() {
+  const citasMes = obtenerCitasReportePeriodo();
+  const mesesNombres = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  const mesNombre = mesesNombres[mesReporteSeleccionado];
+  const anio = anioReporteSeleccionado;
+
+  let csvContent = '\uFEFF'; // BOM para que Excel respete caracteres UTF-8 (acentos, ñ)
+  csvContent += 'Fecha,Hora,Paciente,Monto_MXN,Estado_Pago,Estado_Sesion\n';
+
+  citasMes.forEach(c => {
+    const d = new Date(c.fechaHora);
+    const fecha = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const hora = d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: false });
+    const nombre = `"${(c.paciente ? c.paciente.nombre.replace('[GRUPAL]', '').trim() : 'Paciente').replace(/"/g, '""')}"`;
+    const monto = typeof c.monto === 'number' ? c.monto : 500;
+    const estadoPago = c.estado_pago || 'PENDIENTE';
+    const estadoSesion = c.estado_cita || 'PENDIENTE';
+
+    csvContent += `${fecha},${hora},${nombre},${monto},${estadoPago},${estadoSesion}\n`;
+  });
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `Reporte_PsicoLau_${mesNombre}_${anio}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
+// Impresión y guardado en PDF
+window.imprimirReporteMensual = function() {
+  document.body.classList.add('printing-reporte-mensual');
+  window.print();
+  setTimeout(() => {
+    document.body.classList.remove('printing-reporte-mensual');
+  }, 1000);
 };

@@ -16,15 +16,16 @@ model Usuario {
 }
 
 model Paciente {
-  id          Int          @id @default(autoincrement())
-  nombre      String
-  telefono    String
-  email       String       @unique
-  enlaceZoom  String?
-  citas       Cita[]
-  expedientes Expediente[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id            Int          @id @default(autoincrement())
+  nombre        String
+  telefono      String
+  email         String       @unique
+  enlaceZoom    String?
+  tarifaDefecto Float?       @default(500)
+  citas         Cita[]
+  expedientes   Expediente[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 }
 
 model Expediente {
@@ -57,11 +58,15 @@ model Cita {
   fechaHora        DateTime
   categoria        String?            
   color            String?            @default("#3EB8CC")
+  monto            Float              @default(500)
   estado_cita      EstadoCita         @default(PENDIENTE)
   estado_pago      EstadoPago         @default(PENDIENTE)
   notificaciones   LogNotificacion[]
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
+
+  @@index([pacienteId])
+  @@index([fechaHora])
 }
 
 model LogNotificacion {
@@ -71,6 +76,8 @@ model LogNotificacion {
   tipo        TipoNotificacion
   fecha_envio DateTime         @default(now())
   estado      String           
+
+  @@index([citaId])
 }
 
 enum EstadoCita {

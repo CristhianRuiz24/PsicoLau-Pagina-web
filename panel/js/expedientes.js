@@ -68,7 +68,7 @@ window.abrirDirectorioExpedientes = async function() {
 
     if (res.status === 401) {
       localStorage.removeItem('psicolau_token');
-      window.location.href = 'index.html';
+      window.location.href = '/panel/index.html';
       return;
     }
 
@@ -239,7 +239,7 @@ window.abrirExpedientePorId = async function(pacienteId) {
 
     if (res.status === 401) {
       localStorage.removeItem('psicolau_token');
-      window.location.href = 'index.html';
+      window.location.href = '/panel/index.html';
       return;
     }
 

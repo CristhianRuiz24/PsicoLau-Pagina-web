@@ -4,7 +4,7 @@
 if (window.location.pathname.includes('agenda') || document.getElementById('easyTableWrapper')) {
   const token = localStorage.getItem('psicolau_token');
   if (!token) {
-    window.location.href = 'index.html';
+    window.location.href = '/panel/index.html';
   } else {
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
@@ -39,7 +39,7 @@ async function initAgenda() {
     
     if (response.status === 401) {
       localStorage.removeItem('psicolau_token');
-      window.location.href = 'index.html';
+      window.location.href = '/panel/index.html';
       return;
     }
     
@@ -194,14 +194,14 @@ window.filtrarCitasEnTabla = function(query) {
             <div style="flex: 1; min-width: 0; padding-right: 8px;">
               <div class="item-title">
                 <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${esCancelada ? '#94a3b8' : color}; flex-shrink: 0;"></span>
-                <span style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; ${esCancelada ? 'text-decoration: line-through; opacity: 0.75;' : ''}">${esBloqueo ? `<i class="fa-solid fa-ban" style="color: #ef4444;"></i> ${nombre}` : nombre}</span>
+                <span style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; ${esCancelada ? 'text-decoration: line-through; opacity: 0.75;' : ''}">${esBloqueo ? `<i class="fa-solid fa-ban" style="color: #ef4444;"></i> ${escapeHtml(nombre)}` : escapeHtml(nombre)}</span>
                 ${esCancelada ? `<span style="font-size: 0.65rem; padding: 1px 5px; border-radius: 4px; background: #fee2e2; color: #b91c1c; font-weight: 700;">✕ Cancelada / Borrada</span>` : ''}
                 ${esCompletada && !esBloqueo && !esCancelada ? `<span style="font-size: 0.65rem; padding: 1px 5px; border-radius: 4px; background: #dcfce7; color: #15803d; font-weight: 700;">✓ Realizada</span>` : ''}
                 ${!esBloqueo && !esCancelada ? `<span style="font-size: 0.65rem; padding: 1px 5px; border-radius: 4px; background: ${esPagado ? '#dcfce7' : '#ffedd5'}; color: ${esPagado ? '#166534' : '#9a3412'};">${esPagado ? 'Pagado' : 'Por pagar'}</span>` : ''}
               </div>
               <div class="item-meta">
                 <i class="fa-solid fa-calendar-day" style="margin-right: 3px; color: var(--turquesa);"></i> ${fechaTxt}
-                ${notas ? ` · <span style="color: #334155; font-weight: 500;">${notas}</span>` : ''}
+                ${notas ? ` · <span style="color: #334155; font-weight: 500;">${escapeHtml(notas)}</span>` : ''}
               </div>
             </div>
             <div style="display: flex; align-items: center; gap: 4px;">
@@ -258,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (logoutBtn) {
     logoutBtn.addEventListener('click', () => {
       localStorage.removeItem('psicolau_token');
-      window.location.href = 'index.html';
+      window.location.href = '/panel/index.html';
     });
   }
 
@@ -344,6 +344,21 @@ document.addEventListener('DOMContentLoaded', () => {
         emailFinal = document.getElementById('nc_email').value.trim();
       }
 
+      const montoVal = document.getElementById('nc_monto')?.value;
+      let montoFinal = 500;
+      if (tipoEfectivo === 'BLOQUEO' || tipoEfectivo === 'GRUPAL') {
+        montoFinal = 0;
+      } else if (montoVal !== undefined && montoVal !== null && montoVal !== '') {
+        const parsed = parseFloat(montoVal);
+        if (isNaN(parsed) || parsed < 0) {
+          alert('Por favor introduce un monto de tarifa válido (mayor o igual a 0).');
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-check" style="margin-right: 4px;"></i> Confirmar y Guardar';
+          return;
+        }
+        montoFinal = parsed;
+      }
+
       const data = {
         nombre: nombre,
         email: emailFinal,
@@ -352,7 +367,8 @@ document.addEventListener('DOMContentLoaded', () => {
         fechaHora: fechaHora,
         categoria: notas,
         notas: notas,
-        color: document.getElementById('nc_color').value
+        color: document.getElementById('nc_color').value,
+        monto: montoFinal
       };
 
       if (!esEdicion && document.getElementById('nc_repetir') && document.getElementById('nc_repetir').checked) {

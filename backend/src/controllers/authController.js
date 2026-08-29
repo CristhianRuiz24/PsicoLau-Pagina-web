@@ -10,9 +10,11 @@ const login = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Email y contraseña son requeridos' });
     }
 
-    // Buscar usuaria en la base de datos
-    const usuario = await prisma.usuario.findUnique({
-      where: { email }
+    const emailNormalizado = String(email).trim().toLowerCase();
+
+    // Buscar usuaria en la base de datos (búsqueda insensible a mayúsculas)
+    const usuario = await prisma.usuario.findFirst({
+      where: { email: { equals: emailNormalizado, mode: 'insensitive' } }
     });
 
     if (!usuario) {
