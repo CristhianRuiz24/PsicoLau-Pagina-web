@@ -1,28 +1,61 @@
-const nodemailer = require('nodemailer');
 const { escapeHtml } = require('../utils/sanitizer');
 
-// Configuración para usar Resend (o cualquier otro SMTP compatible)
-const transporter = nodemailer.createTransport({
-  host: 'smtp.resend.com',
-  secure: true,
-  port: 465,
-  auth: {
-    user: 'resend',
-    pass: process.env.RESEND_API_KEY,
-  },
-});
-
-// Remitente y Destinatario
-const REMITENTE = process.env.REMITENTE || 'PsicoLau Web <contacto@psicolau.com>';
+// Remitente y Destinatario oficial
+const REMITENTE = process.env.REMITENTE || 'PsicoLau <contacto@psicolau.com>';
 const CORREO_DESTINO = process.env.CORREO_LAURA || 'lince_lg@yahoo.com.mx';
+
+/**
+ * Envío de correos mediante la API REST oficial de Resend (HTTPS / Puerto 443).
+ * Evita bloqueos de puertos SMTP (465/587) en proveedores como Render y responde en <200ms.
+ */
+const enviarEmailResend = async ({ to, subject, html, replyTo }) => {
+  const apiKey = process.env.RESEND_API_KEY ? process.env.RESEND_API_KEY.trim() : '';
+  if (!apiKey) {
+    console.warn('[Resend API] RESEND_API_KEY no está configurada en las variables de entorno. Omitiendo envío de correo.');
+    return { success: false, message: 'RESEND_API_KEY no configurada' };
+  }
+
+  const payload = {
+    from: REMITENTE,
+    to: Array.isArray(to) ? to : [to],
+    subject,
+    html
+  };
+
+  if (replyTo && String(replyTo).trim().length > 0) {
+    payload.reply_to = String(replyTo).trim();
+  }
+
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('[Resend API Error]:', data);
+      throw new Error(data.message || `Error en Resend API (${response.status})`);
+    }
+
+    return data;
+  } catch (error) {
+    console.error('[Resend Network Error]:', error.message);
+    throw error;
+  }
+};
 
 const enviarConfirmacionPaciente = async (emailPaciente, nombrePaciente, fechaHora) => {
   try {
     const sNombre = escapeHtml(nombrePaciente);
     const sFecha = escapeHtml(new Date(fechaHora).toLocaleString('es-MX'));
 
-    const mailOptions = {
-      from: REMITENTE,
+    return await enviarEmailResend({
       to: emailPaciente,
       subject: 'Solicitud de Cita Recibida - PsicoLau',
       html: `
@@ -31,11 +64,9 @@ const enviarConfirmacionPaciente = async (emailPaciente, nombrePaciente, fechaHo
         <p>La Lic. Laura Gómez revisará la solicitud y te contactaremos a la brevedad para confirmar y enviarte los detalles de pago.</p>
         <p>Gracias por confiar en PsicoLau.</p>
       `
-    };
-    return await transporter.sendMail(mailOptions);
+    });
   } catch (error) {
-    // Si Resend bloquea por sandbox de dominio no verificado, loguear para no romper el flujo
-    console.warn('Aviso: No se pudo enviar confirmación al paciente debido a restricciones de sandbox en Resend:', error.message);
+    console.warn('Aviso: No se pudo enviar confirmación al paciente:', error.message);
   }
 };
 
@@ -47,10 +78,11 @@ const enviarAvisoLaura = async (citaDetalles) => {
   const sFecha = escapeHtml(new Date(fechaHora).toLocaleString('es-MX'));
   const sCategoria = escapeHtml(categoria || 'No especificada');
 
-  const mailOptions = {
-    from: REMITENTE,
+  const replyTo = paciente.email && !paciente.email.startsWith('sin-email-') ? paciente.email : undefined;
+
+  return enviarEmailResend({
     to: CORREO_DESTINO,
-    replyTo: paciente.email && !paciente.email.startsWith('sin-email-') ? paciente.email : undefined,
+    replyTo,
     subject: `Nueva solicitud de cita - ${sNombre}`,
     html: `
       <h2>Nueva solicitud de cita</h2>
@@ -63,8 +95,7 @@ const enviarAvisoLaura = async (citaDetalles) => {
       </ul>
       <p>Revisa el panel de administración para confirmarla.</p>
     `
-  };
-  return transporter.sendMail(mailOptions);
+  });
 };
 
 const enviarMensajeContacto = async (datos) => {
@@ -76,8 +107,7 @@ const enviarMensajeContacto = async (datos) => {
   const sMensaje = escapeHtml(mensaje);
   const telLimpio = telefono ? escapeHtml(telefono.replace(/\D/g, '')) : '';
 
-  const mailOptions = {
-    from: REMITENTE,
+  return enviarEmailResend({
     to: CORREO_DESTINO,
     replyTo: email,
     subject: `Nuevo mensaje de contacto en web - ${sNombre}`,
@@ -99,8 +129,7 @@ const enviarMensajeContacto = async (datos) => {
         </p>
       </div>
     `
-  };
-  return transporter.sendMail(mailOptions);
+  });
 };
 
 module.exports = {
