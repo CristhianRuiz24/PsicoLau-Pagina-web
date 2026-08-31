@@ -744,11 +744,6 @@ textarea:focus-visible {
   border-left-color: var(--color-primary);
 }
 
-.talk-card-featured {
-  grid-column: 1 / -1;
-  background: linear-gradient(135deg, #ffffff 0%, #fdfbf9 100%);
-  border-left: 5px solid var(--color-secondary);
-}
 
 .protocols-grid {
   display: grid;
