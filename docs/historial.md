@@ -173,4 +173,21 @@ Este documento recopila la bitácora histórica completa de sesiones, cambios ar
   - **Ventana de Expedientes Clínicos Optimizada (97vh)**: Compactación de encabezado y pie de expedientes para liberar más del 70% de la pantalla para lectura de sesiones en dispositivos móviles.
   - **Edición In-Place de Notas de Sesión**: Reubicación dinámica del formulario de notas clínicas directamente debajo de la tarjeta seleccionada al pulsar editar (✏️), eliminando saltos bruscos hacia arriba y preservando el cifrado AES-256-GCM y sincronización con PostgreSQL.
   - **Módulos de Contabilidad y Auditoría de Pagos Responsivos**: Cuadrícula compacta de exportación en el reporte mensual y tarjetas apiladas con botones de cobro 50/50 en la auditoría de pagos.
+- **2026-08-31 (Sesión 33 - Integración Completa de Experiencia Profesional, Protocolos Propios y Conferencias en Web Pública)**:
+  - **Práctica Clínica y Experiencia Profesional en `experiencia.html`**:
+    - Creación de cuadrícula visual con tarjetas estructuradas para *Psicóloga Clínica en la Práctica Privada (PsicoLau 2023-Presente)*, *Psicoterapeuta y Facilitadora Grupal (Fundación Ana Bella 2022-2025)*, *Diseño y Aplicación de Protocolos Clínicos Propios (2023-Presente)*, *Asesoría y Colaboración Institucional en Campañas Públicas y Educativas* y *Docente Invitada y Conferencista (2022-Presente)*.
+  - **5 Protocolos de Intervención Clínicos Desarrollados**:
+    - Fichas estructuradas con distintivos temáticos (*Neuroafirmativo*, *12 Sesiones*, *Trauma Relacional*, *Duelo Ambiguo*, *Apego Seguro y Autonomía*):
+      1. *Protocolo de abordaje para autistas de diagnóstico tardío* (des-enmascaramiento, regulación sensorial, prevención de iatrogenia, individual y grupal).
+      2. *Protocolo de abordaje terapéutico para neurodivergentes supervivientes de violencia de pareja* (análisis funcional, procesamiento de trauma relacional, anti-revictimización).
+      3. *Protocolo conductual para víctimas de violencia relacional* (intervención estructurada de 12 sesiones, análisis funcional y prevención de recaídas).
+      4. *Protocolo terapéutico grupal para víctimas de violencia vicaria* (12 sesiones, duelo ambiguo, validación del vínculo materno en Fundación Ana Bella).
+      5. *Protocolo clínico basado en el Manual de relaciones saludables* (intervención estructurada para análisis de apego, autonomía y límites aplicable a TEA, TDAH y población general).
+  - **Catálogo de 15 Conferencias, Ponencias y Talleres Impartidos**:
+    - Tarjetas con etiquetas de sede, año y tipo de evento (Universidad Autónoma de Tlaxcala, Museo Leonora Carrington en Xilitla SLP, SNDIF Nacional, CCH Naucalpan UNAM, Seminario Latinoamericano en Colombia, Festival Punkytud, Centros Penitenciarios Fundación Plan B, Grupo Santa Rosa y festivales artísticos).
+  - **Estilos y Componentes Responsivos (`css/style.css`)**:
+    - Clases utilitarias y componentes modulares: `.badge-tag`, `.exp-role-card`, `.protocol-card`, `.protocol-card-featured` y `.talk-card` con contrastes calibrados (WCAG 2.1 AA) y paleta de la marca (Rosa `#EC5E86`, Turquesa `#1E94A8`, Fondo `#FDFBF9`).
+  - **Optimización de SEO y Datos Estructurados**:
+    - Enriquecimiento del Schema.org JSON-LD en `experiencia.html` para indexación semántica en motores de búsqueda.
+
 
