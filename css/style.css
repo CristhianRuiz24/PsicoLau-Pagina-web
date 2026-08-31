@@ -640,15 +640,49 @@ textarea:focus-visible {
   color: var(--color-text);
 }
 
-.experience-grid {
-  display: grid;
-  grid-template-columns: 1fr;
+.experience-layout {
+  display: flex;
+  flex-direction: column;
   gap: 2rem;
   margin-top: 2rem;
 }
+
+.exp-card-featured {
+  background: var(--color-white);
+  border-radius: var(--border-radius);
+  padding: 2.2rem;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.04);
+  border-left: 6px solid var(--color-primary);
+  border-top: 1px solid rgba(236, 94, 134, 0.15);
+  transition: var(--transition);
+}
+.exp-card-featured:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(236, 94, 134, 0.1);
+}
+
+.exp-featured-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+@media (min-width: 850px) {
+  .exp-featured-grid {
+    grid-template-columns: 1.2fr 1fr;
+    gap: 2.5rem;
+    align-items: center;
+  }
+}
+
+.exp-cards-subgrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
 @media (min-width: 768px) {
-  .experience-grid {
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  .exp-cards-subgrid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -669,24 +703,51 @@ textarea:focus-visible {
 .exp-role-card.teal-top {
   border-top-color: var(--color-secondary);
 }
-.exp-role-header {
+
+.exp-role-meta {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.75rem;
 }
+
 .exp-role-title {
   font-size: 1.25rem;
   color: var(--color-primary);
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.5rem;
   font-family: var(--font-heading);
+  line-height: 1.35;
 }
 .exp-role-org {
   font-weight: 600;
   color: var(--color-secondary);
   font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.exp-highlight-box {
+  background: rgba(30, 148, 168, 0.05);
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  line-height: 1.55;
+  margin-top: auto;
+  border-left: 3px solid var(--color-secondary);
+}
+.exp-highlight-box.pink-border {
+  background: rgba(236, 94, 134, 0.05);
+  border-left-color: var(--color-primary);
+}
+
+.talk-card-featured {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, #ffffff 0%, #fdfbf9 100%);
+  border-left: 5px solid var(--color-secondary);
 }
 
 .protocols-grid {

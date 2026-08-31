@@ -189,5 +189,9 @@ Este documento recopila la bitácora histórica completa de sesiones, cambios ar
     - Clases utilitarias y componentes modulares: `.badge-tag`, `.exp-role-card`, `.protocol-card`, `.protocol-card-featured` y `.talk-card` con contrastes calibrados (WCAG 2.1 AA) y paleta de la marca (Rosa `#EC5E86`, Turquesa `#1E94A8`, Fondo `#FDFBF9`).
   - **Optimización de SEO y Datos Estructurados**:
     - Enriquecimiento del Schema.org JSON-LD en `experiencia.html` para indexación semántica en motores de búsqueda.
+  - **Armonización Visual y Simetría de Cuadrículas en Escritorio**:
+    - Reestructuración de la sección con una tarjeta principal destacada a todo el ancho para la práctica privada de PsicoLau (distribución interna en 2 columnas: servicios clínicos individuales a la izquierda y recuadro de metodología/enfoque a la derecha).
+    - Cuadrícula inferior simétrica de 2x2 para las 4 áreas restantes (*Fundación Ana Bella*, *Innovación Clínica*, *Campañas Públicas* y *Docencia*), eliminando el hueco asimétrico en pantallas de escritorio.
+    - Conferencia Magistral en UATx configurada como tarjeta destacada a todo el ancho al inicio del catálogo de ponencias para lograr una distribución balanceada de 1 + 14 (7 pares simétricos).
 
 
