@@ -385,7 +385,7 @@
       </div>
 
       <!-- Pie del Modal -->
-      <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.8rem; border-top: 1px solid #f1f5f9;">
+      <div class="modal-auditoria-footer" style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.8rem; border-top: 1px solid #f1f5f9;">
         <button type="button" class="btn" style="background: var(--gris-calido); width: auto; padding: 0.5rem 1.4rem;" onclick="cerrarModalAuditoriaPagos()">Cerrar</button>
         <button type="button" class="btn" style="background: var(--turquesa); width: auto; padding: 0.5rem 1.2rem; font-size: 0.85rem;" onclick="cerrarModalAuditoriaPagos(); abrirModalDatosPago();">
           <i class="fa-solid fa-gear" style="margin-right: 4px;"></i> Configurar Datos de Pago
@@ -476,11 +476,11 @@
 
   <!-- Modal / Expediente Clínico del Paciente (Historial, Notas y Cifrado) -->
   <div id="modalExpedientePaciente" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1001; justify-content: center; align-items: center; padding: 1rem;">
-    <div style="background: #ffffff; padding: 1.8rem; border-radius: 14px; width: 100%; max-width: 860px; max-height: 94vh; display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.3);">
+    <div class="modal-expediente-dialog" style="background: #ffffff; padding: 1.8rem; border-radius: 14px; width: 100%; max-width: 860px; max-height: 94vh; display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.3);">
       
       <!-- Cabecera del Expediente -->
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.8rem; margin-bottom: 1rem; gap: 1rem;">
-        <div style="flex: 1; min-width: 0;">
+      <div class="modal-expediente-header" style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.8rem; margin-bottom: 1rem; gap: 1rem;">
+        <div class="modal-expediente-patient-info" style="flex: 1; min-width: 0;">
           <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
             <h3 id="expNombrePaciente" style="color: var(--rosa-coral); font-size: 1.35rem; margin: 0; font-weight: 800;">Nombre del Paciente</h3>
             <span id="expBadgeTotalNotas" style="background: #fdf2f8; color: var(--rosa-coral); border: 1px solid #fbcfe8; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 20px;">0 Sesiones</span>
@@ -491,14 +491,14 @@
           </div>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; flex-wrap: wrap;">
-          <button type="button" class="btn" style="width: auto; padding: 0.5rem 0.85rem; font-size: 0.85rem; background: #f8fafc; color: #334155; border: 1px solid #cbd5e1;" onclick="volverAlDirectorioExpedientes()" title="Volver al Directorio de Expedientes">
+        <div class="modal-expediente-actions" style="display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; flex-wrap: wrap;">
+          <button type="button" class="btn btn-exp-volver" style="width: auto; padding: 0.5rem 0.85rem; font-size: 0.85rem; background: #f8fafc; color: #334155; border: 1px solid #cbd5e1;" onclick="volverAlDirectorioExpedientes()" title="Volver al Directorio de Expedientes">
             <i class="fa-solid fa-arrow-left" style="margin-right: 4px;"></i> Volver al Directorio
           </button>
-          <button type="button" class="btn" style="width: auto; padding: 0.5rem 0.85rem; font-size: 0.85rem; background: #f8fafc; color: #475569; border: 1px solid #cbd5e1;" onclick="toggleMaximizarModalExpediente()" title="Agrandar o reducir tamaño del expediente para lectura cómoda">
+          <button type="button" class="btn btn-exp-expand" style="width: auto; padding: 0.5rem 0.85rem; font-size: 0.85rem; background: #f8fafc; color: #475569; border: 1px solid #cbd5e1;" onclick="toggleMaximizarModalExpediente()" title="Agrandar o reducir tamaño del expediente para lectura cómoda">
             <i class="fa-solid fa-expand" id="iconAgrandarModalExpediente" style="margin-right: 3px;"></i> Agrandar
           </button>
-          <button type="button" class="btn" style="width: auto; padding: 0.5rem 0.9rem; font-size: 0.85rem; background: var(--turquesa); color: white;" onclick="mostrarFormularioNuevaNota()" title="Agregar nueva nota de sesión">
+          <button type="button" class="btn btn-exp-nueva" style="width: auto; padding: 0.5rem 0.9rem; font-size: 0.85rem; background: var(--turquesa); color: white;" onclick="mostrarFormularioNuevaNota()" title="Agregar nueva nota de sesión">
             <i class="fa-solid fa-plus" style="margin-right: 4px;"></i> Nueva Sesión
           </button>
           <button type="button" class="btn-close-modal" onclick="cerrarModalExpediente()" title="Cerrar expediente">&times;</button>
@@ -544,7 +544,7 @@
             </div>
 
             <!-- Grid de 6 Campos Clínicos -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; margin-bottom: 1rem;">
+            <div class="modal-expediente-fields-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; margin-bottom: 1rem;">
               <div class="form-group" style="margin-bottom: 0;">
                 <label for="exp_estadoActual" style="font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 0.3rem;">
                   <i class="fa-solid fa-heart-pulse" style="color: #ec4899; margin-right: 4px;"></i> 1. Estado Actual / Motivo de Sesión
@@ -614,13 +614,13 @@
       </div>
 
       <!-- Pie del Expediente -->
-      <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.8rem; border-top: 1px solid #f1f5f9; margin-top: 0.8rem; flex-wrap: wrap; gap: 0.5rem;">
+      <div class="modal-expediente-footer" style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.8rem; border-top: 1px solid #f1f5f9; margin-top: 0.8rem; flex-wrap: wrap; gap: 0.5rem;">
         <div id="contenedorBtnEliminarExpedienteModal">
           <button type="button" class="btn" id="btnEliminarExpedienteModal" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; width: auto; padding: 0.45rem 1rem; font-size: 0.84rem; font-weight: 600;" onclick="if(pacienteActivoExpediente) eliminarPacienteDirectorio(pacienteActivoExpediente.id, pacienteActivoExpediente.nombre)" title="Eliminar paciente y todo su expediente clínico permanentemente">
             <i class="fa-solid fa-trash-can" style="margin-right: 4px;"></i> Eliminar Expediente de este Paciente
           </button>
         </div>
-        <div style="display: flex; align-items: center; gap: 0.8rem;">
+        <div class="modal-expediente-footer-actions" style="display: flex; align-items: center; gap: 0.8rem;">
           <span style="font-size: 0.78rem; color: #64748b; display: flex; align-items: center; gap: 4px;">
             <i class="fa-solid fa-user-shield" style="color: #16a34a;"></i> Cifrado AES-256-GCM
           </span>

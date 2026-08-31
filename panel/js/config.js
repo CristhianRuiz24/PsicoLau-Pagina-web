@@ -1,8 +1,17 @@
 // --- Configuración y Estado Global de la Suite Clínica ---
 
-const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:' || !window.location.hostname)
-  ? 'http://localhost:3000/api'
+const isLocal = window.location.hostname === 'localhost' ||
+  window.location.hostname === '127.0.0.1' ||
+  /^192\.168\./.test(window.location.hostname) ||
+  /^10\./.test(window.location.hostname) ||
+  /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(window.location.hostname) ||
+  window.location.protocol === 'file:' ||
+  !window.location.hostname;
+
+const API_URL = isLocal
+  ? `http://${window.location.hostname || 'localhost'}:3000/api`
   : (window.PSICOLAU_API_URL || 'https://api.psicolau.com/api');
+
 
 const PALETA_COLORES = [
   // Rosas y Corales (Marca PsicoLau)

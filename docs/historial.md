@@ -162,6 +162,11 @@ Este documento recopila la bitácora histórica completa de sesiones, cambios ar
   - **Reducción de Ventana de Exposición JWT**: Ajuste del tiempo de expiración del token administrativo a **8 horas** (`expiresIn: '8h'`) en `backend/src/controllers/authController.js` para alinear la sesión con una jornada clínica y mitigar el impacto de accesos desatendidos.
   - **Blindaje de Sanitización Preventiva (Defensa en Profundidad)**:
     - Aplicación de `escapeHtml()` en el buscador global de la suite (`panel/js/app.js`) para términos de búsqueda, títulos de expedientes y enlaces telefónicos dinámicos.
-    - Aplicación de `escapeHtml()` en el módulo de contabilidad y auditoría de pagos (`panel/js/pagos.js`) para tarjetas de cobro pendiente y tabla mensual detallada.
-    - Sanitización de opciones del `<datalist>` dinámico de pacientes en la agenda (`panel/js/agenda.js`).
+- **2026-08-31 (Sesión 32 - Optimización de Ergonomía Móvil, Responsividad de la Suite y Edición In-Place de Expedientes)**:
+  - **Buscador Móvil a Pantalla Completa**: Reestructuración de la cabecera del panel en móviles (`@media (max-width: 900px)`), desplegando el buscador en una fila inferior dedicada de 100% de ancho con dropdown amplio y touch-friendly.
+  - **Tarjetas de Citas en 2 Niveles**: Reorganización de acciones en cabecera (check de realizada + expediente) y barra de herramientas inferior simétrica (`Zoom`, `WhatsApp`, `Cobro`, `Editar`, `Borrar`) con distribución proporcional `flex: 1 1 0` y `overflow: hidden`, evitando desbordamiento del botón de eliminación en cualquier resolución.
+  - **Matriz Semanal Fluida (5 y 7 Días)**: Establecimiento de ancho mínimo garantizado de `135px` por columna de día (`1040px` total) con desplazamiento horizontal nativo y columna de horas fija (`position: sticky`).
+  - **Ventana de Expedientes Clínicos Optimizada (97vh)**: Compactación de encabezado y pie de expedientes para liberar más del 70% de la pantalla para lectura de sesiones en dispositivos móviles.
+  - **Edición In-Place de Notas de Sesión**: Reubicación dinámica del formulario de notas clínicas directamente debajo de la tarjeta seleccionada al pulsar editar, eliminando saltos bruscos hacia arriba y preservando el cifrado AES-256-GCM y sincronización con PostgreSQL.
+  - **Módulos de Contabilidad y Auditoría de Pagos Responsivos**: Cuadrícula compacta de exportación en reporte mensual y tarjetas apiladas con botones de cobro 50/50 en auditoría de pagos.
 

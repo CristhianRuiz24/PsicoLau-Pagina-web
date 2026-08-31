@@ -472,7 +472,7 @@ function renderEasyTable() {
 
           tbodyHtml += `
             <div id="cita-block-${cita.id}" class="${blockClass}" style="background-color: ${color}; color: ${textColor};" onclick="event.stopPropagation()">
-              <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 2px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 3px;">
                 <span class="time-badge">${cTime}</span>
                 <div class="card-actions-capsule">
                   ${!esBloqueo ? `
@@ -484,27 +484,7 @@ function renderEasyTable() {
                         <i class="fa-solid fa-folder-open"></i>
                       </button>
                     ` : ''}
-                    <button type="button" class="card-btn btn-zoom" onclick="abrirZoomSesion(${cita.id}, event)" title="${cita.paciente && cita.paciente.enlaceZoom ? (esGrupal ? 'Entrar a la sala grupal de Zoom' : 'Entrar a la sesión de Zoom (' + nombreLimpio + ')') : 'Configurar enlace de Zoom'}" style="color: ${cita.paciente && cita.paciente.enlaceZoom ? '#2563eb' : '#94a3b8'};">
-                      <i class="fa-solid fa-video"></i>
-                    </button>
-                    ${!esGrupal ? `
-                      <button type="button" class="card-btn" onclick="enviarWhatsAppRecordatorio(${cita.id}, event)" title="Recordatorio de cita por WhatsApp" style="color: #16a34a;">
-                        <i class="fa-brands fa-whatsapp"></i>
-                      </button>
-                    ` : ''}
-                    ${!esPagado && !esGrupal ? `
-                      <button type="button" class="card-btn" onclick="enviarWhatsAppCobro(${cita.id}, event)" title="Recordar pago y enviar datos bancarios por WhatsApp" style="color: #ea580c;">
-                        <i class="fa-solid fa-file-invoice-dollar"></i>
-                      </button>
-                    ` : ''}
                   ` : ''}
-
-                  <button type="button" class="card-btn" onclick="editarCita(${cita.id})" style="color: #334155;" title="${esGrupal ? 'Editar sesión grupal' : 'Editar cita'}">
-                    <i class="fa-solid fa-pen"></i>
-                  </button>
-                  <button type="button" class="card-btn" onclick="eliminarCita(${cita.id})" style="color: #dc2626;" title="${esGrupal ? 'Eliminar sesión grupal' : 'Eliminar cita'}">
-                    <i class="fa-solid fa-trash-can"></i>
-                  </button>
                 </div>
               </div>
 
@@ -516,6 +496,31 @@ function renderEasyTable() {
                   ${esCompletada && !esBloqueo ? `<div class="badge-completada"><i class="fa-solid fa-check"></i> Realizada</div>` : ''}
                 </div>
               ` : ''}
+
+              <!-- Barra de Acciones Rápidas (Zoom, WA, Cobro, Editar, Eliminar) -->
+              <div class="card-quick-actions-bar">
+                ${!esBloqueo ? `
+                  <button type="button" class="card-btn btn-zoom" onclick="abrirZoomSesion(${cita.id}, event)" title="${cita.paciente && cita.paciente.enlaceZoom ? (esGrupal ? 'Entrar a la sala grupal de Zoom' : 'Entrar a la sesión de Zoom (' + nombreLimpio + ')') : 'Configurar enlace de Zoom'}" style="color: ${cita.paciente && cita.paciente.enlaceZoom ? '#2563eb' : '#94a3b8'};">
+                    <i class="fa-solid fa-video"></i>
+                  </button>
+                  ${!esGrupal ? `
+                    <button type="button" class="card-btn btn-wa" onclick="enviarWhatsAppRecordatorio(${cita.id}, event)" title="Recordatorio de cita por WhatsApp" style="color: #16a34a;">
+                      <i class="fa-brands fa-whatsapp"></i>
+                    </button>
+                  ` : ''}
+                  ${!esPagado && !esGrupal ? `
+                    <button type="button" class="card-btn btn-cobro" onclick="enviarWhatsAppCobro(${cita.id}, event)" title="Recordar pago y enviar datos bancarios por WhatsApp" style="color: #ea580c;">
+                      <i class="fa-solid fa-file-invoice-dollar"></i>
+                    </button>
+                  ` : ''}
+                ` : ''}
+                <button type="button" class="card-btn btn-edit" onclick="editarCita(${cita.id})" style="color: #334155;" title="${esGrupal ? 'Editar sesión grupal' : 'Editar cita'}">
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+                <button type="button" class="card-btn btn-del" onclick="eliminarCita(${cita.id})" style="color: #dc2626;" title="${esGrupal ? 'Eliminar sesión grupal' : 'Eliminar cita'}">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
               
               ${!esBloqueo && !esGrupal ? `
                 <div style="margin-top: 4px;">

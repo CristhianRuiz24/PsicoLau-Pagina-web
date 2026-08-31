@@ -296,14 +296,16 @@ function actualizarCabeceraExpediente(paciente, totalNotas) {
 
   if (infoEl) {
     const tieneEmail = paciente.email && !paciente.email.startsWith('sin-email-');
-    let infoHtml = `<span><i class="fa-brands fa-whatsapp" style="color: #16a34a; margin-right: 4px;"></i> ${paciente.telefono || 'Sin teléfono'}</span>`;
+    let infoHtml = `<div class="exp-info-chips-container">
+      <span class="exp-info-chip"><i class="fa-brands fa-whatsapp" style="color: #16a34a; margin-right: 4px;"></i> ${escapeHtml(paciente.telefono || 'Sin teléfono')}</span>`;
     if (tieneEmail) {
-      infoHtml += `<span style="margin-left: 1rem;"><i class="fa-regular fa-envelope" style="color: var(--turquesa); margin-right: 4px;"></i> ${paciente.email}</span>`;
+      infoHtml += `<span class="exp-info-chip"><i class="fa-regular fa-envelope" style="color: var(--turquesa); margin-right: 4px;"></i> ${escapeHtml(paciente.email)}</span>`;
     }
-    infoHtml += `<span style="margin-left: 1rem;"><i class="fa-solid fa-calendar-check" style="color: #6366f1; margin-right: 4px;"></i> ${totalCitas} citas</span>`;
+    infoHtml += `<span class="exp-info-chip"><i class="fa-solid fa-calendar-check" style="color: #6366f1; margin-right: 4px;"></i> ${totalCitas} citas</span>`;
     if (paciente.enlaceZoom) {
-      infoHtml += `<span style="margin-left: 1rem;"><a href="${paciente.enlaceZoom.startsWith('http') ? paciente.enlaceZoom : 'https://' + paciente.enlaceZoom}" target="_blank" style="color: #2563eb; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;"><i class="fa-solid fa-video"></i> Sala Zoom</a></span>`;
+      infoHtml += `<span class="exp-info-chip"><a href="${paciente.enlaceZoom.startsWith('http') ? paciente.enlaceZoom : 'https://' + paciente.enlaceZoom}" target="_blank" style="color: #2563eb; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;"><i class="fa-solid fa-video"></i> Sala Zoom</a></span>`;
     }
+    infoHtml += `</div>`;
     infoEl.innerHTML = infoHtml;
   }
 
@@ -541,6 +543,12 @@ window.mostrarFormularioNuevaNota = function(fechaPrefill = null) {
   const form = document.getElementById('formNotaExpediente');
   const titulo = document.getElementById('formNotaTitulo');
   const idInput = document.getElementById('exp_nota_id');
+  const listaContainer = document.getElementById('listaNotasExpediente');
+
+  // Si se viene de editar una tarjeta abajo, reubicar el formulario en la parte superior para nueva nota
+  if (formSeccion && listaContainer && formSeccion.parentElement) {
+    listaContainer.parentElement.insertBefore(formSeccion, listaContainer);
+  }
 
   if (form) form.reset();
   if (idInput) idInput.value = '';
@@ -570,8 +578,16 @@ window.mostrarFormularioNuevaNota = function(fechaPrefill = null) {
 window.ocultarFormularioNota = function() {
   const formSeccion = document.getElementById('seccionFormNotaExpediente');
   const form = document.getElementById('formNotaExpediente');
+  const listaContainer = document.getElementById('listaNotasExpediente');
+
   if (form) form.reset();
-  if (formSeccion) formSeccion.style.display = 'none';
+  if (formSeccion) {
+    formSeccion.style.display = 'none';
+    // Reubicar de regreso en el ancla superior
+    if (listaContainer && listaContainer.parentElement) {
+      listaContainer.parentElement.insertBefore(formSeccion, listaContainer);
+    }
+  }
 };
 
 window.guardarNotaExpediente = async function(event) {
@@ -638,11 +654,22 @@ window.editarNotaExpedienteModal = function(notaId) {
   const nota = notasCacheExpediente.find(n => n.id === notaId);
   if (!nota) return;
 
-  mostrarFormularioNuevaNota();
+  const formSeccion = document.getElementById('seccionFormNotaExpediente');
+  const cardEl = document.getElementById(`nota-exp-${notaId}`);
+  
+  // Posicionar el formulario directamente en el lugar de la tarjeta seleccionada
+  if (formSeccion && cardEl) {
+    cardEl.insertAdjacentElement('afterend', formSeccion);
+  }
+
+  const form = document.getElementById('formNotaExpediente');
+  if (form) form.reset();
 
   const titulo = document.getElementById('formNotaTitulo');
   if (titulo) {
-    titulo.innerHTML = '<i class="fa-solid fa-pen-to-square" style="color: var(--rosa-coral);"></i> Editar Nota de Sesión';
+    const d = new Date(nota.fechaSesion);
+    const fechaTxt = d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' });
+    titulo.innerHTML = `<i class="fa-solid fa-pen-to-square" style="color: var(--rosa-coral);"></i> Editando Nota de Sesión (${fechaTxt})`;
   }
 
   document.getElementById('exp_nota_id').value = nota.id;
@@ -661,9 +688,9 @@ window.editarNotaExpedienteModal = function(notaId) {
   document.getElementById('exp_tareasAsignadas').value = nota.tareasAsignadas || '';
   document.getElementById('exp_pendientesProximaSesion').value = nota.pendientesProximaSesion || '';
 
-  const formSeccion = document.getElementById('seccionFormNotaExpediente');
   if (formSeccion) {
-    formSeccion.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    formSeccion.style.display = 'block';
+    formSeccion.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 };
 
