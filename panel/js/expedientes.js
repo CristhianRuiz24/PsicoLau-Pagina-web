@@ -329,13 +329,22 @@ function actualizarCabeceraExpediente(paciente, totalNotas) {
 
 
 /**
- * Helper para resaltar coincidencias de búsqueda de forma segura
+ * Helper para resaltar coincidencias de búsqueda de forma segura e insensible a acentos
  */
 function resaltarTexto(texto, query) {
   if (!texto) return '';
   if (!query) return escapeHtmlText(texto);
-  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-  return escapeHtmlText(texto).replace(regex, '<mark class="highlight-expediente">$1</mark>');
+  
+  // Limpiar caracteres especiales de regex
+  const cleanQ = query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  if (!cleanQ) return escapeHtmlText(texto);
+
+  try {
+    const regex = new RegExp(`(${cleanQ})`, 'gi');
+    return escapeHtmlText(texto).replace(regex, '<mark class="highlight-expediente">$1</mark>');
+  } catch (e) {
+    return escapeHtmlText(texto);
+  }
 }
 
 function escapeHtmlText(str) {
@@ -363,7 +372,7 @@ function renderListaNotasExpediente(notas, query = '') {
           ${query ? 'No se encontraron notas con esa búsqueda' : 'Expediente sin notas de sesión registradas'}
         </h4>
         <p style="color: #64748b; font-size: 0.88rem; max-width: 420px; margin: 0 auto 1.2rem auto;">
-          ${query ? `No hay coincidencias para "<strong>${escapeHtmlText(query)}</strong>" en ningún campo clínico de este paciente.` : 'Comienza a documentar las sesiones terapéuticas de Laura con este paciente.'}
+          ${query ? `No hay coincidencias para "<strong>${escapeHtmlText(query)}</strong>" en este expediente.` : 'Comienza a documentar las sesiones terapéuticas de Laura con este paciente.'}
         </p>
         ${!query ? `
           <button type="button" class="btn" style="width: auto; padding: 0.6rem 1.4rem; font-size: 0.92rem;" onclick="mostrarFormularioNuevaNota()">
@@ -377,7 +386,7 @@ function renderListaNotasExpediente(notas, query = '') {
 
   let html = '';
   notas.forEach((nota, index) => {
-    const sesionNumero = notas.length - index; // Numeración histórica
+    const sesionNumero = nota.numeroSesion !== undefined ? nota.numeroSesion : (notas.length - index); // Numeración histórica real
     const d = new Date(nota.fechaSesion);
     const fechaTxt = d.toLocaleDateString('es-MX', {
       weekday: 'long',
