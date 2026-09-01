@@ -1419,25 +1419,25 @@ window.pedirAlcanceSerie = function(accion = 'EDITAR', totalFuturas = 0) {
   });
 };
 
-// Cancelar cita (Soft Delete: cambia estado_cita a 'CANCELADA', con soporte para series)
+// Eliminar cita de la agenda (Borrado real de la agenda, con soporte para series)
 window.eliminarCita = async function(id) {
   const cita = citasCache.find(c => c.id === id);
   const futuras = cita ? window.detectarCitasFuturasEnMemoria(cita) : [];
   
   let alcance = 'SOLO_ESTA';
   if (futuras.length > 0) {
-    const seleccion = await window.pedirAlcanceSerie('CANCELAR', futuras.length);
+    const seleccion = await window.pedirAlcanceSerie('ELIMINAR', futuras.length);
     if (!seleccion) return; // Cancelado por la usuaria
     alcance = seleccion;
   } else {
-    const confirmado = window.confirm('¿Deseas retirar esta cita de la agenda activa? (Permanecerá registrada en el historial de búsqueda)');
+    const confirmado = window.confirm('¿Deseas eliminar esta cita de la agenda?');
     if (!confirmado) return;
   }
 
   const token = localStorage.getItem('psicolau_token');
   try {
-    const response = await fetch(`${API_URL}/agenda/citas/${id}/cancelar`, {
-      method: 'PATCH',
+    const response = await fetch(`${API_URL}/agenda/citas/${id}`, {
+      method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -1454,10 +1454,10 @@ window.eliminarCita = async function(id) {
         window.filtrarCitasEnTabla(queryActual);
       }
     } else {
-      alert(data.message || 'Error al cancelar la cita');
+      alert(data.message || 'Error al eliminar la cita');
     }
   } catch (error) {
-    alert('Error de conexión al intentar cancelar la cita');
+    alert('Error de conexión al intentar eliminar la cita');
   }
 };
 
