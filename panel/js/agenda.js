@@ -430,9 +430,8 @@ function renderEasyTable() {
     tbodyHtml += `<tr><td class="time-col">${slot.label}</td>`;
 
     diasSemana.forEach(d => {
-      // Filtrar citas para esta celda [día, hora] excluyendo canceladas
+      // Filtrar citas para esta celda [día, hora]
       const citasCelda = citasCache.filter(c => {
-        if (c.estado_cita === 'CANCELADA') return false;
         const cDate = new Date(c.fechaHora);
         return cDate.toDateString() === d.toDateString() && cDate.getHours() === slot.hora;
       });
@@ -450,18 +449,20 @@ function renderEasyTable() {
           const payLabel = esPagado ? 'Pagado' : 'Por Pagar';
           const payClass = esPagado ? 'paid' : 'unpaid';
 
+          const esCancelada = cita.estado_cita === 'CANCELADA';
           const esBloqueo = (cita.categoria && cita.categoria.startsWith('[BLOQUEO]')) || (cita.paciente && cita.paciente.nombre.startsWith('[BLOQUEO]'));
           const esGrupal = (cita.categoria && cita.categoria.startsWith('[GRUPAL]')) || (cita.paciente && cita.paciente.nombre.startsWith('[GRUPAL]'));
           const nombreLimpio = cita.paciente.nombre.replace('[BLOQUEO]', '').replace('[GRUPAL]', '').trim();
           const notasLimpias = (cita.categoria || '').replace('[BLOQUEO]', '').replace('[GRUPAL]', '').trim();
-          const esCompletada = cita.estado_cita === 'REALIZADA' || cita.estado_cita === 'CONFIRMADA';
+          const esCompletada = !esCancelada && (cita.estado_cita === 'REALIZADA' || cita.estado_cita === 'CONFIRMADA');
 
           let matchesBusqueda = true;
           let blockClass = esBloqueo ? 'appointment-block is-blocked' : (esGrupal ? 'appointment-block is-group' : (esCompletada ? 'appointment-block is-completed' : 'appointment-block'));
           if (esGrupal && esCompletada) blockClass += ' is-completed';
+          if (esCancelada) blockClass += ' is-cancelled';
 
           if (terminoBusqueda) {
-            const textoCompleto = `${nombreLimpio} ${notasLimpias} ${cita.paciente.telefono || ''} ${esGrupal ? 'grupal grupo taller' : ''}`.toLowerCase();
+            const textoCompleto = `${nombreLimpio} ${notasLimpias} ${cita.paciente.telefono || ''} ${esGrupal ? 'grupal grupo taller' : ''} ${esCancelada ? 'cancelada cancelado' : ''}`.toLowerCase();
             matchesBusqueda = textoCompleto.includes(terminoBusqueda);
             if (matchesBusqueda) {
               blockClass += ' is-highlighted';
@@ -475,31 +476,48 @@ function renderEasyTable() {
               <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 3px;">
                 <span class="time-badge">${cTime}</span>
                 <div class="card-actions-capsule">
-                  ${!esBloqueo ? `
-                    <button type="button" class="btn-check-completada ${esCompletada ? 'completed' : 'pending'}" onclick="toggleCompletarCita(${cita.id}, event)" title="${esCompletada ? (esGrupal ? 'Sesión grupal realizada (clic para desmarcar)' : 'Sesión realizada (clic para desmarcar)') : (esGrupal ? 'Marcar sesión grupal como realizada' : 'Marcar sesión como realizada / completada')}">
-                      <i class="${esCompletada ? 'fa-solid fa-circle-check' : 'fa-regular fa-circle'}"></i>
+                  ${esCancelada ? `
+                    <button type="button" class="btn-check-cancelada" onclick="toggleReactivarCita(${cita.id}, event)" title="Cita cancelada (clic para reactivar)">
+                      <i class="fa-solid fa-circle-xmark"></i>
                     </button>
                     ${!esGrupal ? `
                       <button type="button" class="card-btn" onclick="abrirExpedientePorCita(${cita.id}, event)" title="Expediente clínico del paciente (notas y sesiones)" style="color: var(--rosa-coral);">
                         <i class="fa-solid fa-folder-open"></i>
                       </button>
                     ` : ''}
-                  ` : ''}
+                  ` : (!esBloqueo ? `
+                    <button type="button" class="btn-check-completada ${esCompletada ? 'completed' : 'pending'}" onclick="toggleCompletarCita(${cita.id}, event)" title="${esCompletada ? (esGrupal ? 'Sesión grupal realizada (clic para desmarcar)' : 'Sesión realizada (clic para desmarcar)') : (esGrupal ? 'Marcar sesión grupal como realizada' : 'Marcar sesión como realizada / completada')}">
+                      <i class="${esCompletada ? 'fa-solid fa-circle-check' : 'fa-regular fa-circle'}"></i>
+                    </button>
+                    <button type="button" class="btn-cancel-quick" onclick="toggleCancelarCita(${cita.id}, event)" title="Marcar cita como cancelada (paciente avisó que no asistirá)">
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                    ${!esGrupal ? `
+                      <button type="button" class="card-btn" onclick="abrirExpedientePorCita(${cita.id}, event)" title="Expediente clínico del paciente (notas y sesiones)" style="color: var(--rosa-coral);">
+                        <i class="fa-solid fa-folder-open"></i>
+                      </button>
+                    ` : ''}
+                  ` : '')}
                 </div>
               </div>
 
               <div class="patient-name">${esBloqueo ? `<i class="fa-solid fa-ban" style="margin-right: 3px;"></i>${escapeHtml(nombreLimpio)}` : (esGrupal ? `<i class="fa-solid fa-users" style="margin-right: 4px;"></i>${escapeHtml(nombreLimpio)}` : escapeHtml(nombreLimpio))}</div>
               ${notasLimpias ? `<div class="appointment-note">${escapeHtml(notasLimpias)}</div>` : ''}
-              ${(esGrupal || (esCompletada && !esBloqueo)) ? `
+              ${(esCancelada || esGrupal || (esCompletada && !esBloqueo)) ? `
                 <div class="card-badges-row">
+                  ${esCancelada ? `<div class="badge-cancelada"><i class="fa-solid fa-xmark"></i> Cancelada</div>` : ''}
                   ${esGrupal ? `<div class="badge-grupal"><i class="fa-solid fa-people-group"></i> Grupal</div>` : ''}
-                  ${esCompletada && !esBloqueo ? `<div class="badge-completada"><i class="fa-solid fa-check"></i> Realizada</div>` : ''}
+                  ${esCompletada && !esBloqueo && !esCancelada ? `<div class="badge-completada"><i class="fa-solid fa-check"></i> Realizada</div>` : ''}
                 </div>
               ` : ''}
 
-              <!-- Barra de Acciones Rápidas (Zoom, WA, Cobro, Editar, Eliminar) -->
+              <!-- Barra de Acciones Rápidas (Zoom, WA, Cobro, Reactivar, Editar, Borrar) -->
               <div class="card-quick-actions-bar">
-                ${!esBloqueo ? `
+                ${esCancelada ? `
+                  <button type="button" class="card-btn btn-reactivar" onclick="toggleReactivarCita(${cita.id}, event)" style="color: #16a34a;" title="Reactivar cita en la agenda activa">
+                    <i class="fa-solid fa-rotate-left"></i>
+                  </button>
+                ` : (!esBloqueo ? `
                   <button type="button" class="card-btn btn-zoom" onclick="abrirZoomSesion(${cita.id}, event)" title="${cita.paciente && cita.paciente.enlaceZoom ? (esGrupal ? 'Entrar a la sala grupal de Zoom' : 'Entrar a la sesión de Zoom (' + nombreLimpio + ')') : 'Configurar enlace de Zoom'}" style="color: ${cita.paciente && cita.paciente.enlaceZoom ? '#2563eb' : '#94a3b8'};">
                     <i class="fa-solid fa-video"></i>
                   </button>
@@ -513,16 +531,16 @@ function renderEasyTable() {
                       <i class="fa-solid fa-file-invoice-dollar"></i>
                     </button>
                   ` : ''}
-                ` : ''}
+                ` : '')}
                 <button type="button" class="card-btn btn-edit" onclick="editarCita(${cita.id})" style="color: #334155;" title="${esGrupal ? 'Editar sesión grupal' : 'Editar cita'}">
                   <i class="fa-solid fa-pen"></i>
                 </button>
-                <button type="button" class="card-btn btn-del" onclick="eliminarCita(${cita.id})" style="color: #dc2626;" title="${esGrupal ? 'Eliminar sesión grupal' : 'Eliminar cita'}">
+                <button type="button" class="card-btn btn-del" onclick="eliminarCita(${cita.id})" style="color: #dc2626;" title="${esGrupal ? 'Borrar sesión grupal' : 'Borrar cita de la agenda'}">
                   <i class="fa-solid fa-trash-can"></i>
                 </button>
               </div>
               
-              ${!esBloqueo && !esGrupal ? `
+              ${!esBloqueo && !esGrupal && !esCancelada ? `
                 <div style="margin-top: 4px;">
                   <button type="button" class="mini-pay-btn ${payClass}" onclick="togglePagoDirecto(${cita.id}, event)" title="Clic para alternar estado de pago">
                     <i class="fa-solid ${esPagado ? 'fa-circle-check' : 'fa-clock'}"></i> ${payLabel}
@@ -597,6 +615,70 @@ window.toggleCompletarCita = async function(id, e) {
     }
   } catch (error) {
     console.error('Error al actualizar estado:', error);
+  }
+};
+
+// Marcar cita rápida como cancelada (1 clic desde la tarjeta)
+window.toggleCancelarCita = async function(id, e) {
+  if (e) e.stopPropagation();
+  const cita = citasCache.find(c => c.id === id);
+  if (!cita) return;
+
+  if (window.reproducirSonidoPop) window.reproducirSonidoPop();
+
+  cita.estado_cita = 'CANCELADA';
+  renderEasyTable();
+
+  const token = localStorage.getItem('psicolau_token');
+  try {
+    const res = await fetch(`${API_URL}/agenda/citas/${id}/estado`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ estado_cita: 'CANCELADA' })
+    });
+    const data = await res.json();
+    if (!data.success) {
+      alert(data.message || 'Error al marcar cita como cancelada');
+      await initAgenda();
+    }
+  } catch (error) {
+    console.error('Error al cancelar cita:', error);
+    await initAgenda();
+  }
+};
+
+// Reactivar cita rápida (1 clic desde la tarjeta)
+window.toggleReactivarCita = async function(id, e) {
+  if (e) e.stopPropagation();
+  const cita = citasCache.find(c => c.id === id);
+  if (!cita) return;
+
+  if (window.reproducirSonidoPop) window.reproducirSonidoPop();
+
+  cita.estado_cita = 'PENDIENTE';
+  renderEasyTable();
+
+  const token = localStorage.getItem('psicolau_token');
+  try {
+    const res = await fetch(`${API_URL}/agenda/citas/${id}/estado`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ estado_cita: 'PENDIENTE' })
+    });
+    const data = await res.json();
+    if (!data.success) {
+      alert(data.message || 'Error al reactivar cita');
+      await initAgenda();
+    }
+  } catch (error) {
+    console.error('Error al reactivar cita:', error);
+    await initAgenda();
   }
 };
 
@@ -872,6 +954,10 @@ window.abrirModal = function() {
   const seccionRec = document.getElementById('seccionRecurrencia');
   if (seccionRec) seccionRec.style.display = 'block';
 
+  const seccionEstado = document.getElementById('seccionEstadoCita');
+  if (seccionEstado) seccionEstado.style.display = 'none';
+  window.seleccionarEstadoModal('PENDIENTE');
+
   const tabs = document.getElementById('seccionTabsTipo');
   if (tabs) tabs.style.display = 'flex';
 
@@ -928,6 +1014,10 @@ window.cerrarModal = function() {
   const seccionRec = document.getElementById('seccionRecurrencia');
   if (seccionRec) seccionRec.style.display = 'block';
 
+  const seccionEstado = document.getElementById('seccionEstadoCita');
+  if (seccionEstado) seccionEstado.style.display = 'none';
+  window.seleccionarEstadoModal('PENDIENTE');
+
   const tabs = document.getElementById('seccionTabsTipo');
   if (tabs) tabs.style.display = 'flex';
 
@@ -936,6 +1026,17 @@ window.cerrarModal = function() {
   window.toggleOpcionesRecurrencia(false);
 
   window.seleccionarTipoRegistro('CITA');
+};
+
+// Función para seleccionar el estado de la cita en el modal
+window.seleccionarEstadoModal = function(estado) {
+  const hiddenInput = document.getElementById('nc_estado_cita');
+  if (hiddenInput) hiddenInput.value = estado;
+
+  const buttons = document.querySelectorAll('.btn-estado-opt');
+  buttons.forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.estado === estado);
+  });
 };
 
 // Cargar datos de cita para edición
@@ -968,13 +1069,36 @@ window.editarCita = function(id) {
 
   const subtitulo = document.getElementById('modalSubtitulo');
   if (subtitulo) {
+    let badgeTipoHtml = '';
     if (esGrupal) {
-      subtitulo.innerHTML = '<span class="badge-tipo-info info-grupal"><i class="fa-solid fa-people-group"></i> Terapia Grupal</span>';
+      badgeTipoHtml = '<span class="badge-tipo-info info-grupal"><i class="fa-solid fa-people-group"></i> Terapia Grupal</span>';
     } else if (esBloqueo) {
-      subtitulo.innerHTML = '<span class="badge-tipo-info info-bloqueo"><i class="fa-solid fa-ban"></i> Bloqueo de Horario</span>';
+      badgeTipoHtml = '<span class="badge-tipo-info info-bloqueo"><i class="fa-solid fa-ban"></i> Bloqueo de Horario</span>';
     } else {
-      subtitulo.innerHTML = '<span class="badge-tipo-info info-cita"><i class="fa-solid fa-user-doctor"></i> Cita Individual</span>';
+      badgeTipoHtml = '<span class="badge-tipo-info info-cita"><i class="fa-solid fa-user-doctor"></i> Cita Individual</span>';
     }
+
+    let badgeSerieHtml = '';
+    if (cita.serieId && typeof citasCache !== 'undefined' && citasCache.length) {
+      const citasSerie = citasCache
+        .filter(c => c.serieId === cita.serieId && c.estado_cita !== 'CANCELADA')
+        .sort((a, b) => new Date(a.fechaHora) - new Date(b.fechaHora));
+
+      if (citasSerie.length > 1) {
+        const pos = citasSerie.findIndex(c => c.id === cita.id);
+        const sesionNum = pos >= 0 ? pos + 1 : 1;
+        badgeSerieHtml = `<span id="badgeSerieRecurrente" class="badge-tipo-info info-serie" title="Cita vinculada a una serie recurrente"><i class="fa-solid fa-repeat"></i> Serie recurrente (Sesión ${sesionNum} de ${citasSerie.length})</span>`;
+      } else {
+        badgeSerieHtml = `<span id="badgeSerieRecurrente" class="badge-tipo-info info-serie" title="Cita vinculada a una serie recurrente"><i class="fa-solid fa-repeat"></i> Serie recurrente</span>`;
+      }
+    } else {
+      const matchSesion = (cita.categoria || '').match(/\(Sesión\s+(\d+)\/(\d+)\)/i);
+      if (matchSesion) {
+        badgeSerieHtml = `<span id="badgeSerieRecurrente" class="badge-tipo-info info-serie" title="Cita vinculada a una serie recurrente"><i class="fa-solid fa-repeat"></i> Serie recurrente (Sesión ${matchSesion[1]} de ${matchSesion[2]})</span>`;
+      }
+    }
+
+    subtitulo.innerHTML = `<div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">${badgeTipoHtml}${badgeSerieHtml}</div>`;
     subtitulo.style.display = 'block';
   }
 
@@ -1000,6 +1124,12 @@ window.editarCita = function(id) {
 
   const seccionRec = document.getElementById('seccionRecurrencia');
   if (seccionRec) seccionRec.style.display = 'none';
+
+  const seccionEstado = document.getElementById('seccionEstadoCita');
+  if (seccionEstado) {
+    seccionEstado.style.display = (!esBloqueo && !esGrupal) ? 'block' : 'none';
+  }
+  window.seleccionarEstadoModal(cita.estado_cita || 'PENDIENTE');
 
   const nombreLimpio = cita.paciente.nombre.replace('[BLOQUEO]', '').replace('[GRUPAL]', '').trim() || '';
   document.getElementById('nc_nombre').value = nombreLimpio;
@@ -1027,7 +1157,13 @@ window.editarCita = function(id) {
     badge.style.display = (!esBloqueo && !esGrupal) ? 'inline-flex' : 'none';
   }
 
-  document.getElementById('nc_notas').value = (cita.categoria || '').replace('[BLOQUEO]', '').replace('[GRUPAL]', '').trim();
+  const notasLimpias = (cita.categoria || '')
+    .replace('[BLOQUEO]', '')
+    .replace('[GRUPAL]', '')
+    .replace(/\(Sesión\s+\d+\/\d+\)/i, '')
+    .replace(/·\s*$/, '')
+    .trim();
+  document.getElementById('nc_notas').value = notasLimpias;
 
   const colorCita = cita.color || (esBloqueo ? '#94a3b8' : (esGrupal ? '#8b5cf6' : '#3EB8CC'));
   document.getElementById('nc_color').value = colorCita;
@@ -1191,10 +1327,112 @@ window.reactivarCita = async function(id) {
   }
 };
 
-// Cancelar cita (Soft Delete: cambia estado_cita a 'CANCELADA')
+// Detección de citas futuras vinculadas a una serie recurrente en caché
+window.detectarCitasFuturasEnMemoria = function(cita) {
+  if (!cita || !citasCache || !citasCache.length) return [];
+  
+  const fechaCitaTime = new Date(cita.fechaHora).getTime();
+
+  // 1. Si cuenta con serieId explícito
+  if (cita.serieId) {
+    return citasCache.filter(c => 
+      c.serieId === cita.serieId && 
+      c.id !== cita.id && 
+      new Date(c.fechaHora).getTime() >= fechaCitaTime && 
+      c.estado_cita !== 'CANCELADA'
+    );
+  }
+
+  // 2. Fallback para series anteriores identificadas por (Sesión X/N)
+  const match = (cita.categoria || '').match(/\(Sesión\s+(\d+)\/(\d+)\)/i);
+  if (match && cita.pacienteId) {
+    const totalSerie = parseInt(match[2], 10);
+    const sesionActual = parseInt(match[1], 10);
+    if (totalSerie > 1 && sesionActual < totalSerie) {
+      const regex = new RegExp(`\\(Sesión\\s+\\d+\\/${totalSerie}\\)`, 'i');
+      return citasCache.filter(c =>
+        c.pacienteId === cita.pacienteId &&
+        c.id !== cita.id &&
+        new Date(c.fechaHora).getTime() >= fechaCitaTime &&
+        c.estado_cita !== 'CANCELADA' &&
+        regex.test(c.categoria || '')
+      );
+    }
+  }
+
+  return [];
+};
+
+// Modal de Selección de Alcance (Promise-based)
+window.pedirAlcanceSerie = function(accion = 'EDITAR', totalFuturas = 0) {
+  return new Promise((resolve) => {
+    const modal = document.getElementById('modalAlcanceSerie');
+    const iconContainer = document.getElementById('modalAlcanceIconContainer');
+    const iconEl = document.getElementById('modalAlcanceIcon');
+    const titulo = document.getElementById('modalAlcanceTitulo');
+    const desc = document.getElementById('modalAlcanceDescripcion');
+    const btnSolo = document.getElementById('btnAlcanceSoloEsta');
+    const btnSerie = document.getElementById('btnAlcanceEstaYSiguientes');
+    const lblSolo = document.getElementById('lblAlcanceSoloEsta');
+    const lblSerie = document.getElementById('lblAlcanceEstaYSiguientes');
+    const btnCancelar = document.getElementById('btnAlcanceCancelar');
+
+    if (!modal) return resolve('SOLO_ESTA');
+
+    if (accion === 'ELIMINAR' || accion === 'CANCELAR') {
+      if (iconContainer) {
+        iconContainer.style.background = '#fee2e2';
+        iconContainer.style.color = '#dc2626';
+      }
+      if (iconEl) iconEl.className = 'fa-solid fa-trash-can';
+      if (titulo) titulo.textContent = 'Borrar Cita Recurrente';
+      if (desc) desc.textContent = `Esta cita pertenece a una serie con ${totalFuturas} sesión(es) futura(s). ¿Qué deseas borrar?`;
+      if (lblSolo) lblSolo.textContent = 'Borrar solo esta cita';
+      if (lblSerie) lblSerie.textContent = `Borrar esta y la${totalFuturas === 1 ? '' : 's'} ${totalFuturas} siguiente${totalFuturas === 1 ? '' : 's'}`;
+      if (btnSerie) btnSerie.className = 'btn btn-alcance-eliminar-serie';
+    } else {
+      if (iconContainer) {
+        iconContainer.style.background = '#ede9fe';
+        iconContainer.style.color = '#7c3aed';
+      }
+      if (iconEl) iconEl.className = 'fa-solid fa-repeat';
+      if (titulo) titulo.textContent = 'Guardar Cambios en Serie';
+      if (desc) desc.textContent = `Esta cita pertenece a una serie con ${totalFuturas} sesión(es) futura(s). ¿A cuáles sesiones deseas aplicar los cambios?`;
+      if (lblSolo) lblSolo.textContent = 'Solo a esta cita';
+      if (lblSerie) lblSerie.textContent = `A esta y las ${totalFuturas} siguientes`;
+      if (btnSerie) btnSerie.className = 'btn btn-alcance-serie';
+    }
+
+    modal.style.display = 'flex';
+
+    const cleanup = (resultado) => {
+      modal.style.display = 'none';
+      btnSolo.onclick = null;
+      btnSerie.onclick = null;
+      btnCancelar.onclick = null;
+      resolve(resultado);
+    };
+
+    btnSolo.onclick = () => cleanup('SOLO_ESTA');
+    btnSerie.onclick = () => cleanup('ESTA_Y_SIGUIENTES');
+    btnCancelar.onclick = () => cleanup(null);
+  });
+};
+
+// Cancelar cita (Soft Delete: cambia estado_cita a 'CANCELADA', con soporte para series)
 window.eliminarCita = async function(id) {
-  const confirmado = window.confirm('¿Deseas cancelar y retirar esta cita de la agenda activa? (Permanecerá registrada en el historial de búsqueda)');
-  if (!confirmado) return;
+  const cita = citasCache.find(c => c.id === id);
+  const futuras = cita ? window.detectarCitasFuturasEnMemoria(cita) : [];
+  
+  let alcance = 'SOLO_ESTA';
+  if (futuras.length > 0) {
+    const seleccion = await window.pedirAlcanceSerie('CANCELAR', futuras.length);
+    if (!seleccion) return; // Cancelado por la usuaria
+    alcance = seleccion;
+  } else {
+    const confirmado = window.confirm('¿Deseas retirar esta cita de la agenda activa? (Permanecerá registrada en el historial de búsqueda)');
+    if (!confirmado) return;
+  }
 
   const token = localStorage.getItem('psicolau_token');
   try {
@@ -1203,7 +1441,8 @@ window.eliminarCita = async function(id) {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
-      }
+      },
+      body: JSON.stringify({ alcance })
     });
     const data = await response.json();
     if (data.success) {

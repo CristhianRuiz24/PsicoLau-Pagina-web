@@ -187,14 +187,13 @@ const crearCita = async (req, res) => {
     const diasSalto = frecuencia === 'QUINCENAL' ? 14 : 7;
     const citasCreadas = [];
     const fechaBase = new Date(fechaHora);
+    const serieId = totalSesiones > 1 ? `serie_${Date.now()}_${Math.random().toString(36).substring(2, 9)}` : null;
 
     for (let i = 0; i < totalSesiones; i++) {
       const fechaSesion = new Date(fechaBase);
       fechaSesion.setDate(fechaBase.getDate() + (i * diasSalto));
 
-      const notaSesion = totalSesiones > 1 
-        ? `${notas || categoria || ''}${notas || categoria ? ' · ' : ''}(Sesión ${i + 1}/${totalSesiones})`
-        : (notas || categoria || null);
+      const notaSesion = notas || categoria || null;
 
       const nuevaCita = await prisma.cita.create({
         data: {
@@ -202,7 +201,8 @@ const crearCita = async (req, res) => {
           fechaHora: fechaSesion,
           categoria: notaSesion,
           color: color || '#3EB8CC',
-          monto: montoFinal
+          monto: montoFinal,
+          serieId: serieId
         },
         include: { paciente: true }
       });
@@ -226,12 +226,39 @@ const crearCita = async (req, res) => {
   }
 };
 
-// Cancelar cita (Soft Delete: cambia estado_cita a 'CANCELADA')
+// Cancelar cita (Soft Delete: cambia estado_cita a 'CANCELADA', con soporte para serie)
 const cancelarCita = async (req, res) => {
   try {
     const citaId = parseId(req.params.id);
     if (!citaId) {
       return res.status(400).json({ success: false, message: 'ID de cita inválido' });
+    }
+
+    const { alcance = 'SOLO_ESTA' } = req.body || {};
+
+    const citaExistente = await prisma.cita.findUnique({
+      where: { id: citaId },
+      include: { paciente: true }
+    });
+
+    if (!citaExistente) {
+      return res.status(404).json({ success: false, message: 'Cita no encontrada' });
+    }
+
+    if (alcance === 'ESTA_Y_SIGUIENTES') {
+      const citasFuturas = await obtenerCitasFuturasDeSerie(citaExistente, prisma);
+      const idsACancelar = [citaId, ...citasFuturas.map(c => c.id)];
+
+      await prisma.cita.updateMany({
+        where: { id: { in: idsACancelar } },
+        data: { estado_cita: 'CANCELADA' }
+      });
+
+      return res.json({ 
+        success: true, 
+        message: `${idsACancelar.length} citas de la serie canceladas correctamente`,
+        totalCanceladas: idsACancelar.length
+      });
     }
 
     const citaActualizada = await prisma.cita.update({
@@ -247,15 +274,17 @@ const cancelarCita = async (req, res) => {
   }
 };
 
-// Eliminar cita permanentemente de la base de datos (Hard Delete con transacción atómica)
+// Eliminar cita permanentemente de la base de datos (Hard Delete con transacción atómica y soporte para serie)
 const eliminarCita = async (req, res) => {
   try {
     const citaId = parseId(req.params.id);
     if (!citaId) {
       return res.status(400).json({ success: false, message: 'ID de cita inválido' });
     }
+
+    const { alcance = 'SOLO_ESTA' } = req.body || req.query || {};
     
-    // Obtener la cita para conocer el pacienteId
+    // Obtener la cita para conocer el pacienteId y serieId
     const cita = await prisma.cita.findUnique({
       where: { id: citaId }
     });
@@ -264,7 +293,37 @@ const eliminarCita = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Cita no encontrada' });
     }
 
-    // Ejecutar eliminación atómica en transacción
+    if (alcance === 'ESTA_Y_SIGUIENTES') {
+      const citasFuturas = await obtenerCitasFuturasDeSerie(cita, prisma);
+      const idsAEliminar = [citaId, ...citasFuturas.map(c => c.id)];
+
+      await prisma.$transaction(async (tx) => {
+        // Eliminar notificaciones de todas las citas involucradas
+        await tx.logNotificacion.deleteMany({
+          where: { citaId: { in: idsAEliminar } }
+        });
+        
+        // Eliminar las citas
+        await tx.cita.deleteMany({
+          where: { id: { in: idsAEliminar } }
+        });
+
+        // Si el paciente no tiene más citas ni expedientes, limpiar registro huérfano
+        const totalCitasRestantes = await tx.cita.count({ where: { pacienteId: cita.pacienteId } });
+        const totalExpRestantes = await tx.expediente.count({ where: { pacienteId: cita.pacienteId } });
+        if (totalCitasRestantes === 0 && totalExpRestantes === 0) {
+          await tx.paciente.delete({ where: { id: cita.pacienteId } });
+        }
+      });
+
+      return res.json({ 
+        success: true, 
+        message: `${idsAEliminar.length} citas de la serie eliminadas permanentemente`,
+        totalEliminadas: idsAEliminar.length
+      });
+    }
+
+    // Ejecutar eliminación atómica individual en transacción
     await prisma.$transaction(async (tx) => {
       // Eliminar notificaciones si las hay
       await tx.logNotificacion.deleteMany({
@@ -291,7 +350,7 @@ const eliminarCita = async (req, res) => {
   }
 };
 
-// Actualizar cita completa (editar datos del paciente, fecha/hora, notas, color y monto)
+// Actualizar cita completa (editar datos del paciente, fecha/hora, notas, color, monto y propagación en serie)
 const editarCita = async (req, res) => {
   try {
     const citaId = parseId(req.params.id);
@@ -300,7 +359,7 @@ const editarCita = async (req, res) => {
     }
 
     const validData = editarCitaAdminSchema.parse(req.body);
-    const { nombre, telefono, email, enlaceZoom, fechaHora, categoria, notas, color, monto } = validData;
+    const { nombre, telefono, email, enlaceZoom, fechaHora, categoria, notas, color, monto, estado_cita, alcance = 'SOLO_ESTA' } = validData;
 
     const emailLimpio = email ? email.trim() : (email === '' ? '' : null);
     const telefonoLimpio = telefono ? telefono.trim() : (telefono === '' ? '' : null);
@@ -351,7 +410,96 @@ const editarCita = async (req, res) => {
       }
     }
 
-    // Actualizar datos del paciente preservando naturaleza de origen y unicidad de email
+    // 1. Si el alcance es ESTA_Y_SIGUIENTES: ejecutar propagación en serie con transacción atómica
+    if (alcance === 'ESTA_Y_SIGUIENTES') {
+      let deltaMs = 0;
+      if (fechaHora) {
+        const nuevaFechaMs = new Date(fechaHora).getTime();
+        const fechaOrigMs = new Date(citaExistente.fechaHora).getTime();
+        deltaMs = nuevaFechaMs - fechaOrigMs;
+      }
+
+      const citasFuturas = await obtenerCitasFuturasDeSerie(citaExistente, prisma);
+
+      const resultado = await prisma.$transaction(async (tx) => {
+        // Actualizar datos del paciente
+        if (nombreFinal || telefono !== undefined || email !== undefined || enlaceZoom !== undefined || (montoValido !== undefined && !eraBloqueo && !eraGrupal)) {
+          const emailFinal = (eraBloqueo || eraGrupal)
+            ? citaExistente.paciente.email
+            : (emailLimpio ? emailLimpio : citaExistente.paciente.email);
+
+          await tx.paciente.update({
+            where: { id: citaExistente.pacienteId },
+            data: {
+              ...(nombreFinal && { nombre: nombreFinal }),
+              ...(telefono !== undefined && { telefono: (eraBloqueo || eraGrupal) ? '' : (telefono ? telefono.trim() : '') }),
+              ...(email !== undefined && { email: emailFinal }),
+              ...(enlaceZoom !== undefined && { enlaceZoom: eraBloqueo ? null : (enlaceZoom ? enlaceZoom.trim() : null) }),
+              ...(montoValido !== undefined && !eraBloqueo && !eraGrupal && { tarifaDefecto: montoValido })
+            }
+          });
+        }
+
+        // Actualizar cita base
+        const citaBaseActualizada = await tx.cita.update({
+          where: { id: citaId },
+          data: {
+            ...(fechaHora && { fechaHora: new Date(fechaHora) }),
+            categoria: categoriaFinal,
+            ...(color && { color }),
+            ...(montoValido !== undefined && { monto: montoValido }),
+            ...(estado_cita && { estado_cita })
+          },
+          include: { paciente: true }
+        });
+
+        // Actualizar citas futuras vinculadas
+        let totalActualizadas = 1;
+        for (const citaFutura of citasFuturas) {
+          const updateData = {};
+
+          // RF-5, RF-6: Desplazar fechaHora solo si no está REALIZADA
+          if (deltaMs !== 0 && citaFutura.estado_cita !== 'REALIZADA') {
+            const fechaFuturaOrig = new Date(citaFutura.fechaHora).getTime();
+            updateData.fechaHora = new Date(fechaFuturaOrig + deltaMs);
+          }
+
+          // Color
+          if (color) {
+            updateData.color = color;
+          }
+
+          // RF-7: Monto (si no ha sido pagada, aplicar nuevo monto; si ya está PAGADO, conservar pago)
+          if (montoValido !== undefined && citaFutura.estado_pago !== 'PAGADO') {
+            updateData.monto = montoValido;
+          }
+
+          // Notas / Categoría limpias
+          if (categoriaFinal !== undefined) {
+            updateData.categoria = categoriaFinal;
+          }
+
+          if (Object.keys(updateData).length > 0) {
+            await tx.cita.update({
+              where: { id: citaFutura.id },
+              data: updateData
+            });
+            totalActualizadas++;
+          }
+        }
+
+        return { citaBaseActualizada, totalActualizadas };
+      });
+
+      return res.json({ 
+        success: true, 
+        message: `${resultado.totalActualizadas} citas de la serie actualizadas exitosamente`, 
+        data: resultado.citaBaseActualizada,
+        totalActualizadas: resultado.totalActualizadas
+      });
+    }
+
+    // 2. Alcance SOLO_ESTA: Actualización individual
     if (nombreFinal || telefono !== undefined || email !== undefined || enlaceZoom !== undefined || (montoValido !== undefined && !eraBloqueo && !eraGrupal)) {
       const emailFinal = (eraBloqueo || eraGrupal)
         ? citaExistente.paciente.email
@@ -376,7 +524,8 @@ const editarCita = async (req, res) => {
         ...(fechaHora && { fechaHora: new Date(fechaHora) }),
         categoria: categoriaFinal,
         ...(color && { color }),
-        ...(montoValido !== undefined && { monto: montoValido })
+        ...(montoValido !== undefined && { monto: montoValido }),
+        ...(estado_cita && { estado_cita })
       },
       include: { paciente: true }
     });
@@ -419,6 +568,53 @@ const actualizarMontoCita = async (req, res) => {
   }
 };
 
+// Función auxiliar para obtener citas futuras de una serie recurrente
+const obtenerCitasFuturasDeSerie = async (citaActual, dbClient = prisma) => {
+  if (!citaActual) return [];
+
+  // 1. Si la cita tiene serieId explícito
+  if (citaActual.serieId) {
+    return await dbClient.cita.findMany({
+      where: {
+        serieId: citaActual.serieId,
+        id: { not: citaActual.id },
+        fechaHora: { gte: citaActual.fechaHora },
+        estado_cita: { not: 'CANCELADA' }
+      },
+      orderBy: { fechaHora: 'asc' },
+      include: { paciente: true }
+    });
+  }
+
+  // 2. Fallback para citas creadas antes de la existencia de serieId:
+  // Detectar si la categoría o notas tienen formato "(Sesión X/N)"
+  const matchSesion = (citaActual.categoria || '').match(/\(Sesión\s+(\d+)\/(\d+)\)/i);
+  if (matchSesion && citaActual.pacienteId) {
+    const totalSerie = parseInt(matchSesion[2], 10);
+    const sesionActual = parseInt(matchSesion[1], 10);
+
+    if (totalSerie > 1 && sesionActual < totalSerie) {
+      // Buscar citas del mismo paciente con fechaHora posterior no canceladas
+      const candidatas = await dbClient.cita.findMany({
+        where: {
+          pacienteId: citaActual.pacienteId,
+          id: { not: citaActual.id },
+          fechaHora: { gte: citaActual.fechaHora },
+          estado_cita: { not: 'CANCELADA' }
+        },
+        orderBy: { fechaHora: 'asc' },
+        include: { paciente: true }
+      });
+
+      // Filtrar las que compartan el total de la serie ej "(Sesión Y/totalSerie)"
+      const regexCompat = new RegExp(`\\(Sesión\\s+\\d+\\/${totalSerie}\\)`, 'i');
+      return candidatas.filter(c => regexCompat.test(c.categoria || ''));
+    }
+  }
+
+  return [];
+};
+
 module.exports = {
   obtenerCitas,
   actualizarEstadoCita,
@@ -427,5 +623,6 @@ module.exports = {
   editarCita,
   actualizarMontoCita,
   cancelarCita,
-  eliminarCita
+  eliminarCita,
+  obtenerCitasFuturasDeSerie
 };

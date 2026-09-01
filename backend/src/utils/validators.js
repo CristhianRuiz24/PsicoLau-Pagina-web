@@ -67,7 +67,9 @@ const editarCitaAdminSchema = z.object({
     z.coerce.number().min(0, "El monto debe ser mayor o igual a 0"),
     z.literal(''),
     z.null()
-  ]).optional()
+  ]).optional(),
+  estado_cita: z.enum(['PENDIENTE', 'CONFIRMADA', 'REALIZADA', 'CANCELADA']).optional(),
+  alcance: z.enum(['SOLO_ESTA', 'ESTA_Y_SIGUIENTES']).optional().default('SOLO_ESTA')
 });
 
 // Schema para notas clínicas de expedientes

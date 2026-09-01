@@ -761,6 +761,128 @@ body {
   line-height: 1.2;
 }
 
+/* Estilos para Cita Cancelada en Matriz Semanal */
+.appointment-block.is-cancelled {
+  opacity: 0.78;
+  filter: saturate(0.65);
+  border-left: 3.5px solid #ef4444 !important;
+  background-image: repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(0, 0, 0, 0.04) 8px, rgba(0, 0, 0, 0.04) 16px);
+}
+
+.appointment-block.is-cancelled .patient-name {
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+  opacity: 0.92;
+}
+
+.badge-cancelada {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  background: #ffffff;
+  color: #dc2626;
+  padding: 1.5px 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  line-height: 1.2;
+}
+
+.btn-cancel-quick {
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 1px 2px;
+  font-size: 0.82rem;
+  line-height: 1;
+  color: #94a3b8;
+  transition: transform 0.15s ease, color 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-cancel-quick:hover {
+  color: #dc2626 !important;
+  transform: scale(1.25);
+}
+
+.btn-check-cancelada {
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 1px 2px;
+  font-size: 0.88rem;
+  line-height: 1;
+  color: #ef4444 !important;
+  transition: transform 0.15s ease, color 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-check-cancelada:hover {
+  transform: scale(1.25);
+  color: #dc2626 !important;
+}
+
+.card-btn.btn-reactivar:hover {
+  color: #15803d !important;
+  transform: scale(1.25);
+}
+
+/* Selector de Estado en Modal de Edición */
+.estado-cita-selector {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.btn-estado-opt {
+  flex: 1;
+  padding: 0.55rem 0.4rem;
+  border-radius: 8px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: all 0.15s ease;
+}
+
+.btn-estado-opt:hover {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+}
+
+.btn-estado-opt.active[data-estado="PENDIENTE"] {
+  border-color: #3b82f6;
+  background: #eff6ff;
+  color: #1d4ed8;
+  box-shadow: 0 1px 3px rgba(59, 130, 246, 0.2);
+}
+
+.btn-estado-opt.active[data-estado="REALIZADA"] {
+  border-color: #22c55e;
+  background: #f0fdf4;
+  color: #15803d;
+  box-shadow: 0 1px 3px rgba(34, 197, 94, 0.2);
+}
+
+.btn-estado-opt.active[data-estado="CANCELADA"] {
+  border-color: #ef4444;
+  background: #fef2f2;
+  color: #b91c1c;
+  box-shadow: 0 1px 3px rgba(239, 68, 68, 0.2);
+}
+
 /* Badges informativos fijos para subtítulo del modal en modo edición */
 .badge-tipo-info {
   display: inline-flex;
@@ -1094,6 +1216,88 @@ body {
   line-height: 1.4;
 }
 
+/* Badges informativos de tipo de registro y serie en cabeceras de modal */
+.badge-tipo-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 9999px;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+}
+
+.badge-tipo-info.info-cita {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.badge-tipo-info.info-grupal {
+  background: #f3e8ff;
+  color: #7e22ce;
+  border: 1px solid #e9d5ff;
+}
+
+.badge-tipo-info.info-bloqueo {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.badge-tipo-info.info-serie {
+  background: #ede9fe;
+  color: #6d28d9;
+  border: 1px solid #ddd6fe;
+  box-shadow: 0 1px 2px rgba(109, 40, 217, 0.12);
+  transition: all 0.2s ease;
+}
+
+.badge-tipo-info.info-serie i {
+  color: #7c3aed;
+}
+
+/* Botones de Selección de Alcance en Citas Recurrentes */
+.btn-alcance-solo {
+  background: #f0fdfa !important;
+  color: #0f766e !important;
+  border: 1.5px solid #5eead4 !important;
+  transition: all 0.15s ease;
+}
+
+.btn-alcance-solo:hover {
+  background: #ccfbf1 !important;
+  transform: translateY(-1px);
+}
+
+.btn-alcance-serie {
+  background: #7c3aed !important;
+  color: #ffffff !important;
+  border: 1.5px solid #6d28d9 !important;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.25);
+  transition: all 0.15s ease;
+}
+
+.btn-alcance-serie:hover {
+  background: #6d28d9 !important;
+  transform: translateY(-1px);
+}
+
+.btn-alcance-eliminar-serie {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border: 1.5px solid #b91c1c !important;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+  transition: all 0.15s ease;
+}
+
+.btn-alcance-eliminar-serie:hover {
+  background: #b91c1c !important;
+  transform: translateY(-1px);
+}
+
 /* ==========================================================================
    RESPONSIVE DESIGN (TABLETS & MÓVILES)
    ========================================================================== */
@@ -1268,8 +1472,47 @@ body {
   .card-quick-actions-bar .card-btn {
     flex: 1 1 0;
     min-width: 0;
-    padding: 3px 0;
-    font-size: 0.78rem;
+    padding: 4px 0;
+    font-size: 0.84rem;
+  }
+
+  /* Acciones en tarjeta de cita para pantallas táctiles */
+  .card-actions-capsule {
+    gap: 4px !important;
+  }
+  .btn-check-completada,
+  .btn-check-cancelada,
+  .btn-cancel-quick {
+    min-width: 26px !important;
+    min-height: 26px !important;
+    font-size: 0.92rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* Selector de Estado de Cita en Móvil */
+  .estado-cita-selector {
+    gap: 0.35rem !important;
+  }
+  .btn-estado-opt {
+    min-height: 44px !important;
+    font-size: 0.82rem !important;
+    padding: 0.5rem 0.2rem !important;
+  }
+
+  /* Modal de Alcance de Serie en Móviles */
+  #modalAlcanceSerie {
+    padding: 0.8rem !important;
+  }
+  #modalAlcanceSerie > div {
+    padding: 1.4rem 1.1rem !important;
+    max-width: 100% !important;
+    border-radius: 14px !important;
+  }
+  .alcance-actions-container .btn {
+    min-height: 48px !important;
+    font-size: 0.94rem !important;
   }
 
   /* Modales en Móviles */
@@ -1287,17 +1530,27 @@ body {
   .modal-dialog-reporte,
   .modal-expediente-dialog,
   #modalNuevaCita > div,
-  #modalNotasSemana > div,
   #modalAuditoriaPagos > div,
   #modalDirectorioExpedientes > div,
-  #modalDatosPago > div,
   #dialogoDetalleSesion {
     padding: 0.75rem 0.85rem !important;
     width: 100% !important;
     max-width: 100% !important;
     border-radius: 14px !important;
-    height: 97vh !important;
-    max-height: 97vh !important;
+    height: 96vh !important;
+    max-height: 96vh !important;
+  }
+
+  /* Modales Compactos (Datos de Pago, Notas de la Semana) */
+  #modalDatosPago > div,
+  #modalNotasSemana > div {
+    padding: 1.1rem 0.9rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 14px !important;
+    height: auto !important;
+    max-height: 90vh !important;
+    margin: auto !important;
   }
 
   /* Modal de Expediente Clínico (Optimización de Espacio) */

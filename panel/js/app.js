@@ -376,6 +376,29 @@ document.addEventListener('DOMContentLoaded', () => {
         data.frecuencia = document.getElementById('nc_frecuencia').value || 'SEMANAL';
       }
 
+      if (esEdicion && tipoEfectivo === 'CITA') {
+        const estadoCitaVal = document.getElementById('nc_estado_cita')?.value;
+        if (estadoCitaVal) {
+          data.estado_cita = estadoCitaVal;
+        }
+      }
+
+      if (esEdicion && typeof citasCache !== 'undefined') {
+        const citaOriginal = citasCache.find(c => c.id === parseInt(id));
+        if (citaOriginal) {
+          const futuras = window.detectarCitasFuturasEnMemoria ? window.detectarCitasFuturasEnMemoria(citaOriginal) : [];
+          if (futuras.length > 0) {
+            const alcanceElegido = await window.pedirAlcanceSerie('EDITAR', futuras.length);
+            if (!alcanceElegido) {
+              btn.disabled = false;
+              btn.innerHTML = '<i class="fa-solid fa-check" style="margin-right: 4px;"></i> Guardar Cambios';
+              return;
+            }
+            data.alcance = alcanceElegido;
+          }
+        }
+      }
+
       try {
         const url = esEdicion ? `${API_URL}/agenda/citas/${id}` : `${API_URL}/agenda/citas`;
         const method = esEdicion ? 'PUT' : 'POST';

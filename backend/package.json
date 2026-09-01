@@ -4,6 +4,7 @@
   "description": "Backend para PsicoLau (Fase 1)",
   "main": "src/index.js",
   "scripts": {
+    "build": "prisma generate && prisma db push",
     "start": "node src/index.js",
     "dev": "nodemon src/index.js"
   },

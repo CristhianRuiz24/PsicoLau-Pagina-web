@@ -59,6 +59,7 @@ model Cita {
   categoria        String?            
   color            String?            @default("#3EB8CC")
   monto            Float              @default(500)
+  serieId          String?
   estado_cita      EstadoCita         @default(PENDIENTE)
   estado_pago      EstadoPago         @default(PENDIENTE)
   notificaciones   LogNotificacion[]
@@ -67,6 +68,7 @@ model Cita {
 
   @@index([pacienteId])
   @@index([fechaHora])
+  @@index([serieId])
 }
 
 model LogNotificacion {

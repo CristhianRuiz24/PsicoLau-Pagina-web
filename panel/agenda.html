@@ -314,6 +314,25 @@
           </div>
         </div>
 
+        <!-- Selector de Estado de Cita (Solo en Modo Edición) -->
+        <div id="seccionEstadoCita" class="form-group" style="display: none; margin-bottom: 1.1rem;">
+          <label style="display: block; margin-bottom: 0.4rem; font-weight: 600; font-size: 0.88rem; color: #334155;">
+            <i class="fa-solid fa-traffic-light" style="color: var(--turquesa); margin-right: 4px;"></i> Estado de la sesión:
+          </label>
+          <div class="estado-cita-selector">
+            <button type="button" class="btn-estado-opt active" data-estado="PENDIENTE" onclick="seleccionarEstadoModal('PENDIENTE')">
+              <i class="fa-solid fa-clock"></i> <span>Pendiente</span>
+            </button>
+            <button type="button" class="btn-estado-opt" data-estado="REALIZADA" onclick="seleccionarEstadoModal('REALIZADA')">
+              <i class="fa-solid fa-circle-check"></i> <span>Realizada</span>
+            </button>
+            <button type="button" class="btn-estado-opt" data-estado="CANCELADA" onclick="seleccionarEstadoModal('CANCELADA')">
+              <i class="fa-solid fa-circle-xmark"></i> <span>Cancelada</span>
+            </button>
+          </div>
+          <input type="hidden" id="nc_estado_cita" value="PENDIENTE">
+        </div>
+
         <!-- Selector de Color (Easy Table Style) -->
         <div id="seccionColorBloque" class="form-group" style="margin-bottom: 1.3rem;">
           <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;"><i class="fa-solid fa-palette" style="color: var(--turquesa); margin-right: 4px;"></i> Color del bloque:</label>
@@ -809,6 +828,31 @@
         <button type="button" class="btn" style="background: var(--gris-calido); width: auto; padding: 0.45rem 1.4rem;" onclick="cerrarModalReporteMensual()">Cerrar</button>
       </div>
 
+    </div>
+  </div>
+
+  <!-- Modal de Selección de Alcance para Citas Recurrentes en Serie -->
+  <div id="modalAlcanceSerie" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10500; justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(2px);">
+    <div style="background: white; padding: 1.8rem; border-radius: 16px; width: 100%; max-width: 440px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align: center; animation: modalPop 0.2s ease-out;">
+      <div id="modalAlcanceIconContainer" style="width: 54px; height: 54px; border-radius: 50%; background: #ede9fe; color: #7c3aed; display: inline-flex; align-items: center; justify-content: center; font-size: 1.6rem; margin-bottom: 0.8rem;">
+        <i id="modalAlcanceIcon" class="fa-solid fa-repeat"></i>
+      </div>
+      <h3 id="modalAlcanceTitulo" style="font-size: 1.25rem; font-weight: 800; color: #1e293b; margin: 0 0 0.4rem 0;">Guardar Cambios en Serie</h3>
+      <p id="modalAlcanceDescripcion" style="font-size: 0.88rem; color: #64748b; margin: 0 0 1.3rem 0; line-height: 1.45;">
+        Esta cita forma parte de una serie recurrente. ¿A cuáles sesiones deseas aplicar esta acción?
+      </p>
+
+      <div class="alcance-actions-container" style="display: flex; flex-direction: column; gap: 0.65rem;">
+        <button type="button" id="btnAlcanceSoloEsta" class="btn btn-alcance-solo" style="width: 100%; min-height: 46px; justify-content: center; font-size: 0.92rem; font-weight: 700;">
+          <i class="fa-solid fa-calendar-day" style="margin-right: 6px;"></i> <span id="lblAlcanceSoloEsta">Solo esta cita</span>
+        </button>
+        <button type="button" id="btnAlcanceEstaYSiguientes" class="btn btn-alcance-serie" style="width: 100%; min-height: 46px; justify-content: center; font-size: 0.92rem; font-weight: 700;">
+          <i class="fa-solid fa-forward-step" style="margin-right: 6px;"></i> <span id="lblAlcanceEstaYSiguientes">Esta y las siguientes</span>
+        </button>
+        <button type="button" id="btnAlcanceCancelar" class="btn" style="width: 100%; min-height: 42px; justify-content: center; font-size: 0.88rem; background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; font-weight: 600;">
+          Cancelar
+        </button>
+      </div>
     </div>
   </div>
 

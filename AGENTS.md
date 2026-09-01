@@ -1,145 +1,98 @@
 # AGENTS.md — Web PsicoLau & Suite Clínica
 
-> Instrucciones de contexto para cualquier agente de IA (Claude, Antigravity, etc.) que trabaje en este repo.
+> Instrucciones de contexto operativo para cualquier agente de IA (Antigravity, Claude, etc.) que trabaje en este repositorio.
 > Principios innegociables del proyecto: ver [`docs/constitution.md`](./docs/constitution.md).
-> `CLAUDE.md` se limita a `@AGENTS.md`.
+> Reglas específicas de Antigravity: ver [`GEMINI.md`](./GEMINI.md).
+> Bitácora de sesiones y decisiones históricas: ver [`docs/historial.md`](./docs/historial.md).
 
-## 🧠 Contexto del Proyecto
+---
+
+## 🧠 1. Contexto del Proyecto
 Sitio web profesional y sistema de gestión clínica para **Ana Laura Gómez Díaz**, psicóloga clínica, bajo la marca **PSICOLAU — Psicología y Resiliencia** (dominio oficial: `psicolau.com`).
-Es un espacio de salud mental: prioriza la calidez, claridad, ética y confianza clínica por encima de plantillas corporativas genéricas.
+Es un espacio de salud mental que prioriza calidez, claridad, ética, confidencialidad médica y confianza clínica por encima de plantillas corporativas genéricas.
 
 ---
 
-## 🔁 Flujo de trabajo: Spec-Driven Development (SDD)
+## 🔁 2. Flujo de Trabajo: Spec-Driven Development (SDD)
 
-Este proyecto sigue un flujo SDD para toda funcionalidad nueva o cambio significativo:
+El proyecto sigue rigurosamente el flujo SDD para cualquier funcionalidad o cambio:
 
-**Constitución → Spec → Clarificación → Plan → Tareas → Implementación (una tarea a la vez, tests primero) → Validación → Cambio (primero la spec, luego el código)**
+**Constitución → Spec (EARS) → Clarificación (QA) → Plan → Tareas (atómicas) → Implementación (tests primero) → Validación (RF por RF) → Cambio (spec primero, luego código)**
 
-- Los principios no negociables están en [`docs/constitution.md`](./docs/constitution.md). No se contradicen sin discutirlo explícitamente primero.
-- Cada feature nueva vive en `specs/00X-nombre-feature/`, con `spec.md` (requisitos RF-x en notación EARS), `plan.md` (módulos, modelo de datos, decisiones técnicas) y `tasks.md` (tareas T1..Tn con "Hecho cuando: ...").
-- Antes de escribir código para una feature nueva, debe existir su `spec.md` aprobado. Cambios pequeños de mantenimiento (fixes, ajustes menores) no requieren spec formal, pero sí deben respetar la constitución.
-- Al terminar una tarea, no se marca como hecha sin cumplir la "Verificación obligatoria" (más abajo).
-
----
-
-## 📜 Fuente de Verdad para Contenido
-- **Datos Profesionales**: Toda la información sobre formación, credenciales, experiencia, libros y publicaciones proviene del currículum vitae oficial en `Recursos para que use la IA/Currículum Vitae Laura Gómez-3.pdf` (ignorado en git por privacidad).
-- **Recursos Gráficos**: El logo oficial y fotografías se encuentran en la carpeta `assets/`.
-- **Regla Estricta**: No inventar credenciales, cifras ni diagnósticos clínicos. Si falta un dato o testimonio, consultar en lugar de asumir.
+1. **Constitución**: Principios innegociables en [`docs/constitution.md`](./docs/constitution.md). Nunca se modifican sin solicitud explícita del usuario.
+2. **Especificación**: Cada feature nueva se gestiona en `specs/00X-[nombre]/spec.md` con requisitos funcionales numerados (`RF-1`, `RF-2`...) en notación EARS.
+3. **Memoria de Sesión Persistente**:
+   - `overview/session.md`: Estado actual, qué se logró, próximo paso.
+   - `overview/tasks.md`: Tareas activas, estado y bloqueos.
+   - `overview/architecture.md`: Diagrama vivo de arquitectura y decisiones técnicas.
+   - `overview/learning.md`: Propuestas de reglas para revisión del usuario.
 
 ---
 
-## 🌐 Estructura del Proyecto
+## 🛠️ 3. Stack Tecnológico y Arquitectura
 
-### 1. Sitio Web Público (Multipágina)
-* `index.html` — Inicio, presentación, resumen de áreas y testimonios destacados.
-* `sobre-mi.html` — Biografía profesional, enfoque terapéutico y formación de Laura Gómez.
-* `areas-de-atencion.html` — 5 áreas de atención especializadas (Neurodivergencias en adultos, Trauma/Violencia, Ansiedad/Depresión, Neuropsicología clínica, Relaciones y vínculos).
-* `experiencia.html` — Trayectoria, medios de comunicación, artículos de divulgación y ponencias.
-* `libros.html` — Libros y publicaciones recomendadas.
-* `preguntas-frecuentes.html` — Acordeón interactivo con 15 preguntas frecuentes sobre el proceso terapéutico.
-* `terapias-grupales.html` — Convocatoria y detalles para módulos de terapia grupal (Autismo en adultos).
-* `testimonios.html` — Muro de testimonios (tarjetas, videos integrados y audios reales).
-* `contacto.html` — Formulario de contacto directo conectado al backend.
+### 🌐 Frontend Público (Multipágina Estática)
+- **Tecnologías**: HTML5 semántico, CSS3 Vanilla, JavaScript Vanilla (sin frameworks ni build steps).
+- **Alojamiento**: Cloudflare Pages (`psicolau.com`) con cabeceras de seguridad CSP/HSTS en `_headers`.
+- **Estructura**: `index.html`, `sobre-mi.html`, `areas-de-atencion.html`, `experiencia.html`, `libros.html`, `preguntas-frecuentes.html`, `terapias-grupales.html`, `testimonios.html`, `contacto.html`, `privacidad.html`.
 
-### 2. Panel Administrativo & Agenda Clínica (`/panel`)
-* `panel/index.html` — Inicio de sesión seguro para la psicóloga mediante autenticación JWT.
-* `panel/agenda.html` — Suite de gestión y calendario semanal tipo Easy Table con:
-  - **Matriz Semanal Continua**: Rango horario de 07:00 a.m. a 12:00 a.m.
-  - **Citas Recurrentes**: Creación automatizada en lote de 2 a 12 sesiones semanales/quincenales con numeración `(Sesión X/N)`.
-  - **Buscador Global de Pacientes**: Búsqueda en tiempo real con historial (pasado, presente y futuro) y navegación directa a la semana de la cita (`irAFechaDeCita`).
-  - **Cita Realizada / Completada**: Botón interactivo con sonido armónico generado por Web Audio API (`reproducirSonidoCompletada`), animación pop (`@keyframes popComplete`) y etiqueta `✓ Realizada`.
-  - **Paleta de 24 Colores + Selector Libre**: 24 tonos clínicos/vibrantes organizados por familias más botón con gotero para selección personalizada de cualquier color hexadecimal con cálculo automático de contraste.
-  - **Cápsula Flotante de Acciones**: Botones de WhatsApp, edición, papelera y verificación en fondo translúcido (`.card-actions-capsule`) para 100% de contraste visual.
-  - **Recordatorios por WhatsApp**: Integración directa con `wa.me` y formato internacional (+52).
-  - **Control de Pagos y Métricas en Vivo**: Alternador `[ 💳 Pagado / ⏳ Por Pagar ]` con cálculo instantáneo de ingresos y citas pendientes.
-  - **Bloqueos de Horario**: Marcado de horarios no disponibles con textura rayada distintiva.
-  - **Bloc de Notas Semanal**: Espacio para pendientes clínicos con autoguardado en `localStorage`.
-  - **Modo de Impresión Limpio**: Reglas `@media print` optimizadas para PDF o papel.
+### 🩺 Panel Administrativo & Suite Clínica (`/panel`)
+- **Tecnologías**: HTML5, CSS3, JavaScript modularizado en `panel/js/`:
+  - `config.js`: Configuración dinámica de API (local `localhost:3000` vs producción `api.psicolau.com`) y soporte LAN para móviles.
+  - `audio.js`: Notificaciones acústicas y retroalimentación armónica con Web Audio API.
+  - `whatsapp.js`: Integración de mensajes preformateados para `wa.me` con prefijos internacionales (+20 países).
+  - `pagos.js`: Auditoría de pagos en 1 clic y reporte contable mensual con KPIs y exportación (WhatsApp, CSV UTF-8 BOM, Impresión/PDF).
+  - `agenda.js`: Matriz semanal interactiva (7:00 a.m. - 12:00 a.m.), citas recurrentes (2 a 12 sesiones), autocompletado y paleta de 24 colores + gotero.
+  - `expedientes.js`: Suite de expedientes médicos cifrados, historial cronológico interactivo, buscador y edición in-place (97vh).
+  - `app.js`: Inicialización, buscador global a pantalla completa y orquestación de vistas.
 
-### 3. Backend & Base de Datos (`/backend`)
-* **Stack**: Node.js, Express, Prisma ORM, CORS, Helmet, dotenv, jsonwebtoken, bcryptjs, Nodemailer.
-* **Base de Datos**: PostgreSQL en Supabase (`DATABASE_URL`), con proyectos separados para dev y producción.
-* **Modelos Prisma** (`backend/prisma/schema.prisma`):
-  - `Usuario`: Credenciales administrativas protegidas con bcrypt.
-  - `Paciente`: Directorio de pacientes (nombre, email, teléfono, notas).
-  - `Cita`: Citas programadas (`fechaHora`, `estado_cita`, `estado_pago`, `categoria`, `color`, relación con paciente).
-* **Seguridad & Autenticación**:
-  - Tokens JWT firmados con clave criptográfica de 256 bits (`JWT_SECRET`), expiración de 24 horas.
-  - Middleware de protección de rutas `authMiddleware.js`.
-  - CORS restringido a un arreglo explícito de dominios permitidos (sin bypass de desarrollo).
-* **Servicio de Correo Oficial**:
-  - Proveedor: Resend API a través de SMTP (`smtp.resend.com`).
-  - Dominio Verificado: `psicolau.com`.
-  - Remitente Oficial: `PsicoLau <contacto@psicolau.com>` (`REMITENTE` en `.env`).
-  - Correo de Destino: `lince_lg@yahoo.com.mx` (`CORREO_LAURA` en `.env`).
-  - Encabezado `replyTo`: Configurado con el correo del paciente para respuesta inmediata con un clic.
-  - *Nota*: Ya no se utiliza Formspree; todos los correos se procesan mediante el endpoint propio `POST /api/contacto`.
+### ⚙️ Backend & Base de Datos (`/backend`)
+- **Tecnologías**: Node.js, Express, Prisma ORM, CORS, Helmet, dotenv, jsonwebtoken, bcrypt, Resend API / Nodemailer, Zod.
+- **Base de Datos**: PostgreSQL en Supabase (`DATABASE_URL`), con proyectos completamente separados para Desarrollo y Producción.
+- **Cifrado Clínico**: `AES-256-GCM` simétrico a nivel de aplicación (`backend/src/utils/crypto.js`) con `ENCRYPTION_KEY` de 256 bits y tag de autenticación. Datos sensibles nunca tocan la base de datos en texto plano.
+- **Modelos Prisma** (`backend/prisma/schema.prisma`):
+  - `Usuario`: Credenciales administrativas con hash bcrypt.
+  - `Paciente`: Directorio de pacientes (nombre, email, teléfono, tarifaDefecto, enlaceZoom, notas).
+  - `Cita`: Citas programadas y recurrentes (`fechaHora`, `estado_cita`, `estado_pago`, `categoria`, `color`, `monto`, `esGrupal`).
+  - `Expediente`: Notas de sesiones con 8 campos clínicos cifrados en AES-256-GCM.
 
 ---
 
-## 🎨 Identidad Visual y Paleta Oficial
-- **Rosa/Coral Marca**: `#EC5E86` — Títulos, elementos de marca y acentos cálidos.
-- **Turquesa Oficial**: `#3EB8CC` — Botones de acción, enlaces principales y estados activos.
-- **Gris Cálido**: `#8C8C8C` — Texto de cuerpo (nunca negro puro para reducir fatiga visual).
-- **Tipografía**: Sans-serif limpia, moderna y accesible (Google Fonts).
+## 🎨 4. Identidad Visual y Paleta Oficial
+- **Rosa/Coral Marca**: `#EC5E86` — Títulos, identidad institucional y acentos cálidos.
+- **Turquesa Acción**: `#1E94A8` (calibrado WCAG 2.1 AA) / `#3EB8CC` — Botones de acción, enlaces activos y foco.
+- **Gris Cálido Texto**: `#8C8C8C` / `#4A4A4A` — Texto de lectura (evitar negro puro para reducir fatiga visual).
+- **Fondo General**: `#FDFBF9` — Tono marfil suave y cálido.
+- **Tipografía**: Sans-serif moderna, legible y accesible (Google Fonts: Outfit / Inter).
 
 ---
 
-## ⚙️ Comandos
+## 💻 5. Comandos de Desarrollo
 
-- **Frontend local**: servir la raíz del repo con Live Server u otro servidor estático (`http://127.0.0.1:5500`).
-- **Backend local**: `cd backend && npm install && npm start` (usa `.env` local apuntando al proyecto Supabase de desarrollo).
-- **Generar cliente Prisma**: `npx prisma generate`.
-- **Sincronizar esquema con la DB de desarrollo**: `npx prisma db push`.
-- **Crear usuario admin real (sin bypass)**: `node backend/scripts/seedUser.js <email> <password>`.
-
----
-
-## 🔒 Reglas de Seguridad y Despliegue
-1. **Cloudflare Pages**: Despliegue estático del frontend desde GitHub con headers de seguridad CSP en `_headers`.
-2. **Render (Backend API)**: Alojamiento del servicio Node.js (`/backend`) con root directory `backend`, build command `npm install && npx prisma generate`, start command `npm start` y subdominio oficial `api.psicolau.com`.
-3. **Matriz de Variables de Entorno (Local vs Producción)**:
-   | Variable | Local (`backend/.env`) | Producción (Render Dashboard) | Notas |
-   |---|---|---|---|
-   | `NODE_ENV` | `development` | `production` | **Crítico**: activa modo estricto CORS y oculta stack traces. |
-   | `FRONTEND_URL` | `http://localhost:5500` | `https://psicolau.com` | **Recordatorio**: En Render debe apuntar a la URL pública oficial. |
-   | `DATABASE_URL` | Supabase Dev Pooler | Supabase Prod Pooler | Proyectos separados con connection pooler port 5432 / 6543. |
-   | `PORT` | `3000` | `10000` (o asignado por Render) | Render asigna `PORT` automáticamente si no se define. |
-   | `ENCRYPTION_KEY` | 32 bytes hex (64 caracteres) | 32 bytes hex de producción | Cifrado AES-256-GCM para datos clínicos de expedientes. |
-   | `JWT_SECRET` | Clave secreta dev | Clave secreta criptográfica prod | Firma de tokens administrativos (8h de validez por seguridad). |
-   | `RESEND_API_KEY` | API Key Resend | API Key Resend | Envío transaccional vía `smtp.resend.com`. |
-   | `REMITENTE` | `PsicoLau <contacto@psicolau.com>` | `PsicoLau <contacto@psicolau.com>` | Dominio verificado `psicolau.com`. |
-   | `CORREO_LAURA` | `lince_lg@yahoo.com.mx` | `lince_lg@yahoo.com.mx` | Destino de notificaciones y avisos clínicos. |
-4. **Recordatorio para Despliegue en Producción (UptimeRobot)**:
-   - En el plan gratuito de Render, el servicio se suspende tras 15 minutos de inactividad.
-   - **Acción requerida al desplegar**: Configurar un monitor gratuito en [UptimeRobot](https://uptimerobot.com/) o [cron-job.org](https://cron-job.org/) que envíe una petición HTTP cada 10 minutos a `https://api.psicolau.com/api/health`.
-5. **Blindaje `.gitignore`**:
-   - Variables de entorno (`.env`, `.env.*`, `**/.env`).
-   - Dependencias (`node_modules/`, `**/node_modules/`).
-   - Documentos privados (`Recursos para que use la IA/`, `caso-estudio/`).
-   - Archivos de sistema y logs (`*.log`, `.DS_Store`, `Thumbs.db`).
-   - Plantilla de configuración pública: `backend/.env.example`.
-6. **Protocolo de Pruebas Locales Obligatorias antes de Despliegue**:
-   - Todo cambio nuevo, refactorización o funcionalidad grande debe desarrollarse y probarse **únicamente en el entorno local** (`http://127.0.0.1:5500` con la base de datos de pruebas en Supabase).
-   - **No ejecutar `git push origin main`** de forma prematura: solo realizar el push a producción cuando el usuario haya revisado, probado y aprobado explícitamente el resultado en su navegador local.
+- **Frontend local**: Servidor estático en la raíz (ej. Live Server en `http://127.0.0.1:5500` o `npx serve -l 5500`).
+- **Backend local**: `cd backend && npm install && npm run dev` (o `npm start`, puerto `3000`).
+- **Generar cliente Prisma**: `cd backend && npx prisma generate`.
+- **Sincronizar esquema DB Dev**: `cd backend && npx prisma db push`.
+- **Crear/actualizar usuario admin real**: `node backend/scripts/seedUser.js <email> <password>`.
+- **Ejecutar tests automatizados**: `node backend/scripts/testContabilidad.js` (y scripts correspondientes en `backend/scripts/`).
 
 ---
 
-## ✅ Verificación obligatoria al terminar una tarea
-
-Ningún cambio se da por terminado sin comprobar lo siguiente:
-
-1. **No se rompió nada existente**: el flujo de agenda, login y confirmación de citas sigue funcionando en local.
-2. **Respeta la constitución**: revisar `docs/constitution.md` — en particular cifrado de datos sensibles, separación dev/prod, ausencia de bypasses de auth y CORS explícito.
-3. **Coincide con la spec (si la feature tiene una)**: cada RF de `specs/00X-.../spec.md` tiene al menos un test o verificación manual que lo cubre.
-4. **Probado en local antes de producción**: nunca se hace push a `main` sin aprobación explícita del usuario tras probar en su navegador.
-5. **Sin secretos filtrados**: ningún `.env`, credencial o dato de paciente en claro queda expuesto en el commit.
+## 🔐 6. Reglas Innegociables de Seguridad y Despliegue
+1. **Cifrado de datos sensibles**: Todo dato clínico de expedientes se cifra/descifra exclusivamente en backend con AES-256-GCM.
+2. **Separación Dev / Producción**: Nunca ejecutar pruebas, scripts de seed o migraciones contra la base de datos de producción de Supabase.
+3. **Autenticación real**: Sin bypasses ni usuarios por defecto (`admin/admin`). Tokens JWT de 8h con `JWT_SECRET` criptográfico.
+4. **CORS explícito**: Lista blanca estricta (`psicolau.com`, `www.psicolau.com`, `api.psicolau.com` y `FRONTEND_URL` local). Sin `*` en producción.
+5. **Protección de Secretos**: `.env` completamente blindado en `.gitignore`. Nunca registrar credenciales ni datos clínicos en Git.
+6. **No push prematuro**: No ejecutar `git push` a `origin/main` sin verificación y aprobación explícita del usuario tras probar en local.
 
 ---
 
-## 📝 Historial de Trabajo y Registro de Decisiones
+## ✅ 7. Verificación Obligatoria al Terminar Cualquier Tarea
 
-La bitácora detallada de sesiones y decisiones técnicas históricas se encuentra en [`docs/historial.md`](./docs/historial.md). Consultar ese archivo bajo demanda si se requiere contexto sobre cambios previos.
-
+Ningún cambio o tarea se da por terminado sin comprobar:
+1. **No-regresión en la suite clínica**: La agenda semanal, login, creación de citas, visualización de expedientes y cálculo de pagos continúan funcionando al 100%.
+2. **Cumplimiento de la Constitución**: Verificar cifrado, autenticación JWT, CORS y aislamiento dev/prod.
+3. **Verificación de la Spec**: Cada Requisito Funcional (`RF-x`) de la spec activa cuenta con su prueba (script o verificación guiada) superada.
+4. **Validación de tests backend**: Ejecutar los scripts de verificación en `backend/scripts/` relevantes.
+5. **Revisión de no-exposición de secretos**: Ningún secreto, token o variable sensible queda expuesta en código ni commits.

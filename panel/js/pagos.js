@@ -265,7 +265,9 @@ function obtenerCitasReportePeriodo() {
   if (!Array.isArray(citasCache)) return [];
 
   return citasCache.filter(c => {
-    if (c.estado_cita === 'CANCELADA') return false;
+    // Excluir canceladas a menos que ya se hayan pagado previamente (ingreso real)
+    if (c.estado_cita === 'CANCELADA' && c.estado_pago !== 'PAGADO') return false;
+
     const esBloqueo = (c.categoria && c.categoria.startsWith('[BLOQUEO]')) || (c.paciente && c.paciente.nombre && c.paciente.nombre.startsWith('[BLOQUEO]'));
     if (esBloqueo) return false;
 
@@ -358,7 +360,8 @@ function renderReporteMensual() {
     const nombre = c.paciente ? c.paciente.nombre.replace('[GRUPAL]', '').trim() : 'Paciente';
     const monto = typeof c.monto === 'number' ? c.monto : 500;
     const esPagado = c.estado_pago === 'PAGADO';
-    const esRealizada = c.estado_cita === 'REALIZADA' || c.estado_cita === 'CONFIRMADA';
+    const esCancelada = c.estado_cita === 'CANCELADA';
+    const esRealizada = !esCancelada && (c.estado_cita === 'REALIZADA' || c.estado_cita === 'CONFIRMADA');
 
     html += `
       <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s;">
@@ -372,9 +375,12 @@ function renderReporteMensual() {
           ${monto === 0 ? '<span style="background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 4px; font-size: 0.78rem;">$0 Cortesía</span>' : formatter.format(monto)}
         </td>
         <td style="padding: 0.65rem 0.8rem; text-align: center;">
-          ${esRealizada 
-            ? `<span style="font-size: 0.72rem; padding: 2px 7px; border-radius: 4px; background: #dcfce7; color: #15803d; font-weight: 700;">✓ Realizada</span>`
-            : `<span style="font-size: 0.72rem; padding: 2px 7px; border-radius: 4px; background: #fef9c3; color: #854d0e; font-weight: 700;">Agendada</span>`
+          ${esCancelada
+            ? `<span style="font-size: 0.72rem; padding: 2px 7px; border-radius: 4px; background: #fee2e2; color: #991b1b; font-weight: 700;">✕ Cancelada (Pagada)</span>`
+            : (esRealizada 
+              ? `<span style="font-size: 0.72rem; padding: 2px 7px; border-radius: 4px; background: #dcfce7; color: #15803d; font-weight: 700;">✓ Realizada</span>`
+              : `<span style="font-size: 0.72rem; padding: 2px 7px; border-radius: 4px; background: #fef9c3; color: #854d0e; font-weight: 700;">Agendada</span>`
+            )
           }
         </td>
         <td style="padding: 0.65rem 0.8rem; text-align: center;">
@@ -424,11 +430,14 @@ window.copiarReporteParaWhatsApp = function() {
     const nombre = c.paciente ? c.paciente.nombre.replace('[GRUPAL]', '').trim() : 'Paciente';
     const monto = typeof c.monto === 'number' ? c.monto : 500;
     const esPagado = c.estado_pago === 'PAGADO';
+    const esCancelada = c.estado_cita === 'CANCELADA';
 
     if (monto === 0) sesionesCortesia++; else sesionesConCosto++;
     if (esPagado) { totalCobrado += monto; countPagadas++; } else { totalPorPagar += monto; countPendientes++; }
 
-    const estadoPagoTxt = esPagado ? 'Pagado' : '⏳ Por Pagar';
+    let estadoPagoTxt = esPagado ? 'Pagado' : '⏳ Por Pagar';
+    if (esCancelada && esPagado) estadoPagoTxt = 'Pagado · Cita Cancelada';
+
     const montoTxt = monto === 0 ? '$0 (Cortesía)' : `$${monto.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
     lineasSesiones.push(`• ${fechaTxt} — ${nombre}: ${montoTxt} [${estadoPagoTxt}]`);
   });
