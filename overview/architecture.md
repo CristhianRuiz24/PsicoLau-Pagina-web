@@ -50,3 +50,5 @@ graph TD
 - **Modularización del Panel en 7 Archivos JS (2026-08-25)**: Descomposición de 1,600+ líneas monolíticas en módulos especializados con responsabilidades desacopladas.
 - **Autenticación Estricta JWT de 8 Horas (2026-08-28)**: Alineación de sesión de login con la jornada laboral clínica y supresión de accesos de prueba.
 - **Resend API por HTTPS (2026-08-28)**: Envío de correos por puerto 443 para evitar bloqueos SMTP tradicionales en Render.
+- **Gestión Atómica de Citas Recurrentes en Serie `serieId` (2026-09-01)**: Vinculación de citas en serie mediante `serieId` UUID único, con modales de alcance (`SOLO_ESTA` vs `ESTA_Y_SIGUIENTES`), protección de sesiones `REALIZADA` y preservación de pagos previos.
+- **Visibilidad y Control de Asistencia de Citas Canceladas (2026-09-01)**: Permanencia visual atenuada en matriz semanal para evitar sobreagendamiento involuntario, toggles rápidos en 1 clic y cómputo contable exacto.
