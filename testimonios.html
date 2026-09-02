@@ -37,9 +37,25 @@
   }
   </script>
 
-  <link rel="icon" type="image/png" href="assets/logo.png">
-  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="icon" type="image/png" href="assets/logo-nav.webp">
+
+  <!-- Preconexión a CDNs externos -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preconnect" href="https://i.ytimg.com">
+
+  <!-- Google Fonts optimizado no bloqueante -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap"></noscript>
+
+  <!-- Font Awesome asíncrono no bloqueante -->
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+
+  <!-- Estilos Críticos -->
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -48,7 +64,7 @@
   <header>
     <div class="container navbar">
       <a href="index.html" class="logo-container">
-        <img src="assets/logo.png" alt="Logo de PsicoLau">
+        <img src="assets/logo-nav.webp" alt="Logo de PsicoLau" width="50" height="50">
       </a>
       <button class="menu-toggle" aria-label="Abrir menú"><i class="fas fa-bars"></i></button>
       <nav>
@@ -65,6 +81,9 @@
       </nav>
     </div>
   </header>
+
+  <!-- Contenido Principal -->
+  <main id="main-content">
 
   <!-- Hero Testimonios -->
   <section class="section" style="padding-bottom: 2rem;">
@@ -85,43 +104,43 @@
         <div class="card testimonial-card">
           <i class="fas fa-quote-left quote-icon"></i>
           <p class="testimonial-text">"Lo que más valoro es el compromiso de la terapeuta, su enfoque completamente neuroafirmativo y respetuoso; ha sido un espacio seguro en todo momento. El impacto de la terapia ha sido bastante fuerte en mi vida. <strong>Aceptación y compromiso.</strong>"</p>
-          <h4 class="testimonial-author">Cris. persona queer. 22 años</h4>
+          <p class="testimonial-author">Cris. persona queer. 22 años</p>
         </div>
 
         <div class="card testimonial-card">
           <i class="fas fa-quote-left quote-icon"></i>
           <p class="testimonial-text">"Me sentí muy bien, acompañada y con un trato muy humano y profesional. El mayor impacto positivo fue que <strong>me sentí segura para iniciar una nueva etapa</strong> en mi vida. Muy buena experiencia."</p>
-          <h4 class="testimonial-author">Silvia Castañeda Garduño</h4>
+          <p class="testimonial-author">Silvia Castañeda Garduño</p>
         </div>
 
         <div class="card testimonial-card">
           <i class="fas fa-quote-left quote-icon"></i>
           <p class="testimonial-text">"Valoro la manera tan respetuosa, empática, profesional y comprometida con la que la psicóloga me ha acompañado. Me hace sentir segura que su enfoque está <strong>basado en evidencias</strong> y es bastante enriquecedor que se haya formado con ayuda de sus propias experiencias."</p>
-          <h4 class="testimonial-author">Mujer autista, 29 años</h4>
+          <p class="testimonial-author">Mujer autista, 29 años</p>
         </div>
 
         <div class="card testimonial-card">
           <i class="fas fa-quote-left quote-icon"></i>
           <p class="testimonial-text">"Desde hace años sospechaba de ser neurodivergente pero no lograba encontrar un profesionista que tomara en cuenta mis sospechas sin invalidarme. Con esta terapia, el enmascaramiento se ha reducido y aprendes a <strong>vivir desde la neuroafirmación</strong>."</p>
-          <h4 class="testimonial-author">P. Mujer autista AACC, 39 años</h4>
+          <p class="testimonial-author">P. Mujer autista AACC, 39 años</p>
         </div>
 
         <div class="card testimonial-card">
           <i class="fas fa-quote-left quote-icon"></i>
           <p class="testimonial-text">"El enfoque terapéutico me ayudó a sentirme segura e identificar mis inseguridades. El mayor impacto positivo que he notado desde que inicié es que <strong>sé ser yo misma</strong>. Me dio mucha tranquilidad."</p>
-          <h4 class="testimonial-author">Evelyn</h4>
+          <p class="testimonial-author">Evelyn</p>
         </div>
 
         <div class="card testimonial-card">
           <i class="fas fa-quote-left quote-icon"></i>
           <p class="testimonial-text">"Desde el primer día me sentí segura y fue más sencillo de lo que pensé el poder expresar lo que me pasaba sin miedo de ser juzgada o ser vista como una persona ridícula. Dejé de tener pensamientos intrusivos. <strong>Me ayudó mucho cuando ya no podía más</strong>."</p>
-          <h4 class="testimonial-author">Mariela</h4>
+          <p class="testimonial-author">Mariela</p>
         </div>
         
         <div class="card testimonial-card">
           <i class="fas fa-quote-left quote-icon"></i>
           <p class="testimonial-text">"Valoro la validación y la información compartida con soporte visual y ejercicios. Me he podido conocer más y dado a ello puedo ir soltando cosas que me costaban. <strong>La mejor terapia que he tenido</strong>."</p>
-          <h4 class="testimonial-author">anonimo</h4>
+          <p class="testimonial-author">anonimo</p>
         </div>
 
         <div class="card testimonial-card">
@@ -133,7 +152,7 @@
               Tu navegador no soporta el elemento de audio.
             </audio>
           </div>
-          <h4 class="testimonial-author">Paciente, Terapia Individual</h4>
+          <p class="testimonial-author">Paciente, Terapia Individual</p>
         </div>
 
       </div>
@@ -147,11 +166,19 @@
       
       <!-- Testimonios en Video -->
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
-        <div class="video-responsive-container">
-          <iframe src="https://www.youtube.com/embed/yDNqqzNFWqs?rel=0" title="Testimonio de Terapia Grupal" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <div class="video-facade" role="button" tabindex="0" data-video-id="yDNqqzNFWqs" data-video-title="Testimonio de Terapia Grupal" aria-label="Reproducir testimonio en video de Terapia Grupal">
+          <img src="https://i.ytimg.com/vi/yDNqqzNFWqs/hqdefault.jpg" alt="Miniatura de Testimonio de Terapia Grupal" class="video-facade-thumb" width="480" height="360" loading="lazy">
+          <button class="video-facade-play" aria-hidden="true" tabindex="-1">
+            <i class="fas fa-play"></i>
+          </button>
+          <span class="video-facade-title">Ver testimonio de Terapia Grupal <i class="fas fa-play-circle" style="margin-left: 6px;"></i></span>
         </div>
-        <div class="video-responsive-container">
-          <iframe src="https://www.youtube.com/embed/LO-H5erLEsU?rel=0" title="Testimonio de Terapia Grupal" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <div class="video-facade" role="button" tabindex="0" data-video-id="LO-H5erLEsU" data-video-title="Testimonio de Terapia Grupal" aria-label="Reproducir testimonio en video de Terapia Grupal">
+          <img src="https://i.ytimg.com/vi/LO-H5erLEsU/hqdefault.jpg" alt="Miniatura de Testimonio de Terapia Grupal" class="video-facade-thumb" width="480" height="360" loading="lazy">
+          <button class="video-facade-play" aria-hidden="true" tabindex="-1">
+            <i class="fas fa-play"></i>
+          </button>
+          <span class="video-facade-title">Ver testimonio de Terapia Grupal <i class="fas fa-play-circle" style="margin-left: 6px;"></i></span>
         </div>
       </div>
 
@@ -160,43 +187,43 @@
         <div class="card testimonial-card">
           <i class="fas fa-quote-left quote-icon" style="color: var(--color-primary);"></i>
           <p class="testimonial-text">"Cuando llegué a la terapia, lo hice llena de miedos y una profunda sensación de soledad. Poco a poco comprendí que yo también merecía una oportunidad para sanar. Hoy <strong>mi historia es de resiliencia</strong> y me llena de orgullo saber que soy una persona más fuerte, capaz y feliz."</p>
-          <h4 class="testimonial-author">Luna Sanchez</h4>
+          <p class="testimonial-author">Luna Sanchez</p>
         </div>
 
         <div class="card testimonial-card">
           <i class="fas fa-quote-left quote-icon" style="color: var(--color-primary);"></i>
           <p class="testimonial-text">"Llegué muy angustiada y desorientada. Esta terapia me ayudó muchísimo a saber valorarme, trabajar en mi salud emocional y saber defenderme del maltrato. En este momento me siento valiente para enfrentarme a la vida y sobre todo <strong>me siento libre</strong>."</p>
-          <h4 class="testimonial-author">C.P.</h4>
+          <p class="testimonial-author">C.P.</p>
         </div>
 
         <div class="card testimonial-card">
           <i class="fas fa-quote-left quote-icon" style="color: var(--color-primary);"></i>
           <p class="testimonial-text">"Para mí ha sido un faro de luz. Ver y escuchar que no era la única y que hay personas reales que ya han avanzado tanto y están del otro lado de la oscuridad me muestra la esperanza de que también podré estar allí. Es el lugar donde <strong>me sentí escuchada y vista</strong>, donde me volví a sentir real."</p>
-          <h4 class="testimonial-author">Miryam Garduño</h4>
+          <p class="testimonial-author">Miryam Garduño</p>
         </div>
 
         <div class="card testimonial-card">
           <i class="fas fa-quote-left quote-icon" style="color: var(--color-primary);"></i>
           <p class="testimonial-text">"Yo creía que lo tenía todo resuelto. Pero la terapia me dio paz y herramientas que me son muy útiles; si tomas la terapia descubrirás muchas cosas útiles y buenas que harán de ti un neurodivergente mejor. El mayor alivio ha sido el <strong>sentimiento de pertenencia</strong>."</p>
-          <h4 class="testimonial-author">Jorge Castro</h4>
+          <p class="testimonial-author">Jorge Castro</p>
         </div>
 
         <div class="card testimonial-card">
           <i class="fas fa-quote-left quote-icon" style="color: var(--color-primary);"></i>
           <p class="testimonial-text">"El hecho de que la terapeuta también sea neurodivergente y su enfoque sea neuroafirmativo hace una gran diferencia. En este proceso encontrarás <strong>herramientas prácticas</strong> para tener una vida en bienestar."</p>
-          <h4 class="testimonial-author">Erika Rodríguez</h4>
+          <p class="testimonial-author">Erika Rodríguez</p>
         </div>
 
         <div class="card testimonial-card">
           <i class="fas fa-quote-left quote-icon" style="color: var(--color-primary);"></i>
           <p class="testimonial-text">"Recomendaría este grupo a un adulto autista recién diagnosticado diciéndole: <strong>Va a apoyarte mucho</strong>, no tienes que fingir nada ni dejarte de nadie. Fue liberador."</p>
-          <h4 class="testimonial-author">Laura Elena Sosa Cáceres</h4>
+          <p class="testimonial-author">Laura Elena Sosa Cáceres</p>
         </div>
 
         <div class="card testimonial-card">
           <i class="fas fa-quote-left quote-icon" style="color: var(--color-primary);"></i>
           <p class="testimonial-text">"Cuando llegué estaba totalmente deprimida; solo quería que mi esposo volviera a casa. Pero gracias a las terapias pude aprender que soy valiosa, inteligente, y que <strong>no necesito de él para ser feliz</strong>. Ahora tengo las herramientas para evitar ser maltratada de nuevo."</p>
-          <h4 class="testimonial-author">Y.R.A. (Mujer, 49 años)</h4>
+          <p class="testimonial-author">Y.R.A. (Mujer, 49 años)</p>
         </div>
 
       </div>
@@ -212,11 +239,13 @@
     </div>
   </section>
 
+  </main>
+
   <!-- Footer -->
   <footer>
     <div class="container">
       <div class="logo-container" style="display: flex; justify-content: center; margin-bottom: 1rem;">
-        <img src="assets/logo.png" alt="PsicoLau Logo" style="height: 40px;">
+        <img src="assets/logo-nav.webp" alt="PsicoLau Logo" width="40" height="40" style="height: 40px; width: auto;" loading="lazy">
       </div>
       <div style="text-align: center; margin-bottom: 0.5rem; display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap;">
         <a href="preguntas-frecuentes.html" style="color: var(--color-text-light); text-decoration: underline; font-size: 0.95rem;">Preguntas Frecuentes</a>

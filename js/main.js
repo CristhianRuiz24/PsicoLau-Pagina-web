@@ -100,5 +100,35 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // Fachadas de video ligeras (Click-to-Play con youtube-nocookie)
+  const videoFacades = document.querySelectorAll('.video-facade');
+  videoFacades.forEach(facade => {
+    const playVideo = () => {
+      const videoId = facade.getAttribute('data-video-id');
+      const title = facade.getAttribute('data-video-title') || 'Video de testimonio';
+      if (!videoId) return;
+
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0`;
+      iframe.title = title;
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      iframe.allowFullscreen = true;
+
+      facade.innerHTML = '';
+      facade.appendChild(iframe);
+      facade.style.cursor = 'default';
+      facade.classList.add('video-playing');
+    };
+
+    facade.addEventListener('click', playVideo);
+    facade.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        playVideo();
+      }
+    });
+  });
 });
+
 

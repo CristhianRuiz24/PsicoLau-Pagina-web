@@ -35,21 +35,34 @@
    - Renovación transparente de sesión JWT en `localStorage` (sin cerrar la sesión de Laura).
    - Suite completa de 8 tests automatizados pasando al 100% (incluyendo `testCambioPassword.js`).
 
+6. **Spec 006 (Optimización Web Integral y Rendimiento PageSpeed / Core Web Vitals) — 100% Implementada y Verificada**:
+   - **CSP Hardening & Eliminación de Errores (`_headers`)**: Incorporados `https://static.cloudflareinsights.com` en `script-src`, `https://cloudflareinsights.com` en `connect-src` y `https://www.youtube-nocookie.com` en `frame-src`. Consola con 0 errores y 0 avisos de CSP.
+   - **Contraste Accesibilidad & Estilos Globales (`css/style.css`)**: Calibrado `--color-text-light` a `#5C5C5C` superando la ratio WCAG 2.1 AA (5.5:1). Definidos estilos de botones y fachada de video.
+   - **Activos Modernos WebP Dimensionados (`assets/`)**: Generadas versiones WebP con alta compresión visual: `logo.webp` (600x600 px), `logo-nav.webp` (120x120 px, 8.4 KB), `foto-laura.webp` (800x1103 px, 73 KB), `libro-manual.webp` (600x776 px, 39 KB) y `libro-resiliencia.webp` (599x926 px, 81 KB).
+   - **Fachada de Video Click-to-Play (`testimonios.html`, `js/main.js`)**: Sustituidos los reproductores pesados de YouTube por componentes `.video-facade` interactivos accesibles por ratón y teclado, inyectando `youtube-nocookie.com` bajo demanda. Ahorro de más de 2 MB de transferencia inicial y eliminación total de cookies de rastreo (`YSC`, `VISITOR_INFO1_LIVE`).
+   - **Optimización Integral de las 10 Páginas HTML**:
+     - Preconexión a Google Fonts y CDNs de Cloudflare.
+     - Carga asíncrona no bloqueante de Google Fonts y Font Awesome con respaldo `<noscript>`.
+     - Delimitación del contenido principal con elemento semántico `<main id="main-content">`.
+     - Dimensionado explícito `width` y `height` en todas las imágenes visibles para erradicar el CLS a 0.
+     - Priorización LCP con `fetchpriority="high"` en imágenes de cabecera y `loading="lazy"` en las restantes.
+   - **Verificación Integral y No Regresión**:
+     - 8/8 tests automatizados del backend pasando al 100% de éxito.
+     - Navegación visual y funcional en navegador local validada con 0 errores.
+
 ## En qué quedó
 
-- Spec 005 (Cambio de contraseña desde el panel) 100% completada, verificada y desplegada a producción en la rama `main` (commit `912344c`).
-- Toda la batería de 8 tests automatizados backend en verde.
-- Repositorio completamente limpio y sincronizado con `origin/main`.
-- Servidores locales activos (Backend en puerto 3000, Frontend en puerto 5500).
+- Spec 006 (Optimización Web Integral PageSpeed) 100% completada, verificada y documentada en local.
+- Todas las 10 páginas públicas optimizadas para Core Web Vitals (LCP, CLS, FID/INP).
+- Cero regresiones en la suite médica y contable (`/panel`).
+- Repositorio listo para revisión y despliegue a producción.
 
 ## Próximo paso
 
-- Probar el nuevo flujo en producción una vez propagado y esperar feedback de Laura.
-
-
-
+- Presentar el reporte detallado al usuario para su aprobación y proceder al commit/push hacia producción en Cloudflare Pages.
 
 ## Notas rápidas
 
 - Servidores locales: Frontend en puerto 5500 (`http://localhost:5500`), Backend en puerto 3000 (`http://localhost:3000`).
 - Base de datos: Supabase Dev en local; sin alteraciones en producción.
+

@@ -1,9 +1,17 @@
 # Tareas Activas — PsicoLau
 
 ## En Progreso
-*Ninguna tarea activa por el momento.*
+*Ninguna.*
 
 ## Completadas Recientemente
+- [x] **Spec 006: Optimización Web Integral y Rendimiento PageSpeed (Core Web Vitals)**:
+  - [x] T1: Hardening de Seguridad CSP y Eliminación de Errores de Consola (`_headers`)
+  - [x] T2: Calibración de Estilos Globales, Accesibilidad y Fachada de Video (`css/style.css`)
+  - [x] T3: Generación de Activos Modernos WebP Dimensionados (`assets/`)
+  - [x] T4: Fachada de Video Ligera y Privacidad en Testimonios (`testimonios.html`, `js/main.js`)
+  - [x] T5: Optimización Integral de las 10 Páginas Públicas HTML (LCP, CLS, Preconexión, `<main>`)
+  - [x] T6: Verificación Integral de No Regresión y Auditoría Final (Tests backend 8/8 OK, Browser QA 100% OK)
+
 - [x] **Spec 005: Cambio de Contraseña desde el Panel Clínico**:
   - [x] T1: Validación Zod y Endpoint Backend de Cambio de Contraseña (`backend/src/controllers/authController.js`, `backend/src/routes/auth.js`)
   - [x] T2: Interfaz Visual (Botón en Cabecera y Modal de Seguridad) (`panel/agenda.html`, `panel/panel.css`)
