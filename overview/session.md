@@ -37,13 +37,15 @@
 
 ## En qué quedó
 
-- Spec 005 (Cambio de contraseña) implementada, probada en backend (8/8 tests) y validada en navegador.
-- Lista para confirmación del usuario para commitear y desplegar a producción.
-
+- Spec 005 (Cambio de contraseña desde el panel) 100% completada, verificada y desplegada a producción en la rama `main` (commit `912344c`).
+- Toda la batería de 8 tests automatizados backend en verde.
+- Repositorio completamente limpio y sincronizado con `origin/main`.
+- Servidores locales activos (Backend en puerto 3000, Frontend en puerto 5500).
 
 ## Próximo paso
 
-- Esperar nuevas solicitudes o feedback de Laura tras el uso en producción.
+- Probar el nuevo flujo en producción una vez propagado y esperar feedback de Laura.
+
 
 
 

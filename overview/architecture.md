@@ -60,4 +60,5 @@ graph TD
   - **Logging Seguro en Producción**: Implementación de `backend/src/utils/logger.js` que en producción oculta stack traces, rutas internas y queries de base de datos para prevenir fugas de información.
   - **Rate Limiting Diferenciado en Agenda**: Aplicación de `agendaMutationLimiter` (45 req/min) en rutas de escritura (`POST`, `PUT`, `DELETE`, `PATCH`) preservando 120 req/min para lecturas (`GET`).
   - **Hardening CSP en Cloudflare**: Inclusión de `object-src 'none';` y `base-uri 'self';` en `_headers`.
+- **Cambio Seguro de Contraseña in-app con Rate Limiting y Renovación JWT (2026-09-02, Spec 005)**: Endpoint `PUT /api/auth/cambiar-password` protegido con `verificarToken`, `cambiarPasswordLimiter` (5 req / 15 min), validación Zod y hash `bcrypt` (costo 10). Renovación transparente de JWT en `localStorage` manteniendo la sesión activa sin forzar relogin y modal con alternancia de visibilidad 👁️.
 
