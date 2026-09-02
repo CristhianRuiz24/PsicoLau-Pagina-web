@@ -63,13 +63,12 @@ function renderAuditoriaPagos() {
   const subtitulo = document.getElementById('auditSubtitulo');
   if (!container) return;
 
-  // Filtrar citas no canceladas, que no sean bloqueos ni terapias grupales y que tengan estado de pago PENDIENTE
+  // Filtrar citas no canceladas, que no sean bloqueos y que tengan estado de pago PENDIENTE
   let pendientes = citasCache.filter(c => {
     if (c.estado_cita === 'CANCELADA') return false;
     if (c.estado_pago === 'PAGADO') return false;
     const esBloqueo = (c.categoria && c.categoria.startsWith('[BLOQUEO]')) || (c.paciente && c.paciente.nombre && c.paciente.nombre.startsWith('[BLOQUEO]'));
-    const esGrupal = (c.categoria && c.categoria.startsWith('[GRUPAL]')) || (c.paciente && c.paciente.nombre && c.paciente.nombre.startsWith('[GRUPAL]'));
-    return !esBloqueo && !esGrupal;
+    return !esBloqueo;
   });
 
   if (filtroAuditoriaActual === 'SEMANA') {
@@ -114,8 +113,8 @@ function renderAuditoriaPagos() {
   pendientes.forEach(c => {
     const d = new Date(c.fechaHora);
     const fechaTxt = `${diasSemana[d.getDay()]} ${d.getDate()} ${meses[d.getMonth()]} ${d.getFullYear()} — ${d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true })}`;
-    const nombre = c.paciente ? c.paciente.nombre.replace('[BLOQUEO]', '').trim() : 'Paciente';
-    const notas = (c.categoria || '').replace('[BLOQUEO]', '').trim();
+    const nombre = c.paciente ? c.paciente.nombre.replace(/^\[(BLOQUEO|GRUPAL|EVALUACION)\]\s*/i, '').trim() : 'Paciente';
+    const notas = (c.categoria || '').replace(/^\[(BLOQUEO|GRUPAL|EVALUACION)\]\s*/i, '').trim();
     const esCompletada = c.estado_cita === 'REALIZADA' || c.estado_cita === 'CONFIRMADA';
 
     html += `
@@ -261,6 +260,17 @@ window.irMesActualReporte = function() {
   renderReporteMensual();
 };
 
+function detectarTipoCita(c) {
+  const cat = c.categoria || '';
+  const nom = (c.paciente && c.paciente.nombre) ? c.paciente.nombre : '';
+  const email = (c.paciente && c.paciente.email) ? c.paciente.email : '';
+
+  if (cat.startsWith('[BLOQUEO]') || nom.startsWith('[BLOQUEO]')) return 'BLOQUEO';
+  if (cat.startsWith('[GRUPAL]') || nom.startsWith('[GRUPAL]') || email.startsWith('grupal-')) return 'GRUPAL';
+  if (cat.startsWith('[EVALUACION]') || nom.startsWith('[EVALUACION]')) return 'EVALUACION';
+  return 'INDIVIDUAL';
+}
+
 function obtenerCitasReportePeriodo() {
   if (!Array.isArray(citasCache)) return [];
 
@@ -270,9 +280,6 @@ function obtenerCitasReportePeriodo() {
 
     const esBloqueo = (c.categoria && c.categoria.startsWith('[BLOQUEO]')) || (c.paciente && c.paciente.nombre && c.paciente.nombre.startsWith('[BLOQUEO]'));
     if (esBloqueo) return false;
-
-    const esGrupal = (c.categoria && c.categoria.startsWith('[GRUPAL]')) || (c.paciente && c.paciente.nombre && c.paciente.nombre.startsWith('[GRUPAL]')) || (c.paciente && c.paciente.email && c.paciente.email.startsWith('grupal-'));
-    if (esGrupal) return false;
 
     const d = new Date(c.fechaHora);
     return d.getMonth() === mesReporteSeleccionado && d.getFullYear() === anioReporteSeleccionado;
@@ -293,7 +300,8 @@ function renderReporteMensual() {
   let countPagadas = 0;
 
   citasMes.forEach(c => {
-    const monto = typeof c.monto === 'number' ? c.monto : 500;
+    const tipo = detectarTipoCita(c);
+    const monto = typeof c.monto === 'number' ? c.monto : (tipo === 'EVALUACION' ? 4000 : 500);
     if (monto === 0) {
       sesionesCortesia++;
     } else {
@@ -357,11 +365,21 @@ function renderReporteMensual() {
     const d = new Date(c.fechaHora);
     const fechaTxt = `${diasSemana[d.getDay()]} ${d.getDate()} ${meses[d.getMonth()]}`;
     const horaTxt = d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true });
-    const nombre = c.paciente ? c.paciente.nombre.replace('[GRUPAL]', '').trim() : 'Paciente';
-    const monto = typeof c.monto === 'number' ? c.monto : 500;
+    const tipo = detectarTipoCita(c);
+    const nombre = c.paciente ? c.paciente.nombre.replace(/^\[(BLOQUEO|GRUPAL|EVALUACION)\]\s*/i, '').trim() : 'Paciente';
+    const monto = typeof c.monto === 'number' ? c.monto : (tipo === 'EVALUACION' ? 4000 : 500);
     const esPagado = c.estado_pago === 'PAGADO';
     const esCancelada = c.estado_cita === 'CANCELADA';
     const esRealizada = !esCancelada && (c.estado_cita === 'REALIZADA' || c.estado_cita === 'CONFIRMADA');
+
+    let badgeTipoHtml = '';
+    if (tipo === 'GRUPAL') {
+      badgeTipoHtml = '<span class="badge-servicio-grupal" style="font-size: 0.7rem; font-weight: 800; background: #f3e8ff; color: #6b21a8; padding: 2px 7px; border-radius: 4px; display: inline-flex; align-items: center; gap: 3px;"><i class="fa-solid fa-people-group"></i> Grupal</span>';
+    } else if (tipo === 'EVALUACION') {
+      badgeTipoHtml = '<span class="badge-servicio-evaluacion" style="font-size: 0.7rem; font-weight: 800; background: #e0e7ff; color: #4338ca; padding: 2px 7px; border-radius: 4px; display: inline-flex; align-items: center; gap: 3px;"><i class="fa-solid fa-brain"></i> Evaluación</span>';
+    } else {
+      badgeTipoHtml = '<span class="badge-servicio-individual" style="font-size: 0.7rem; font-weight: 700; background: #e0f2fe; color: #0369a1; padding: 2px 7px; border-radius: 4px; display: inline-flex; align-items: center; gap: 3px;"><i class="fa-solid fa-user"></i> Individual</span>';
+    }
 
     html += `
       <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s;">
@@ -369,7 +387,10 @@ function renderReporteMensual() {
           <span>${fechaTxt}</span> <span style="font-size: 0.8rem; color: #64748b; font-weight: 500;">· ${horaTxt}</span>
         </td>
         <td style="padding: 0.65rem 0.8rem; font-weight: 600; color: #334155;">
-          ${escapeHtml(nombre)}
+          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <span>${escapeHtml(nombre)}</span>
+            ${badgeTipoHtml}
+          </div>
         </td>
         <td style="padding: 0.65rem 0.8rem; text-align: right; font-weight: 800; color: ${monto === 0 ? '#64748b' : '#0f172a'};">
           ${monto === 0 ? '<span style="background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 4px; font-size: 0.78rem;">$0 Cortesía</span>' : formatter.format(monto)}
@@ -406,63 +427,91 @@ window.togglePagoDesdeReporte = async function(id) {
   renderReporteMensual();
 };
 
-// Exportador a WhatsApp / Mensaje de texto estructurado
-window.copiarReporteParaWhatsApp = function() {
+// Exportador oficial categorizado para la contadora de Laura
+window.copiarReporteParaContadora = function() {
   const citasMes = obtenerCitasReportePeriodo();
   const mesesNombres = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
   const mesNombre = mesesNombres[mesReporteSeleccionado];
   const anio = anioReporteSeleccionado;
 
-  let totalSesiones = citasMes.length;
-  let sesionesConCosto = 0;
-  let sesionesCortesia = 0;
-  let totalCobrado = 0;
-  let totalPorPagar = 0;
-  let countPagadas = 0;
-  let countPendientes = 0;
-
-  const lineasSesiones = [];
-  const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  const individualesPorMonto = {};
+  let totalSesionesGrupales = 0;
+  let totalIngresoGrupal = 0;
+  const evaluacionesPorMonto = {};
+  let sesionesGratuitas = 0;
+  let totalIngresos = 0;
 
   citasMes.forEach(c => {
-    const d = new Date(c.fechaHora);
-    const fechaTxt = `${diasSemana[d.getDay()]} ${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')} ${d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true })}`;
-    const nombre = c.paciente ? c.paciente.nombre.replace('[GRUPAL]', '').trim() : 'Paciente';
-    const monto = typeof c.monto === 'number' ? c.monto : 500;
+    const tipo = detectarTipoCita(c);
+    const monto = typeof c.monto === 'number' ? c.monto : (tipo === 'EVALUACION' ? 4000 : 500);
     const esPagado = c.estado_pago === 'PAGADO';
-    const esCancelada = c.estado_cita === 'CANCELADA';
 
-    if (monto === 0) sesionesCortesia++; else sesionesConCosto++;
-    if (esPagado) { totalCobrado += monto; countPagadas++; } else { totalPorPagar += monto; countPendientes++; }
-
-    let estadoPagoTxt = esPagado ? 'Pagado' : '⏳ Por Pagar';
-    if (esCancelada && esPagado) estadoPagoTxt = 'Pagado · Cita Cancelada';
-
-    const montoTxt = monto === 0 ? '$0 (Cortesía)' : `$${monto.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
-    lineasSesiones.push(`• ${fechaTxt} — ${nombre}: ${montoTxt} [${estadoPagoTxt}]`);
+    if (monto === 0) {
+      sesionesGratuitas++;
+    } else if (esPagado) {
+      totalIngresos += monto;
+      if (tipo === 'GRUPAL') {
+        totalSesionesGrupales++;
+        totalIngresoGrupal += monto;
+      } else if (tipo === 'EVALUACION') {
+        evaluacionesPorMonto[monto] = (evaluacionesPorMonto[monto] || 0) + 1;
+      } else {
+        individualesPorMonto[monto] = (individualesPorMonto[monto] || 0) + 1;
+      }
+    }
   });
 
-  const texto = `📊 *REPORTE CONTABLE PSICOLAU — ${mesNombre.toUpperCase()} ${anio}*
+  const lineasDesglose = [];
+
+  // 1. Consultas individuales ordenadas por tarifa descendente
+  const tarifasInd = Object.keys(individualesPorMonto).map(Number).sort((a, b) => b - a);
+  tarifasInd.forEach(tarifa => {
+    const cant = individualesPorMonto[tarifa];
+    const subtotal = cant * tarifa;
+    const txtSesion = cant === 1 ? 'sesión individual' : 'sesiones individuales';
+    lineasDesglose.push(`• ${cant} ${txtSesion} de $${tarifa.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} = $${subtotal.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+  });
+
+  // 2. Terapias grupales
+  if (totalSesionesGrupales > 0) {
+    const txtGrupal = totalSesionesGrupales === 1 ? 'sesión grupal' : 'sesiones grupales';
+    lineasDesglose.push(`• ${totalSesionesGrupales} ${txtGrupal} = $${totalIngresoGrupal.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} total`);
+  }
+
+  // 3. Evaluaciones ordenadas por tarifa descendente
+  const tarifasEval = Object.keys(evaluacionesPorMonto).map(Number).sort((a, b) => b - a);
+  tarifasEval.forEach(tarifa => {
+    const cant = evaluacionesPorMonto[tarifa];
+    const subtotal = cant * tarifa;
+    const txtEval = cant === 1 ? 'evaluación' : 'evaluaciones';
+    lineasDesglose.push(`• ${cant} ${txtEval} de $${tarifa.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} = $${subtotal.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+  });
+
+  // 4. Sesiones gratuitas / cortesías
+  if (sesionesGratuitas > 0) {
+    const txtGratis = sesionesGratuitas === 1 ? 'sesión gratuita' : 'sesiones gratuitas';
+    lineasDesglose.push(`• ${sesionesGratuitas} ${txtGratis} (cortesía $0)`);
+  }
+
+  const texto = `📋 *DESGLOSE CONTABLE PSICOLAU — ${mesNombre.toUpperCase()} ${anio}*
 Psicóloga: Ana Laura Gómez Díaz
 
-*RESUMEN DEL PERIODO:*
-• Total de sesiones brindadas: ${totalSesiones} (${sesionesConCosto} con costo · ${sesionesCortesia} de cortesía)
-• Total de ingresos cobrados: $${totalCobrado.toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN (${countPagadas} sesiones pagadas)
-• Total pendiente por cobrar: $${totalPorPagar.toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN (${countPendientes} sesiones pendientes)
+*INGRESOS DEL PERIODO:*
+${lineasDesglose.length > 0 ? lineasDesglose.join('\n') : 'No se registraron ingresos en este periodo.'}
 
-*DESGLOSE DE SESIONES:*
-${lineasSesiones.length > 0 ? lineasSesiones.join('\n') : 'No se registraron sesiones en este mes.'}
+━━━━━━━━━━━━━━━━━━━━
+💰 *Ingresos totales: $${totalIngresos.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN*
 `;
 
   navigator.clipboard.writeText(texto).then(() => {
-    const btn = document.getElementById('btnCopiarReporteWA');
+    const btn = document.getElementById('btnCopiarReporteContadora');
     if (btn) {
       const orig = btn.innerHTML;
-      btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>¡Copiado!</span>';
+      btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>¡Copiado para Contadora!</span>';
       btn.style.background = '#059669';
       setTimeout(() => {
         btn.innerHTML = orig;
-        btn.style.background = '#16a34a';
+        btn.style.background = '#6366f1';
       }, 2500);
     }
   }).catch(() => {
@@ -470,7 +519,8 @@ ${lineasSesiones.length > 0 ? lineasSesiones.join('\n') : 'No se registraron ses
   });
 };
 
-// Exportador a archivo CSV para Excel
+
+// Exportador a archivo CSV para Excel con Tipo de Servicio
 window.descargarReporteCSV = function() {
   const citasMes = obtenerCitasReportePeriodo();
   const mesesNombres = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -478,18 +528,20 @@ window.descargarReporteCSV = function() {
   const anio = anioReporteSeleccionado;
 
   let csvContent = '\uFEFF'; // BOM para que Excel respete caracteres UTF-8 (acentos, ñ)
-  csvContent += 'Fecha,Hora,Paciente,Monto_MXN,Estado_Pago,Estado_Sesion\n';
+  csvContent += 'Fecha,Hora,Paciente,Tipo_Servicio,Monto_MXN,Estado_Pago,Estado_Sesion\n';
 
   citasMes.forEach(c => {
     const d = new Date(c.fechaHora);
     const fecha = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     const hora = d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: false });
-    const nombre = `"${(c.paciente ? c.paciente.nombre.replace('[GRUPAL]', '').trim() : 'Paciente').replace(/"/g, '""')}"`;
-    const monto = typeof c.monto === 'number' ? c.monto : 500;
+    const tipo = detectarTipoCita(c);
+    const tipoStr = tipo === 'GRUPAL' ? 'Grupal' : (tipo === 'EVALUACION' ? 'Evaluación' : 'Individual');
+    const nombre = `"${(c.paciente ? c.paciente.nombre.replace(/^\[(BLOQUEO|GRUPAL|EVALUACION)\]\s*/i, '').trim() : 'Paciente').replace(/"/g, '""')}"`;
+    const monto = typeof c.monto === 'number' ? c.monto : (tipo === 'EVALUACION' ? 4000 : 500);
     const estadoPago = c.estado_pago || 'PENDIENTE';
     const estadoSesion = c.estado_cita || 'PENDIENTE';
 
-    csvContent += `${fecha},${hora},${nombre},${monto},${estadoPago},${estadoSesion}\n`;
+    csvContent += `${fecha},${hora},${nombre},${tipoStr},${monto},${estadoPago},${estadoSesion}\n`;
   });
 
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });

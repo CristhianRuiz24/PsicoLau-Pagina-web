@@ -33,3 +33,7 @@ coverage/
 # IDEs y Editores
 .vscode/
 .idea/
+
+# Borradores y Plantillas Temporales
+prompts.md
+spec.md

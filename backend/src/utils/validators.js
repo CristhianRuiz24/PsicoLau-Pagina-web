@@ -69,6 +69,7 @@ const editarCitaAdminSchema = z.object({
     z.null()
   ]).optional(),
   estado_cita: z.enum(['PENDIENTE', 'CONFIRMADA', 'REALIZADA', 'CANCELADA']).optional(),
+  estado_pago: z.enum(['PENDIENTE', 'PAGADO']).optional(),
   alcance: z.enum(['SOLO_ESTA', 'ESTA_Y_SIGUIENTES']).optional().default('SOLO_ESTA')
 });
 

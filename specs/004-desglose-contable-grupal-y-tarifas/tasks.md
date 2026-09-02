@@ -1,11 +1,20 @@
 # Tareas — Spec 004: Gestión de Costos en Terapia Grupal, Evaluaciones y Desglose Contable Mensual por Tarifas
 
-> **Estado**: `PENDIENTE DE APROBACIÓN`  
+> **Estado**: `COMPLETADA`  
 > **Flujo**: Spec-Driven Development (SDD)
 
 ---
 
 ## 📋 Lista de Tareas Atómicas
+
+- [x] **T1**: Cuarta Pestaña de Evaluación y Calculadora Grupal en Modal (`panel/agenda.html` & `panel/js/agenda.js`)
+- [x] **T2**: Persistencia de Monto para Evaluaciones y Citas Grupales (`panel/js/app.js`, `panel/js/agenda.js`)
+- [x] **T3**: Inclusión Financiera en el Reporte Mensual (`panel/js/pagos.js`)
+- [x] **T4**: Motor de Agrupación por Tarifas y Botón "Copiar para Contadora" (`panel/agenda.html`, `panel/js/pagos.js`, `panel/panel.css`)
+- [x] **T5**: Exportación CSV para Excel con Tipo de Servicio (`panel/js/pagos.js`)
+- [x] **T6**: Suite de Pruebas Automatizadas (Dataset Real de 37 Citas / $22,500 MXN)
+
+---
 
 ### 🗂️ T1: Cuarta Pestaña de Evaluación y Calculadora Grupal en Modal (`panel/agenda.html` & `panel/js/agenda.js`)
 - **Archivos afectados**: `panel/agenda.html`, `panel/js/agenda.js`

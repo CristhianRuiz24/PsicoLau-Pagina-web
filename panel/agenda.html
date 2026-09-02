@@ -136,15 +136,18 @@
         </button>
       </div>
 
-      <!-- Selector de Tipo de Registro: Cita Individual vs Terapia Grupal vs Bloqueo Personal -->
+      <!-- Selector de Tipo de Registro: Cita Individual vs Evaluación vs Terapia Grupal vs Bloqueo Personal -->
       <div id="seccionTabsTipo" class="event-type-tabs" style="display: flex; gap: 0.5rem; margin-bottom: 1.2rem; flex-wrap: wrap;">
-        <button type="button" id="tabTipoCita" class="tab-btn active" onclick="seleccionarTipoRegistro('CITA')" style="flex: 1; min-width: 130px;">
+        <button type="button" id="tabTipoCita" class="tab-btn active" onclick="seleccionarTipoRegistro('CITA')" style="flex: 1; min-width: 105px;">
           <i class="fa-solid fa-user-doctor"></i> Cita Individual
         </button>
-        <button type="button" id="tabTipoGrupal" class="tab-btn" onclick="seleccionarTipoRegistro('GRUPAL')" style="flex: 1; min-width: 130px;">
+        <button type="button" id="tabTipoEvaluacion" class="tab-btn" onclick="seleccionarTipoRegistro('EVALUACION')" style="flex: 1; min-width: 105px;">
+          <i class="fa-solid fa-brain"></i> Evaluación
+        </button>
+        <button type="button" id="tabTipoGrupal" class="tab-btn" onclick="seleccionarTipoRegistro('GRUPAL')" style="flex: 1; min-width: 105px;">
           <i class="fa-solid fa-people-group"></i> Terapia Grupal
         </button>
-        <button type="button" id="tabTipoBloqueo" class="tab-btn" onclick="seleccionarTipoRegistro('BLOQUEO')" style="flex: 1; min-width: 130px;">
+        <button type="button" id="tabTipoBloqueo" class="tab-btn" onclick="seleccionarTipoRegistro('BLOQUEO')" style="flex: 1; min-width: 105px;">
           <i class="fa-solid fa-ban"></i> Bloquear Horario
         </button>
       </div>
@@ -168,11 +171,11 @@
         <!-- Campos de Contacto Individual (Ocultos si es Grupal o Bloqueo) -->
         <div id="camposContactoIndividual" style="display: grid; grid-template-columns: 1fr 1.25fr; gap: 0.8rem; margin-bottom: 0.4rem;">
           <div class="form-group">
-            <label for="nc_email"><i class="fa-solid fa-envelope" style="color: var(--turquesa); margin-right: 4px;"></i> Correo Electrónico</label>
-            <input type="email" id="nc_email" placeholder="correo@ejemplo.com" style="width: 100%; text-overflow: ellipsis;">
+            <label for="nc_email"><i class="fa-solid fa-envelope" style="color: var(--turquesa); margin-right: 4px;"></i> Correo Electrónico <span style="font-size: 0.8rem; color: #64748b; font-weight: normal;">(opcional)</span></label>
+            <input type="email" id="nc_email" placeholder="correo@ejemplo.com (opcional)" autocomplete="off" style="width: 100%; text-overflow: ellipsis;">
           </div>
           <div class="form-group">
-            <label for="nc_telefono"><i class="fa-brands fa-whatsapp" style="color: #16a34a; margin-right: 4px;"></i> WhatsApp / Teléfono</label>
+            <label for="nc_telefono"><i class="fa-brands fa-whatsapp" style="color: #16a34a; margin-right: 4px;"></i> WhatsApp / Teléfono <span style="font-size: 0.8rem; color: #64748b; font-weight: normal;">(opcional)</span></label>
             <div style="display: flex; gap: 0.35rem;">
               <select id="nc_prefijo" onchange="actualizarPlaceholderTelefono(this.value)" style="width: 95px; padding: 0.72rem 0.3rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.84rem; background: #f8fafc; font-weight: 600; cursor: pointer; flex-shrink: 0;">
                 <option value="+52" selected>🇲🇽 +52</option>
@@ -198,7 +201,7 @@
                 <option value="+41">🇨🇭 +41</option>
                 <option value="">🌐 Otro</option>
               </select>
-              <input type="tel" id="nc_telefono" placeholder="Número de WhatsApp" style="flex: 1; min-width: 0; padding: 0.72rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.92rem;">
+              <input type="tel" id="nc_telefono" placeholder="Número de WhatsApp (opcional)" autocomplete="off" style="flex: 1; min-width: 0; padding: 0.72rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.92rem;">
             </div>
           </div>
         </div>
@@ -267,6 +270,27 @@
               <i class="fa-solid fa-gift" style="color: var(--rosa-coral);"></i> $0 Cortesía
             </button>
           </div>
+
+          <!-- Calculadora Grupal (Visible solo en Terapia Grupal) -->
+          <div id="calculadoraGrupal" style="display: none; background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 8px; padding: 0.75rem; margin-bottom: 0.65rem;">
+            <div style="font-size: 0.8rem; font-weight: 700; color: #6d28d9; margin-bottom: 0.45rem; display: flex; align-items: center; gap: 5px;">
+              <i class="fa-solid fa-calculator"></i> Calculadora de Ingreso Grupal
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
+              <div>
+                <label for="nc_cuota_persona" style="font-size: 0.76rem; font-weight: 600; color: #4b5563; display: block; margin-bottom: 0.2rem;">Cuota por persona ($):</label>
+                <input type="number" id="nc_cuota_persona" step="any" min="0" value="150" placeholder="150" oninput="calcularTotalGrupal()" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; font-weight: 600;">
+              </div>
+              <div>
+                <label for="nc_num_participantes" style="font-size: 0.76rem; font-weight: 600; color: #4b5563; display: block; margin-bottom: 0.2rem;">N° participantes:</label>
+                <input type="number" id="nc_num_participantes" step="1" min="1" placeholder="6" oninput="calcularTotalGrupal()" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; font-weight: 600;">
+              </div>
+            </div>
+            <small style="color: #7c3aed; font-size: 0.72rem; display: block; margin-top: 0.35rem;">
+              Calcula el monto total automáticamente (cuota × participantes). También puedes ajustarlo a mano abajo.
+            </small>
+          </div>
+
           <div style="display: flex; gap: 0.5rem; align-items: center;">
             <div style="position: relative; flex: 1;">
               <span style="position: absolute; left: 0.8rem; top: 50%; transform: translateY(-50%); font-weight: 600; color: #64748b;">$</span>
@@ -708,7 +732,7 @@
 
   <!-- Modal de Reporte Contable Mensual -->
   <div id="modalReporteMensual" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.65); z-index: 1010; justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(4px);">
-    <div class="modal-dialog-reporte" id="dialogoReporteMensual" style="background: #ffffff; padding: 1.8rem; border-radius: 16px; width: 100%; max-width: 960px; max-height: 92vh; display: flex; flex-direction: column; box-shadow: 0 25px 60px rgba(0,0,0,0.3); transition: all 0.25s ease;">
+    <div class="modal-dialog-reporte" id="dialogoReporteMensual" style="background: #ffffff; padding: 1.8rem; border-radius: 16px; width: 100%; max-width: 1060px; max-height: 92vh; display: flex; flex-direction: column; box-shadow: 0 25px 60px rgba(0,0,0,0.3); transition: all 0.25s ease;">
       
       <!-- Cabecera del Modal -->
       <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #f1f5f9; padding-bottom: 0.8rem; margin-bottom: 1rem; gap: 1rem;">
@@ -755,11 +779,11 @@
 
         <!-- Acciones de Exportación (Alineadas a la derecha) -->
         <div class="reporte-export-actions">
-          <button type="button" class="btn-export-wa" id="btnCopiarReporteWA" onclick="copiarReporteParaWhatsApp()" title="Copiar resumen estructurado para WhatsApp">
-            <i class="fa-brands fa-whatsapp"></i> <span>Copiar para WhatsApp</span>
+          <button type="button" class="btn-export-contadora" id="btnCopiarReporteContadora" onclick="copiarReporteParaContadora()" title="Copiar desglose categorizado por tarifas para la contadora">
+            <i class="fa-solid fa-clipboard-list"></i> <span>Copiar para Contadora</span>
           </button>
           <button type="button" class="btn-export-csv" onclick="descargarReporteCSV()" title="Descargar archivo CSV compatible con Excel">
-            <i class="fa-solid fa-file-excel"></i> <span>Descargar Excel (CSV)</span>
+            <i class="fa-solid fa-file-excel"></i> <span>Descargar Excel</span>
           </button>
           <button type="button" class="btn-export-print" onclick="imprimirReporteMensual()" title="Imprimir o guardar como PDF formal">
             <i class="fa-solid fa-print"></i> <span>Imprimir / PDF</span>

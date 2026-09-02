@@ -271,9 +271,9 @@ window.manejarInputNombrePaciente = function(valor) {
       zoomEl.value = coincidencia.enlaceZoom;
     }
 
-    // Autocompletar Tarifa / Monto de sesión
+    // Autocompletar Tarifa / Monto de sesión (solo si no es evaluación)
     const montoEl = document.getElementById('nc_monto');
-    if (montoEl) {
+    if (montoEl && tipoRegistroActual !== 'EVALUACION') {
       if (coincidencia.tarifaDefecto !== undefined && coincidencia.tarifaDefecto !== null) {
         montoEl.value = coincidencia.tarifaDefecto;
       } else if (coincidencia.monto !== undefined && coincidencia.monto !== null) {
@@ -292,7 +292,7 @@ window.manejarInputNombrePaciente = function(valor) {
 // Auto-detectar color usado previamente para el mismo paciente o grupo
 window.autoDetectarColorPaciente = function(nombre) {
   if (!nombre || tipoRegistroActual === 'BLOQUEO') return;
-  const nombreLimpio = nombre.toLowerCase().replace(/^\[(bloqueo|grupal)\]\s*/i, '').trim();
+  const nombreLimpio = nombre.toLowerCase().replace(/^\[(bloqueo|grupal|evaluacion)\]\s*/i, '').trim();
   if (nombreLimpio.length < 3) return;
 
   const previa = citasCache.find(c => {
@@ -374,13 +374,13 @@ function renderEasyTable() {
   });
 
   citasEstaSemana.forEach(c => {
-    const esBloqueo = (c.categoria && c.categoria.startsWith('[BLOQUEO]')) || (c.paciente && c.paciente.nombre.startsWith('[BLOQUEO]'));
-    const esGrupal = (c.categoria && c.categoria.startsWith('[GRUPAL]')) || (c.paciente && c.paciente.nombre.startsWith('[GRUPAL]'));
-    if (!esBloqueo && !esGrupal) {
+    const esBloqueo = (c.categoria && c.categoria.startsWith('[BLOQUEO]')) || (c.paciente && c.paciente.nombre && c.paciente.nombre.startsWith('[BLOQUEO]'));
+    if (!esBloqueo) {
       countTotal++;
+      const monto = typeof c.monto === 'number' ? c.monto : 500;
       if (c.estado_pago === 'PAGADO') {
         countPagadas++;
-      } else {
+      } else if (monto !== 0) {
         countPorPagar++;
       }
     }
@@ -450,19 +450,20 @@ function renderEasyTable() {
           const payClass = esPagado ? 'paid' : 'unpaid';
 
           const esCancelada = cita.estado_cita === 'CANCELADA';
-          const esBloqueo = (cita.categoria && cita.categoria.startsWith('[BLOQUEO]')) || (cita.paciente && cita.paciente.nombre.startsWith('[BLOQUEO]'));
-          const esGrupal = (cita.categoria && cita.categoria.startsWith('[GRUPAL]')) || (cita.paciente && cita.paciente.nombre.startsWith('[GRUPAL]'));
-          const nombreLimpio = cita.paciente.nombre.replace('[BLOQUEO]', '').replace('[GRUPAL]', '').trim();
-          const notasLimpias = (cita.categoria || '').replace('[BLOQUEO]', '').replace('[GRUPAL]', '').trim();
+          const esBloqueo = (cita.categoria && cita.categoria.startsWith('[BLOQUEO]')) || (cita.paciente && cita.paciente.nombre && cita.paciente.nombre.startsWith('[BLOQUEO]'));
+          const esGrupal = (cita.categoria && cita.categoria.startsWith('[GRUPAL]')) || (cita.paciente && cita.paciente.nombre && cita.paciente.nombre.startsWith('[GRUPAL]'));
+          const esEvaluacion = (cita.categoria && cita.categoria.startsWith('[EVALUACION]')) || (cita.paciente && cita.paciente.nombre && cita.paciente.nombre.startsWith('[EVALUACION]'));
+          const nombreLimpio = cita.paciente.nombre.replace(/^\[(BLOQUEO|GRUPAL|EVALUACION)\]\s*/i, '').trim();
+          const notasLimpias = (cita.categoria || '').replace(/^\[(BLOQUEO|GRUPAL|EVALUACION)\]\s*/i, '').trim();
           const esCompletada = !esCancelada && (cita.estado_cita === 'REALIZADA' || cita.estado_cita === 'CONFIRMADA');
 
           let matchesBusqueda = true;
-          let blockClass = esBloqueo ? 'appointment-block is-blocked' : (esGrupal ? 'appointment-block is-group' : (esCompletada ? 'appointment-block is-completed' : 'appointment-block'));
-          if (esGrupal && esCompletada) blockClass += ' is-completed';
+          let blockClass = esBloqueo ? 'appointment-block is-blocked' : (esGrupal ? 'appointment-block is-group' : (esEvaluacion ? 'appointment-block is-evaluacion' : (esCompletada ? 'appointment-block is-completed' : 'appointment-block')));
+          if ((esGrupal || esEvaluacion) && esCompletada) blockClass += ' is-completed';
           if (esCancelada) blockClass += ' is-cancelled';
 
           if (terminoBusqueda) {
-            const textoCompleto = `${nombreLimpio} ${notasLimpias} ${cita.paciente.telefono || ''} ${esGrupal ? 'grupal grupo taller' : ''} ${esCancelada ? 'cancelada cancelado' : ''}`.toLowerCase();
+            const textoCompleto = `${nombreLimpio} ${notasLimpias} ${cita.paciente.telefono || ''} ${esGrupal ? 'grupal grupo taller' : ''} ${esEvaluacion ? 'evaluacion diagnóstico neuro' : ''} ${esCancelada ? 'cancelada cancelado' : ''}`.toLowerCase();
             matchesBusqueda = textoCompleto.includes(terminoBusqueda);
             if (matchesBusqueda) {
               blockClass += ' is-highlighted';
@@ -501,12 +502,13 @@ function renderEasyTable() {
                 </div>
               </div>
 
-              <div class="patient-name">${esBloqueo ? `<i class="fa-solid fa-ban" style="margin-right: 3px;"></i>${escapeHtml(nombreLimpio)}` : (esGrupal ? `<i class="fa-solid fa-users" style="margin-right: 4px;"></i>${escapeHtml(nombreLimpio)}` : escapeHtml(nombreLimpio))}</div>
+              <div class="patient-name">${esBloqueo ? `<i class="fa-solid fa-ban" style="margin-right: 3px;"></i>${escapeHtml(nombreLimpio)}` : (esGrupal ? `<i class="fa-solid fa-users" style="margin-right: 4px;"></i>${escapeHtml(nombreLimpio)}` : (esEvaluacion ? `<i class="fa-solid fa-brain" style="margin-right: 4px;"></i>${escapeHtml(nombreLimpio)}` : escapeHtml(nombreLimpio)))}</div>
               ${notasLimpias ? `<div class="appointment-note">${escapeHtml(notasLimpias)}</div>` : ''}
-              ${(esCancelada || esGrupal || (esCompletada && !esBloqueo)) ? `
+              ${(esCancelada || esGrupal || esEvaluacion || (esCompletada && !esBloqueo)) ? `
                 <div class="card-badges-row">
                   ${esCancelada ? `<div class="badge-cancelada"><i class="fa-solid fa-xmark"></i> Cancelada</div>` : ''}
                   ${esGrupal ? `<div class="badge-grupal"><i class="fa-solid fa-people-group"></i> Grupal</div>` : ''}
+                  ${esEvaluacion ? `<div class="badge-evaluacion"><i class="fa-solid fa-brain"></i> Evaluación</div>` : ''}
                   ${esCompletada && !esBloqueo && !esCancelada ? `<div class="badge-completada"><i class="fa-solid fa-check"></i> Realizada</div>` : ''}
                 </div>
               ` : ''}
@@ -518,7 +520,7 @@ function renderEasyTable() {
                     <i class="fa-solid fa-rotate-left"></i>
                   </button>
                 ` : (!esBloqueo ? `
-                  <button type="button" class="card-btn btn-zoom" onclick="abrirZoomSesion(${cita.id}, event)" title="${cita.paciente && cita.paciente.enlaceZoom ? (esGrupal ? 'Entrar a la sala grupal de Zoom' : 'Entrar a la sesión de Zoom (' + nombreLimpio + ')') : 'Configurar enlace de Zoom'}" style="color: ${cita.paciente && cita.paciente.enlaceZoom ? '#2563eb' : '#94a3b8'};">
+                  <button type="button" class="card-btn btn-zoom" onclick="abrirZoomSesion(${cita.id}, event)" title="${cita.paciente && cita.paciente.enlaceZoom ? (esGrupal ? 'Entrar a la sala grupal de Zoom' : (esEvaluacion ? 'Entrar a la evaluación de Zoom (' + nombreLimpio + ')' : 'Entrar a la sesión de Zoom (' + nombreLimpio + ')')) : 'Configurar enlace de Zoom'}" style="color: ${cita.paciente && cita.paciente.enlaceZoom ? '#2563eb' : '#94a3b8'};">
                     <i class="fa-solid fa-video"></i>
                   </button>
                   ${!esGrupal ? `
@@ -532,15 +534,15 @@ function renderEasyTable() {
                     </button>
                   ` : ''}
                 ` : '')}
-                <button type="button" class="card-btn btn-edit" onclick="editarCita(${cita.id})" style="color: #334155;" title="${esGrupal ? 'Editar sesión grupal' : 'Editar cita'}">
+                <button type="button" class="card-btn btn-edit" onclick="editarCita(${cita.id})" style="color: #334155;" title="${esGrupal ? 'Editar sesión grupal' : (esEvaluacion ? 'Editar evaluación' : 'Editar cita')}">
                   <i class="fa-solid fa-pen"></i>
                 </button>
-                <button type="button" class="card-btn btn-del" onclick="eliminarCita(${cita.id})" style="color: #dc2626;" title="${esGrupal ? 'Borrar sesión grupal' : 'Borrar cita de la agenda'}">
+                <button type="button" class="card-btn btn-del" onclick="eliminarCita(${cita.id})" style="color: #dc2626;" title="${esGrupal ? 'Borrar sesión grupal' : (esEvaluacion ? 'Borrar evaluación' : 'Borrar cita de la agenda')}">
                   <i class="fa-solid fa-trash-can"></i>
                 </button>
               </div>
               
-              ${!esBloqueo && !esGrupal && !esCancelada ? `
+              ${!esBloqueo && !esCancelada ? `
                 <div style="margin-top: 4px;">
                   <button type="button" class="mini-pay-btn ${payClass}" onclick="togglePagoDirecto(${cita.id}, event)" title="Clic para alternar estado de pago">
                     <i class="fa-solid ${esPagado ? 'fa-circle-check' : 'fa-clock'}"></i> ${payLabel}
@@ -758,15 +760,29 @@ function mostrarModalDirecto() {
   if (modal) modal.style.display = 'flex';
 }
 
+window.calcularTotalGrupal = function() {
+  const cuotaInput = document.getElementById('nc_cuota_persona');
+  const partInput = document.getElementById('nc_num_participantes');
+  const montoInput = document.getElementById('nc_monto');
+  if (!montoInput) return;
+
+  const cuota = parseFloat(cuotaInput?.value) || 0;
+  const part = parseFloat(partInput?.value) || 0;
+  const total = Math.round(cuota * part * 100) / 100;
+  montoInput.value = total;
+};
+
 window.seleccionarTipoRegistro = function(tipo) {
   tipoRegistroActual = tipo;
   const tabCita = document.getElementById('tabTipoCita');
+  const tabEvaluacion = document.getElementById('tabTipoEvaluacion');
   const tabGrupal = document.getElementById('tabTipoGrupal');
   const tabBloqueo = document.getElementById('tabTipoBloqueo');
   const camposContacto = document.getElementById('camposContactoIndividual');
   const campoZoomContainer = document.getElementById('campoZoomContainer');
   const seccionRecurrencia = document.getElementById('seccionRecurrencia');
   const seccionMonto = document.getElementById('seccionMontoSesion');
+  const calculadoraGrupal = document.getElementById('calculadoraGrupal');
   const lblNombre = document.getElementById('lblNombre');
   const lblZoom = document.getElementById('lblZoom');
   const inputNombre = document.getElementById('nc_nombre');
@@ -775,8 +791,12 @@ window.seleccionarTipoRegistro = function(tipo) {
   const badge = document.getElementById('badgePacienteDetectado');
 
   if (tabCita) tabCita.classList.remove('active');
+  if (tabEvaluacion) tabEvaluacion.classList.remove('active');
   if (tabGrupal) tabGrupal.classList.remove('active');
   if (tabBloqueo) tabBloqueo.classList.remove('active');
+
+  const idInput = document.getElementById('nc_id');
+  const esNueva = !idInput || !idInput.value;
 
   if (tipo === 'BLOQUEO') {
     if (tabBloqueo) tabBloqueo.classList.add('active');
@@ -784,6 +804,7 @@ window.seleccionarTipoRegistro = function(tipo) {
     if (campoZoomContainer) campoZoomContainer.style.display = 'none';
     if (seccionRecurrencia) seccionRecurrencia.style.display = 'none';
     if (seccionMonto) seccionMonto.style.display = 'none';
+    if (calculadoraGrupal) calculadoraGrupal.style.display = 'none';
     if (inputMonto) inputMonto.value = '0';
     if (badge) badge.style.display = 'none';
     if (lblNombre) lblNombre.innerHTML = '<i class="fa-solid fa-ban" style="color: #ef4444; margin-right: 4px;"></i> Motivo del Bloqueo / Horario No Disponible *';
@@ -792,13 +813,37 @@ window.seleccionarTipoRegistro = function(tipo) {
     }
     document.getElementById('nc_color').value = '#94a3b8';
     renderSwatches('#94a3b8');
+  } else if (tipo === 'EVALUACION') {
+    if (tabEvaluacion) tabEvaluacion.classList.add('active');
+    if (camposContacto) camposContacto.style.display = 'grid';
+    if (campoZoomContainer) campoZoomContainer.style.display = 'block';
+    if (seccionRecurrencia) seccionRecurrencia.style.display = 'block';
+    if (seccionMonto) seccionMonto.style.display = 'block';
+    if (calculadoraGrupal) calculadoraGrupal.style.display = 'none';
+    if (lblNombre) lblNombre.innerHTML = '<i class="fa-solid fa-brain" style="color: #6366f1; margin-right: 4px;"></i> Nombre del paciente / Evaluación *';
+    if (lblZoom) lblZoom.innerHTML = '<i class="fa-solid fa-video" style="color: #6366f1; margin-right: 4px;"></i> Enlace personal de Zoom / Videollamada (opcional)';
+    if (inputZoom) inputZoom.placeholder = 'https://zoom.us/j/... o Google Meet';
+    if (inputNombre) {
+      inputNombre.placeholder = 'Ej: Mariana López (Evaluación neuropsicológica)...';
+    }
+
+    if (esNueva) {
+      if (inputMonto) inputMonto.value = '4000';
+      document.getElementById('nc_color').value = '#6366f1';
+      renderSwatches('#6366f1');
+      const repInput = document.getElementById('nc_repeticiones');
+      if (repInput) repInput.value = '2';
+    } else {
+      const colorExistente = document.getElementById('nc_color').value || '#6366f1';
+      renderSwatches(colorExistente);
+    }
   } else if (tipo === 'GRUPAL') {
     if (tabGrupal) tabGrupal.classList.add('active');
     if (camposContacto) camposContacto.style.display = 'none';
     if (campoZoomContainer) campoZoomContainer.style.display = 'block';
     if (seccionRecurrencia) seccionRecurrencia.style.display = 'block';
-    if (seccionMonto) seccionMonto.style.display = 'none';
-    if (inputMonto) inputMonto.value = '0';
+    if (seccionMonto) seccionMonto.style.display = 'block';
+    if (calculadoraGrupal) calculadoraGrupal.style.display = 'block';
     if (badge) badge.style.display = 'none';
     if (lblNombre) lblNombre.innerHTML = '<i class="fa-solid fa-users" style="color: #8b5cf6; margin-right: 4px;"></i> Tipo / Nombre del Grupo o Programa *';
     if (lblZoom) lblZoom.innerHTML = '<i class="fa-solid fa-video" style="color: #8b5cf6; margin-right: 4px;"></i> Enlace de Zoom de la Sala Grupal (opcional)';
@@ -807,12 +852,21 @@ window.seleccionarTipoRegistro = function(tipo) {
       inputNombre.placeholder = 'Ej: Terapia Grupal para Autistas Adultos...';
     }
     
-    const idInput = document.getElementById('nc_id');
-    if (!idInput || !idInput.value) {
+    if (esNueva) {
       document.getElementById('nc_color').value = '#8b5cf6';
       renderSwatches('#8b5cf6');
       const repInput = document.getElementById('nc_repeticiones');
       if (repInput) repInput.value = '12';
+      const cuotaInput = document.getElementById('nc_cuota_persona');
+      const partInput = document.getElementById('nc_num_participantes');
+      if (cuotaInput && !cuotaInput.value) {
+        cuotaInput.value = '150';
+      }
+      if (cuotaInput && partInput && cuotaInput.value && partInput.value) {
+        window.calcularTotalGrupal();
+      } else if (inputMonto && (inputMonto.value === '500' || inputMonto.value === '4000')) {
+        inputMonto.value = '0';
+      }
     } else {
       const colorExistente = document.getElementById('nc_color').value || '#8b5cf6';
       renderSwatches(colorExistente);
@@ -824,6 +878,7 @@ window.seleccionarTipoRegistro = function(tipo) {
     if (campoZoomContainer) campoZoomContainer.style.display = 'block';
     if (seccionRecurrencia) seccionRecurrencia.style.display = 'block';
     if (seccionMonto) seccionMonto.style.display = 'block';
+    if (calculadoraGrupal) calculadoraGrupal.style.display = 'none';
     if (lblNombre) lblNombre.innerHTML = '<i class="fa-solid fa-user" style="color: var(--turquesa); margin-right: 4px;"></i> Nombre del paciente / Asunto *';
     if (lblZoom) lblZoom.innerHTML = '<i class="fa-solid fa-video" style="color: #2563eb; margin-right: 4px;"></i> Enlace personal de Zoom / Videollamada (opcional)';
     if (inputZoom) inputZoom.placeholder = 'https://zoom.us/j/... o Google Meet';
@@ -831,13 +886,15 @@ window.seleccionarTipoRegistro = function(tipo) {
       inputNombre.placeholder = 'Ej: Mariana López, Carlos Ruiz...';
     }
     
-    const idInput = document.getElementById('nc_id');
-    if (!idInput || !idInput.value) {
+    if (esNueva) {
       const colorNuevo = obtenerSiguienteColorDisponible();
       document.getElementById('nc_color').value = colorNuevo;
       renderSwatches(colorNuevo);
       const repInput = document.getElementById('nc_repeticiones');
       if (repInput) repInput.value = '4';
+      if (inputMonto && (inputMonto.value === '4000' || inputMonto.value === '0' || !inputMonto.value)) {
+        inputMonto.value = '500';
+      }
     } else {
       const colorExistente = document.getElementById('nc_color').value || '#3EB8CC';
       renderSwatches(colorExistente);
@@ -924,6 +981,11 @@ window.abrirModal = function() {
   const montoInput = document.getElementById('nc_monto');
   if (montoInput) montoInput.value = '500';
 
+  const cuotaInput = document.getElementById('nc_cuota_persona');
+  if (cuotaInput) cuotaInput.value = '150';
+  const partInput = document.getElementById('nc_num_participantes');
+  if (partInput) partInput.value = '';
+
   const zoomInput = document.getElementById('nc_enlace_zoom');
   if (zoomInput) zoomInput.value = '';
 
@@ -983,6 +1045,11 @@ window.cerrarModal = function() {
 
   const zoomInput = document.getElementById('nc_enlace_zoom');
   if (zoomInput) zoomInput.value = '';
+
+  const cuotaInput = document.getElementById('nc_cuota_persona');
+  if (cuotaInput) cuotaInput.value = '150';
+  const partInput = document.getElementById('nc_num_participantes');
+  if (partInput) partInput.value = '';
 
   const badge = document.getElementById('badgePacienteDetectado');
   if (badge) badge.style.display = 'none';
@@ -1053,8 +1120,9 @@ window.editarCita = function(id) {
   const idInput = document.getElementById('nc_id');
   if (idInput) idInput.value = cita.id;
 
-  const esBloqueo = (cita.categoria && cita.categoria.startsWith('[BLOQUEO]')) || (cita.paciente && cita.paciente.nombre.startsWith('[BLOQUEO]'));
-  const esGrupal = (cita.categoria && cita.categoria.startsWith('[GRUPAL]')) || (cita.paciente && cita.paciente.nombre.startsWith('[GRUPAL]'));
+  const esBloqueo = (cita.categoria && cita.categoria.startsWith('[BLOQUEO]')) || (cita.paciente && cita.paciente.nombre && cita.paciente.nombre.startsWith('[BLOQUEO]'));
+  const esGrupal = (cita.categoria && cita.categoria.startsWith('[GRUPAL]')) || (cita.paciente && cita.paciente.nombre && cita.paciente.nombre.startsWith('[GRUPAL]'));
+  const esEvaluacion = (cita.categoria && cita.categoria.startsWith('[EVALUACION]')) || (cita.paciente && cita.paciente.nombre && cita.paciente.nombre.startsWith('[EVALUACION]'));
 
   const titulo = document.getElementById('modalTitulo');
   if (titulo) {
@@ -1062,6 +1130,8 @@ window.editarCita = function(id) {
       titulo.innerHTML = '<i class="fa-solid fa-pen-to-square" style="color: #8b5cf6;"></i> <span>Editar Sesión Grupal</span>';
     } else if (esBloqueo) {
       titulo.innerHTML = '<i class="fa-solid fa-pen-to-square" style="color: #ef4444;"></i> <span>Editar Bloqueo</span>';
+    } else if (esEvaluacion) {
+      titulo.innerHTML = '<i class="fa-solid fa-pen-to-square" style="color: #6366f1;"></i> <span>Editar Evaluación</span>';
     } else {
       titulo.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> <span>Editar Cita</span>';
     }
@@ -1074,6 +1144,8 @@ window.editarCita = function(id) {
       badgeTipoHtml = '<span class="badge-tipo-info info-grupal"><i class="fa-solid fa-people-group"></i> Terapia Grupal</span>';
     } else if (esBloqueo) {
       badgeTipoHtml = '<span class="badge-tipo-info info-bloqueo"><i class="fa-solid fa-ban"></i> Bloqueo de Horario</span>';
+    } else if (esEvaluacion) {
+      badgeTipoHtml = '<span class="badge-tipo-info info-evaluacion"><i class="fa-solid fa-brain"></i> Evaluación</span>';
     } else {
       badgeTipoHtml = '<span class="badge-tipo-info info-cita"><i class="fa-solid fa-user-doctor"></i> Cita Individual</span>';
     }
@@ -1114,6 +1186,8 @@ window.editarCita = function(id) {
     window.seleccionarTipoRegistro('BLOQUEO');
   } else if (esGrupal) {
     window.seleccionarTipoRegistro('GRUPAL');
+  } else if (esEvaluacion) {
+    window.seleccionarTipoRegistro('EVALUACION');
   } else {
     window.seleccionarTipoRegistro('CITA');
   }
@@ -1127,11 +1201,11 @@ window.editarCita = function(id) {
 
   const seccionEstado = document.getElementById('seccionEstadoCita');
   if (seccionEstado) {
-    seccionEstado.style.display = (!esBloqueo && !esGrupal) ? 'block' : 'none';
+    seccionEstado.style.display = (!esBloqueo) ? 'block' : 'none';
   }
   window.seleccionarEstadoModal(cita.estado_cita || 'PENDIENTE');
 
-  const nombreLimpio = cita.paciente.nombre.replace('[BLOQUEO]', '').replace('[GRUPAL]', '').trim() || '';
+  const nombreLimpio = cita.paciente.nombre.replace(/^\[(BLOQUEO|GRUPAL|EVALUACION)\]\s*/i, '').trim() || '';
   document.getElementById('nc_nombre').value = nombreLimpio;
   document.getElementById('nc_email').value = cita.paciente.email && !cita.paciente.email.startsWith('sin-email-') && !cita.paciente.email.startsWith('grupal-') ? cita.paciente.email : '';
   
@@ -1149,7 +1223,7 @@ window.editarCita = function(id) {
   if (montoEl) {
     montoEl.value = (cita.monto !== undefined && cita.monto !== null) 
       ? cita.monto 
-      : (cita.paciente && cita.paciente.tarifaDefecto !== null && cita.paciente.tarifaDefecto !== undefined ? cita.paciente.tarifaDefecto : 500);
+      : (cita.paciente && cita.paciente.tarifaDefecto !== null && cita.paciente.tarifaDefecto !== undefined ? cita.paciente.tarifaDefecto : (esEvaluacion ? 4000 : 500));
   }
 
   const badge = document.getElementById('badgePacienteDetectado');
@@ -1158,14 +1232,13 @@ window.editarCita = function(id) {
   }
 
   const notasLimpias = (cita.categoria || '')
-    .replace('[BLOQUEO]', '')
-    .replace('[GRUPAL]', '')
+    .replace(/^\[(BLOQUEO|GRUPAL|EVALUACION)\]\s*/i, '')
     .replace(/\(Sesión\s+\d+\/\d+\)/i, '')
     .replace(/·\s*$/, '')
     .trim();
   document.getElementById('nc_notas').value = notasLimpias;
 
-  const colorCita = cita.color || (esBloqueo ? '#94a3b8' : (esGrupal ? '#8b5cf6' : '#3EB8CC'));
+  const colorCita = cita.color || (esBloqueo ? '#94a3b8' : (esGrupal ? '#8b5cf6' : (esEvaluacion ? '#6366f1' : '#3EB8CC')));
   document.getElementById('nc_color').value = colorCita;
   renderSwatches(colorCita);
 

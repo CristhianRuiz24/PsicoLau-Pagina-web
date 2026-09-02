@@ -1,6 +1,7 @@
 const prisma = require('../config/db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const logger = require('../utils/logger');
 
 const login = async (req, res) => {
   try {
@@ -41,7 +42,7 @@ const login = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error en login:', error);
+    logger.error('Error en login', error);
     res.status(500).json({ success: false, message: 'Error interno del servidor' });
   }
 };

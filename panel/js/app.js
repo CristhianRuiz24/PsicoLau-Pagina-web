@@ -297,7 +297,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (citaOriginal) {
           const eraBloqueo = (citaOriginal.categoria && citaOriginal.categoria.startsWith('[BLOQUEO]')) || (citaOriginal.paciente && citaOriginal.paciente.nombre.startsWith('[BLOQUEO]'));
           const eraGrupal = (citaOriginal.categoria && citaOriginal.categoria.startsWith('[GRUPAL]')) || (citaOriginal.paciente && citaOriginal.paciente.nombre.startsWith('[GRUPAL]'));
-          tipoEfectivo = eraBloqueo ? 'BLOQUEO' : (eraGrupal ? 'GRUPAL' : 'CITA');
+          const eraEvaluacion = (citaOriginal.categoria && citaOriginal.categoria.startsWith('[EVALUACION]')) || (citaOriginal.paciente && citaOriginal.paciente.nombre.startsWith('[EVALUACION]'));
+          tipoEfectivo = eraBloqueo ? 'BLOQUEO' : (eraGrupal ? 'GRUPAL' : (eraEvaluacion ? 'EVALUACION' : 'CITA'));
         }
       }
 
@@ -305,8 +306,8 @@ document.addEventListener('DOMContentLoaded', () => {
       let notas = document.getElementById('nc_notas').value.trim();
 
       // Limpiar prefijos antes de asignar estrictamente según el tipo efectivo
-      nombre = nombre.replace(/^\[(BLOQUEO|GRUPAL)\]\s*/i, '').trim();
-      notas = notas.replace(/^\[(BLOQUEO|GRUPAL)\]\s*/i, '').trim();
+      nombre = nombre.replace(/^\[(BLOQUEO|GRUPAL|EVALUACION)\]\s*/i, '').trim();
+      notas = notas.replace(/^\[(BLOQUEO|GRUPAL|EVALUACION)\]\s*/i, '').trim();
 
       if (tipoEfectivo === 'BLOQUEO') {
         nombre = `[BLOQUEO] ${nombre}`;
@@ -314,6 +315,8 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (tipoEfectivo === 'GRUPAL') {
         nombre = `[GRUPAL] ${nombre}`;
         notas = `[GRUPAL] ${notas}`.trim();
+      } else if (tipoEfectivo === 'EVALUACION') {
+        notas = `[EVALUACION] ${notas}`.trim();
       }
 
       const prefijo = document.getElementById('nc_prefijo')?.value || '';
@@ -345,8 +348,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const montoVal = document.getElementById('nc_monto')?.value;
-      let montoFinal = 500;
-      if (tipoEfectivo === 'BLOQUEO' || tipoEfectivo === 'GRUPAL') {
+      let montoFinal = (tipoEfectivo === 'EVALUACION') ? 4000 : 500;
+      if (tipoEfectivo === 'BLOQUEO') {
         montoFinal = 0;
       } else if (montoVal !== undefined && montoVal !== null && montoVal !== '') {
         const parsed = parseFloat(montoVal);
@@ -376,7 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
         data.frecuencia = document.getElementById('nc_frecuencia').value || 'SEMANAL';
       }
 
-      if (esEdicion && tipoEfectivo === 'CITA') {
+      if (esEdicion && tipoEfectivo !== 'BLOQUEO') {
         const estadoCitaVal = document.getElementById('nc_estado_cita')?.value;
         if (estadoCitaVal) {
           data.estado_cita = estadoCitaVal;

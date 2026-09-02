@@ -56,7 +56,7 @@ let citasCache = [];
 let currentWeekOffset = 0;
 let filtroDias = parseInt(localStorage.getItem('psicolau_filtro_dias')) || 7;
 let terminoBusqueda = '';
-let tipoRegistroActual = 'CITA'; // 'CITA' | 'BLOQUEO'
+let tipoRegistroActual = 'CITA'; // 'CITA' | 'EVALUACION' | 'GRUPAL' | 'BLOQUEO'
 let filtroAuditoriaActual = 'SEMANA'; // 'SEMANA' | 'TODAS'
 
 // Helper para cálculo de contraste de color

@@ -1,5 +1,13 @@
 const prisma = require('../config/db');
 const { parseId, crearCitaAdminSchema, editarCitaAdminSchema } = require('../utils/validators');
+const logger = require('../utils/logger');
+const {
+  parseMontoValido,
+  normalizarNombresYCategorias,
+  validarEmailUnicoPaciente,
+  buscarOCrearPacienteParaCita,
+  obtenerCitasFuturasDeSerie
+} = require('../utils/agendaHelpers');
 
 // Obtener todas las citas para la agenda visual
 const obtenerCitas = async (req, res) => {
@@ -33,7 +41,7 @@ const obtenerCitas = async (req, res) => {
 
     res.json({ success: true, data: citas });
   } catch (error) {
-    console.error('Error al obtener citas:', error);
+    logger.error('Error al obtener citas', error);
     res.status(500).json({ success: false, message: 'Error interno del servidor' });
   }
 };
@@ -59,7 +67,7 @@ const actualizarEstadoCita = async (req, res) => {
 
     res.json({ success: true, message: 'Estado de cita actualizado', data: citaActualizada });
   } catch (error) {
-    console.error('Error al actualizar estado de cita:', error);
+    logger.error('Error al actualizar estado de cita', error);
     res.status(500).json({ success: false, message: 'Error interno del servidor' });
   }
 };
@@ -85,7 +93,7 @@ const actualizarEstadoPago = async (req, res) => {
 
     res.json({ success: true, message: 'Estado de pago actualizado', data: citaActualizada });
   } catch (error) {
-    console.error('Error al actualizar pago:', error);
+    logger.error('Error al actualizar pago', error);
     res.status(500).json({ success: false, message: 'Error interno del servidor' });
   }
 };
@@ -108,17 +116,7 @@ const crearCita = async (req, res) => {
       monto 
     } = validData;
 
-    // Validar monto si fue provisto
-    let montoValido = null;
-    if (monto !== undefined && monto !== null && monto !== '') {
-      const parsedMonto = parseFloat(monto);
-      if (!isNaN(parsedMonto) && parsedMonto >= 0) {
-        montoValido = parsedMonto;
-      }
-    }
-
-
-    // Buscar o asociar paciente existente (comparación flexible e insensible a mayúsculas/minúsculas)
+    const montoValido = parseMontoValido(monto);
     const nombreLimpio = nombre.trim();
     const emailLimpio = email ? email.trim() : null;
     const telefonoLimpio = telefono ? telefono.trim() : null;
@@ -127,59 +125,15 @@ const crearCita = async (req, res) => {
     const esBloqueo = (nombreLimpio && nombreLimpio.startsWith('[BLOQUEO]')) || (notas && notas.startsWith('[BLOQUEO]')) || (categoria && categoria.startsWith('[BLOQUEO]'));
     const esGrupal = (nombreLimpio && nombreLimpio.startsWith('[GRUPAL]')) || (notas && notas.startsWith('[GRUPAL]')) || (categoria && categoria.startsWith('[GRUPAL]'));
 
-    let paciente;
-    if (emailLimpio) {
-      paciente = await prisma.paciente.findFirst({
-        where: { email: { equals: emailLimpio, mode: 'insensitive' } }
-      });
-    }
-
-    if (!paciente && telefonoLimpio) {
-      paciente = await prisma.paciente.findFirst({
-        where: {
-          telefono: { equals: telefonoLimpio },
-          nombre: { equals: nombreLimpio, mode: 'insensitive' }
-        }
-      });
-    }
-
-    if (!paciente && !esBloqueo && !esGrupal) {
-      paciente = await prisma.paciente.findFirst({
-        where: { 
-          nombre: { equals: nombreLimpio, mode: 'insensitive' },
-          NOT: [
-            { nombre: { startsWith: '[BLOQUEO]' } },
-            { nombre: { startsWith: '[GRUPAL]' } }
-          ]
-        }
-      });
-    }
-    
-    if (!paciente) {
-      const emailSeguro = emailLimpio || `sin-email-${Date.now()}-${Math.random().toString(36).substring(2, 9)}@local.com`;
-      paciente = await prisma.paciente.create({
-        data: {
-          nombre: nombreLimpio,
-          telefono: telefonoLimpio || '',
-          email: emailSeguro,
-          enlaceZoom: enlaceZoomLimpio || null,
-          tarifaDefecto: (!esBloqueo && !esGrupal && montoValido !== null) ? montoValido : 500
-        }
-      });
-    } else {
-      // Actualizar datos de contacto, Zoom y tarifa habitual si cambiaron
-      const dataUpdate = {};
-      if (telefonoLimpio && paciente.telefono !== telefonoLimpio) dataUpdate.telefono = telefonoLimpio;
-      if (emailLimpio && (!paciente.email || paciente.email.startsWith('sin-email-'))) dataUpdate.email = emailLimpio;
-      if (enlaceZoomLimpio) dataUpdate.enlaceZoom = enlaceZoomLimpio;
-      if (!esBloqueo && !esGrupal && montoValido !== null) dataUpdate.tarifaDefecto = montoValido;
-      if (Object.keys(dataUpdate).length > 0) {
-        paciente = await prisma.paciente.update({
-          where: { id: paciente.id },
-          data: dataUpdate
-        });
-      }
-    }
+    const paciente = await buscarOCrearPacienteParaCita(prisma, {
+      nombreLimpio,
+      emailLimpio,
+      telefonoLimpio,
+      enlaceZoomLimpio,
+      montoValido,
+      esBloqueo,
+      esGrupal
+    });
 
     const montoFinal = esBloqueo ? 0 : (montoValido !== null ? montoValido : (paciente.tarifaDefecto !== null && paciente.tarifaDefecto !== undefined ? paciente.tarifaDefecto : 500));
 
@@ -217,11 +171,17 @@ const crearCita = async (req, res) => {
       total: citasCreadas.length
     });
   } catch (error) {
+    if (error.code === 'P2002') {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Ya existe otro paciente registrado con ese correo electrónico en el sistema.' 
+      });
+    }
     if (error.name === 'ZodError') {
       const msg = error.errors.map(e => e.message).join(', ');
       return res.status(400).json({ success: false, message: msg, errors: error.errors });
     }
-    console.error('Error al crear cita:', error);
+    logger.error('Error al crear cita', error);
     res.status(500).json({ success: false, message: 'Error interno del servidor' });
   }
 };
@@ -269,7 +229,7 @@ const cancelarCita = async (req, res) => {
 
     res.json({ success: true, message: 'Cita cancelada correctamente', data: citaActualizada });
   } catch (error) {
-    console.error('Error al cancelar cita:', error);
+    logger.error('Error al cancelar cita', error);
     res.status(500).json({ success: false, message: 'Error interno del servidor' });
   }
 };
@@ -345,7 +305,7 @@ const eliminarCita = async (req, res) => {
 
     res.json({ success: true, message: 'Cita eliminada permanentemente' });
   } catch (error) {
-    console.error('Error al eliminar cita:', error);
+    logger.error('Error al eliminar cita', error);
     res.status(500).json({ success: false, message: 'Error interno del servidor' });
   }
 };
@@ -359,7 +319,7 @@ const editarCita = async (req, res) => {
     }
 
     const validData = editarCitaAdminSchema.parse(req.body);
-    const { nombre, telefono, email, enlaceZoom, fechaHora, categoria, notas, color, monto, estado_cita, alcance = 'SOLO_ESTA' } = validData;
+    const { nombre, telefono, email, enlaceZoom, fechaHora, categoria, notas, color, monto, estado_cita, estado_pago, alcance = 'SOLO_ESTA' } = validData;
 
     const emailLimpio = email ? email.trim() : (email === '' ? '' : null);
     const telefonoLimpio = telefono ? telefono.trim() : (telefono === '' ? '' : null);
@@ -376,38 +336,31 @@ const editarCita = async (req, res) => {
 
     const eraBloqueo = (citaExistente.categoria && citaExistente.categoria.startsWith('[BLOQUEO]')) || (citaExistente.paciente && citaExistente.paciente.nombre.startsWith('[BLOQUEO]'));
     const eraGrupal = (citaExistente.categoria && citaExistente.categoria.startsWith('[GRUPAL]')) || (citaExistente.paciente && citaExistente.paciente.nombre.startsWith('[GRUPAL]'));
+    const eraEvaluacion = (citaExistente.categoria && citaExistente.categoria.startsWith('[EVALUACION]')) || (citaExistente.paciente && citaExistente.paciente.nombre.startsWith('[EVALUACION]'));
 
-    let montoValido = undefined;
-    if (monto !== undefined && monto !== null && monto !== '') {
-      const parsedMonto = parseFloat(monto);
-      if (!isNaN(parsedMonto) && parsedMonto >= 0) {
-        montoValido = parsedMonto;
-      }
-    }
+    const montoValido = parseMontoValido(monto);
 
-    let nombreFinal = nombre;
-    let categoriaFinal = notas !== undefined ? notas : (categoria !== undefined ? categoria : citaExistente.categoria);
+    const { nombreFinal, categoriaFinal } = normalizarNombresYCategorias({
+      nombre,
+      notas,
+      categoria,
+      eraBloqueo,
+      eraGrupal,
+      eraEvaluacion,
+      categoriaExistente: citaExistente.categoria
+    });
 
-    if (nombreFinal) {
-      const nomLimpio = nombreFinal.replace(/^\[(BLOQUEO|GRUPAL)\]\s*/i, '').trim();
-      if (eraBloqueo) {
-        nombreFinal = `[BLOQUEO] ${nomLimpio}`;
-      } else if (eraGrupal) {
-        nombreFinal = `[GRUPAL] ${nomLimpio}`;
-      } else {
-        nombreFinal = nomLimpio;
-      }
-    }
+    // Validar unicidad de correo si se proporciona uno nuevo para el paciente
+    const { emailFinal, error: errorEmail } = await validarEmailUnicoPaciente(prisma, {
+      eraBloqueo,
+      eraGrupal,
+      email,
+      emailLimpio,
+      pacienteActual: citaExistente.paciente
+    });
 
-    if (categoriaFinal) {
-      const catLimpia = categoriaFinal.replace(/^\[(BLOQUEO|GRUPAL)\]\s*/i, '').trim();
-      if (eraBloqueo) {
-        categoriaFinal = `[BLOQUEO] ${catLimpia}`.trim();
-      } else if (eraGrupal) {
-        categoriaFinal = `[GRUPAL] ${catLimpia}`.trim();
-      } else {
-        categoriaFinal = catLimpia;
-      }
+    if (errorEmail) {
+      return res.status(400).json({ success: false, message: errorEmail });
     }
 
     // 1. Si el alcance es ESTA_Y_SIGUIENTES: ejecutar propagación en serie con transacción atómica
@@ -423,11 +376,7 @@ const editarCita = async (req, res) => {
 
       const resultado = await prisma.$transaction(async (tx) => {
         // Actualizar datos del paciente
-        if (nombreFinal || telefono !== undefined || email !== undefined || enlaceZoom !== undefined || (montoValido !== undefined && !eraBloqueo && !eraGrupal)) {
-          const emailFinal = (eraBloqueo || eraGrupal)
-            ? citaExistente.paciente.email
-            : (emailLimpio ? emailLimpio : citaExistente.paciente.email);
-
+        if (nombreFinal || telefono !== undefined || email !== undefined || enlaceZoom !== undefined || (montoValido !== null && !eraBloqueo && !eraGrupal)) {
           await tx.paciente.update({
             where: { id: citaExistente.pacienteId },
             data: {
@@ -435,7 +384,7 @@ const editarCita = async (req, res) => {
               ...(telefono !== undefined && { telefono: (eraBloqueo || eraGrupal) ? '' : (telefono ? telefono.trim() : '') }),
               ...(email !== undefined && { email: emailFinal }),
               ...(enlaceZoom !== undefined && { enlaceZoom: eraBloqueo ? null : (enlaceZoom ? enlaceZoom.trim() : null) }),
-              ...(montoValido !== undefined && !eraBloqueo && !eraGrupal && { tarifaDefecto: montoValido })
+              ...(montoValido !== null && !eraBloqueo && !eraGrupal && { tarifaDefecto: montoValido })
             }
           });
         }
@@ -447,8 +396,9 @@ const editarCita = async (req, res) => {
             ...(fechaHora && { fechaHora: new Date(fechaHora) }),
             categoria: categoriaFinal,
             ...(color && { color }),
-            ...(montoValido !== undefined && { monto: montoValido }),
-            ...(estado_cita && { estado_cita })
+            ...(montoValido !== null && { monto: montoValido }),
+            ...(estado_cita && { estado_cita }),
+            ...(estado_pago && { estado_pago })
           },
           include: { paciente: true }
         });
@@ -470,7 +420,7 @@ const editarCita = async (req, res) => {
           }
 
           // RF-7: Monto (si no ha sido pagada, aplicar nuevo monto; si ya está PAGADO, conservar pago)
-          if (montoValido !== undefined && citaFutura.estado_pago !== 'PAGADO') {
+          if (montoValido !== null && citaFutura.estado_pago !== 'PAGADO') {
             updateData.monto = montoValido;
           }
 
@@ -500,11 +450,7 @@ const editarCita = async (req, res) => {
     }
 
     // 2. Alcance SOLO_ESTA: Actualización individual
-    if (nombreFinal || telefono !== undefined || email !== undefined || enlaceZoom !== undefined || (montoValido !== undefined && !eraBloqueo && !eraGrupal)) {
-      const emailFinal = (eraBloqueo || eraGrupal)
-        ? citaExistente.paciente.email
-        : (emailLimpio ? emailLimpio : citaExistente.paciente.email);
-
+    if (nombreFinal || telefono !== undefined || email !== undefined || enlaceZoom !== undefined || (montoValido !== null && !eraBloqueo && !eraGrupal)) {
       await prisma.paciente.update({
         where: { id: citaExistente.pacienteId },
         data: {
@@ -512,7 +458,7 @@ const editarCita = async (req, res) => {
           ...(telefono !== undefined && { telefono: (eraBloqueo || eraGrupal) ? '' : (telefono ? telefono.trim() : '') }),
           ...(email !== undefined && { email: emailFinal }),
           ...(enlaceZoom !== undefined && { enlaceZoom: eraBloqueo ? null : (enlaceZoom ? enlaceZoom.trim() : null) }),
-          ...(montoValido !== undefined && !eraBloqueo && !eraGrupal && { tarifaDefecto: montoValido })
+          ...(montoValido !== null && !eraBloqueo && !eraGrupal && { tarifaDefecto: montoValido })
         }
       });
     }
@@ -524,19 +470,26 @@ const editarCita = async (req, res) => {
         ...(fechaHora && { fechaHora: new Date(fechaHora) }),
         categoria: categoriaFinal,
         ...(color && { color }),
-        ...(montoValido !== undefined && { monto: montoValido }),
-        ...(estado_cita && { estado_cita })
+        ...(montoValido !== null && { monto: montoValido }),
+        ...(estado_cita && { estado_cita }),
+        ...(estado_pago && { estado_pago })
       },
       include: { paciente: true }
     });
 
     res.json({ success: true, message: 'Cita actualizada exitosamente', data: citaActualizada });
   } catch (error) {
+    if (error.code === 'P2002') {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Ya existe otro paciente registrado con ese correo electrónico. Por favor usa otro o déjalo vacío.' 
+      });
+    }
     if (error.name === 'ZodError') {
       const msg = error.errors.map(e => e.message).join(', ');
       return res.status(400).json({ success: false, message: msg, errors: error.errors });
     }
-    console.error('Error al editar cita:', error);
+    logger.error('Error al editar cita', error);
     res.status(500).json({ success: false, message: 'Error interno del servidor' });
   }
 };
@@ -563,56 +516,9 @@ const actualizarMontoCita = async (req, res) => {
 
     res.json({ success: true, message: 'Monto actualizado exitosamente', data: citaActualizada });
   } catch (error) {
-    console.error('Error al actualizar monto de cita:', error);
+    logger.error('Error al actualizar monto de cita', error);
     res.status(500).json({ success: false, message: 'Error interno del servidor' });
   }
-};
-
-// Función auxiliar para obtener citas futuras de una serie recurrente
-const obtenerCitasFuturasDeSerie = async (citaActual, dbClient = prisma) => {
-  if (!citaActual) return [];
-
-  // 1. Si la cita tiene serieId explícito
-  if (citaActual.serieId) {
-    return await dbClient.cita.findMany({
-      where: {
-        serieId: citaActual.serieId,
-        id: { not: citaActual.id },
-        fechaHora: { gte: citaActual.fechaHora },
-        estado_cita: { not: 'CANCELADA' }
-      },
-      orderBy: { fechaHora: 'asc' },
-      include: { paciente: true }
-    });
-  }
-
-  // 2. Fallback para citas creadas antes de la existencia de serieId:
-  // Detectar si la categoría o notas tienen formato "(Sesión X/N)"
-  const matchSesion = (citaActual.categoria || '').match(/\(Sesión\s+(\d+)\/(\d+)\)/i);
-  if (matchSesion && citaActual.pacienteId) {
-    const totalSerie = parseInt(matchSesion[2], 10);
-    const sesionActual = parseInt(matchSesion[1], 10);
-
-    if (totalSerie > 1 && sesionActual < totalSerie) {
-      // Buscar citas del mismo paciente con fechaHora posterior no canceladas
-      const candidatas = await dbClient.cita.findMany({
-        where: {
-          pacienteId: citaActual.pacienteId,
-          id: { not: citaActual.id },
-          fechaHora: { gte: citaActual.fechaHora },
-          estado_cita: { not: 'CANCELADA' }
-        },
-        orderBy: { fechaHora: 'asc' },
-        include: { paciente: true }
-      });
-
-      // Filtrar las que compartan el total de la serie ej "(Sesión Y/totalSerie)"
-      const regexCompat = new RegExp(`\\(Sesión\\s+\\d+\\/${totalSerie}\\)`, 'i');
-      return candidatas.filter(c => regexCompat.test(c.categoria || ''));
-    }
-  }
-
-  return [];
 };
 
 module.exports = {

@@ -1,6 +1,7 @@
 const prisma = require('../config/db');
 const { cifrar, descifrar } = require('../utils/crypto');
 const { parseId, notaExpedienteSchema } = require('../utils/validators');
+const logger = require('../utils/logger');
 
 
 // Lista de los 8 campos clínicos confidenciales que deben ser cifrados/descifrados
@@ -103,7 +104,7 @@ const obtenerExpedientePaciente = async (req, res) => {
       total: notasDescifradas.length
     });
   } catch (error) {
-    console.error('Error al obtener expediente del paciente:', error);
+    logger.error('Error al obtener expediente del paciente', error);
     res.status(500).json({ success: false, message: 'Error interno al consultar expediente' });
   }
 };
@@ -155,7 +156,7 @@ const crearNotaExpediente = async (req, res) => {
       const msg = error.errors.map(e => e.message).join(', ');
       return res.status(400).json({ success: false, message: msg, errors: error.errors });
     }
-    console.error('Error al registrar nota en expediente:', error);
+    logger.error('Error al registrar nota en expediente', error);
     res.status(500).json({ success: false, message: 'Error interno al guardar nota clínica' });
   }
 };
@@ -207,7 +208,7 @@ const editarNotaExpediente = async (req, res) => {
       const msg = error.errors.map(e => e.message).join(', ');
       return res.status(400).json({ success: false, message: msg, errors: error.errors });
     }
-    console.error('Error al editar nota clínica:', error);
+    logger.error('Error al editar nota clínica', error);
     res.status(500).json({ success: false, message: 'Error interno al actualizar nota clínica' });
   }
 };
@@ -320,7 +321,7 @@ const buscarEnExpediente = async (req, res) => {
       total: resultados.length
     });
   } catch (error) {
-    console.error('Error al buscar en expediente:', error);
+    logger.error('Error al buscar en expediente', error);
     res.status(500).json({ success: false, message: 'Error interno en la búsqueda de notas' });
   }
 };
@@ -353,7 +354,7 @@ const eliminarNotaExpediente = async (req, res) => {
       message: 'Nota clínica eliminada correctamente'
     });
   } catch (error) {
-    console.error('Error al eliminar nota clínica:', error);
+    logger.error('Error al eliminar nota clínica', error);
     res.status(500).json({ success: false, message: 'Error interno al eliminar nota' });
   }
 };
@@ -416,7 +417,7 @@ const listarDirectorioPacientes = async (req, res) => {
       data: filtrados
     });
   } catch (error) {
-    console.error('Error al listar directorio de pacientes:', error);
+    logger.error('Error al listar directorio de pacientes', error);
     res.status(500).json({ success: false, message: 'Error interno al listar directorio' });
   }
 };
@@ -488,7 +489,7 @@ const eliminarPaciente = async (req, res) => {
 
 
   } catch (error) {
-    console.error('Error al eliminar paciente:', error);
+    logger.error('Error al eliminar paciente', error);
     res.status(500).json({ success: false, message: 'Error interno al eliminar paciente' });
   }
 };

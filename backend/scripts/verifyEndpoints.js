@@ -6,9 +6,10 @@ const { cifrar, descifrar } = require('../src/utils/crypto');
 async function testFullSuite() {
   console.log('=== VERIFICACIÓN INTEGRAL DE ENDPOINTS Y BASE DE DATOS ===\n');
 
+  let paciente = null;
   try {
     // 1. Crear o buscar paciente real de prueba
-    let paciente = await prisma.paciente.findFirst({
+    paciente = await prisma.paciente.findFirst({
       where: { email: 'expediente.demo@psicolau.com' }
     });
 
@@ -108,6 +109,11 @@ async function testFullSuite() {
   } catch (error) {
     console.error('Error:', error);
   } finally {
+    // Limpiar paciente y notas de prueba creados para evitar registros duplicados en el directorio
+    if (paciente && paciente.email === 'expediente.demo@psicolau.com') {
+      await prisma.expediente.deleteMany({ where: { pacienteId: paciente.id } });
+      await prisma.paciente.delete({ where: { id: paciente.id } });
+    }
     await prisma.$disconnect();
   }
 }
