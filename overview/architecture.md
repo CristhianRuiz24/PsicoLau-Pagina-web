@@ -15,10 +15,12 @@ graph TD
     end
 
     subgraph Backend_API ["Backend API (Node.js + Express)"]
-        G[index.js / Rutas API]
+        G[index.js / Rutas API + Rate Limiting Diferenciado]
         H[authMiddleware - JWT 8h]
         I[crypto.js - AES-256-GCM Cifrado Clínico]
         J[Controllers: agenda, pacientes, expedientes, pagos, auth, contacto]
+        O[agendaHelpers.js - Normalización, Series & P2002 Safe]
+        P[logger.js - Sanitización y Seguridad en Producción]
         K[emailService.js - Resend API / HTTPS]
     end
 

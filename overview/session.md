@@ -30,13 +30,14 @@
 
 ## En qué quedó
 
-- Las mejoras de auditoría, la Spec 004 y las correcciones clínicas previas están 100% completadas y blindadas.
-- La batería de tests automatizados pasa al 100% sin ninguna regresión.
+- Actualización completa desplegada con éxito a producción en la rama `main` (`origin/main`, commit `bc2015d` + commit de ajuste visual).
+- La suite clínica cuenta con la Spec 004 (Evaluaciones, grupales y desglose contable), hardening de auditoría, modal ergonómico de 3 botones y base de datos limpia sin registros duplicados de test.
 - Servidores locales activos (Backend en puerto 3000, Frontend en puerto 5500).
 
 ## Próximo paso
 
-- Probar en la interfaz local (`http://localhost:5500/panel/agenda.html`) o solicitar aprobación del usuario para preparar despliegue a producción.
+- Esperar nuevas solicitudes o feedback de Laura tras el uso en producción.
+
 
 
 ## Notas rápidas

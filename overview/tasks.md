@@ -4,6 +4,10 @@
 *Ninguna tarea activa por el momento.*
 
 ## Completadas Recientemente
+- [x] **Optimización Ergonómica de Barra de Exportación y Protección de Privacidad**:
+  - [x] Retiro de botón redundante `Copiar para WhatsApp` para blindar la confidencialidad de nombres de pacientes con terceros.
+  - [x] Consolidación de barra de acciones en 3 botones limpios (`Contadora`, `Excel`, `Imprimir/PDF`) y modal ampliado a 1060px sin desbordamientos.
+  - [x] Depuración de registros temporales de prueba en la base de datos dev y blindaje con cleanup en `verifyEndpoints.js`.
 - [x] **Mejoras y Hardening Post-Auditoría Técnica**:
   - [x] Higiene de Git: Eliminación de plantillas huérfanas en raíz y configuración en `.gitignore`.
   - [x] Hardening CSP: Integración de `object-src 'none'` y `base-uri 'self'` en cabeceras de Cloudflare Pages (`_headers`).
