@@ -2391,4 +2391,39 @@ body {
   }
 }
 
+/* --- ESTILOS DE CAMBIO DE CONTRASEÑA Y VISIBILIDAD (SPEC 005) --- */
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.password-input-wrapper input {
+  padding-right: 2.6rem !important;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.btn-toggle-pwd {
+  position: absolute;
+  right: 0.6rem;
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0.3rem 0.5rem;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease;
+  border-radius: 4px;
+}
+
+.btn-toggle-pwd:hover {
+  color: #1e293b;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+
 

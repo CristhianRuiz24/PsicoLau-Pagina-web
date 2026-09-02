@@ -34,6 +34,6 @@ coverage/
 .vscode/
 .idea/
 
-# Borradores y Plantillas Temporales
-prompts.md
-spec.md
+# Borradores y Plantillas Temporales en Raíz
+/prompts.md
+/spec.md

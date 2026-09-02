@@ -4,6 +4,11 @@
 *Ninguna tarea activa por el momento.*
 
 ## Completadas Recientemente
+- [x] **Spec 005: Cambio de Contraseña desde el Panel Clínico**:
+  - [x] T1: Validación Zod y Endpoint Backend de Cambio de Contraseña (`backend/src/controllers/authController.js`, `backend/src/routes/auth.js`)
+  - [x] T2: Interfaz Visual (Botón en Cabecera y Modal de Seguridad) (`panel/agenda.html`, `panel/panel.css`)
+  - [x] T3: Lógica de Frontend y Renovación de Sesión (`panel/js/app.js`)
+  - [x] T4: Verificación Integral de No-Regresiones (8/8 tests automatizados al 100%)
 - [x] **Optimización Ergonómica de Barra de Exportación y Protección de Privacidad**:
   - [x] Retiro de botón redundante `Copiar para WhatsApp` para blindar la confidencialidad de nombres de pacientes con terceros.
   - [x] Consolidación de barra de acciones en 3 botones limpios (`Contadora`, `Excel`, `Imprimir/PDF`) y modal ampliado a 1060px sin desbordamientos.

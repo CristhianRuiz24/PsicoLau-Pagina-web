@@ -28,11 +28,18 @@
    - **Reporte Mensual**: Se amplió `max-width` a 1060px, se retiró la opción redundante `Copiar para WhatsApp` (protegiendo el secreto médico de nombres de pacientes) y se consolidó la barra en 3 botones limpios y perfectamente balanceados: `Copiar para Contadora`, `Descargar Excel` e `Imprimir / PDF`.
    - **Depuración de Pacientes Duplicados**: Se eliminaron los pacientes huérfanos creados por tests (Elena Morales Rivera ID 129 y Paciente Test B ID 126) y se blindó `verifyEndpoints.js` con cleanup automático para que el Directorio de Expedientes muestre siempre el conteo real de citas agendadas.
 
+5. **Spec 005 (Cambio de Contraseña desde el Panel Clínico) — 100% Implementada y Verificada**:
+   - Botón `[ 🔒 Seguridad ]` incorporado en la cabecera antes del botón `Salir`.
+   - Modal `#modalCambiarPassword` accesible con campos para contraseña actual, nueva y confirmación, con toggles de visibilidad (icono de ojo 👁️).
+   - Endpoint `PUT /api/auth/cambiar-password` con rate limiter dedicado (5 req/15 min), validación Zod y hash `bcrypt` (costo 10).
+   - Renovación transparente de sesión JWT en `localStorage` (sin cerrar la sesión de Laura).
+   - Suite completa de 8 tests automatizados pasando al 100% (incluyendo `testCambioPassword.js`).
+
 ## En qué quedó
 
-- Actualización completa desplegada con éxito a producción en la rama `main` (`origin/main`, commit `bc2015d` + commit de ajuste visual).
-- La suite clínica cuenta con la Spec 004 (Evaluaciones, grupales y desglose contable), hardening de auditoría, modal ergonómico de 3 botones y base de datos limpia sin registros duplicados de test.
-- Servidores locales activos (Backend en puerto 3000, Frontend en puerto 5500).
+- Spec 005 (Cambio de contraseña) implementada, probada en backend (8/8 tests) y validada en navegador.
+- Lista para confirmación del usuario para commitear y desplegar a producción.
+
 
 ## Próximo paso
 

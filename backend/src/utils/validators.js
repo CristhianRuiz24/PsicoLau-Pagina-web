@@ -89,6 +89,19 @@ const notaExpedienteSchema = z.object({
   resumenBreve: z.string().trim().max(5000).optional().nullable()
 });
 
+// Schema para cambio de contraseña desde el panel administrativo
+const cambiarPasswordSchema = z.object({
+  passwordActual: z.string().trim().min(1, "La contraseña actual es requerida"),
+  passwordNueva: z.string().trim().min(8, "La nueva contraseña debe tener al menos 8 caracteres"),
+  confirmarPassword: z.string().trim().min(1, "Debes confirmar la nueva contraseña")
+}).refine((data) => data.passwordNueva === data.confirmarPassword, {
+  message: "Las contraseñas no coinciden",
+  path: ["confirmarPassword"]
+}).refine((data) => data.passwordActual !== data.passwordNueva, {
+  message: "La nueva contraseña no puede ser igual a la anterior",
+  path: ["passwordNueva"]
+});
+
 // Helper para validar IDs numéricos enteros positivos
 const parseId = (id) => {
   const parsed = parseInt(id, 10);
@@ -101,7 +114,8 @@ module.exports = {
   contactoSchema,
   crearCitaAdminSchema,
   editarCitaAdminSchema,
-  notaExpedienteSchema
+  notaExpedienteSchema,
+  cambiarPasswordSchema
 };
 
 

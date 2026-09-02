@@ -445,3 +445,157 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+// --- GESTIÓN DE SEGURIDAD Y CAMBIO DE CONTRASEÑA (SPEC 005) ---
+
+window.abrirModalCambiarPassword = function() {
+  const modal = document.getElementById('modalCambiarPassword');
+  if (!modal) return;
+  const form = document.getElementById('formCambiarPassword');
+  if (form) form.reset();
+
+  const alerta = document.getElementById('alertaCambioPassword');
+  if (alerta) {
+    alerta.style.display = 'none';
+    alerta.textContent = '';
+  }
+
+  ['cp_passwordActual', 'cp_passwordNueva', 'cp_confirmarPassword'].forEach(id => {
+    const input = document.getElementById(id);
+    if (input) input.type = 'password';
+  });
+  ['icon_cp_actual', 'icon_cp_nueva', 'icon_cp_confirmar'].forEach(id => {
+    const icon = document.getElementById(id);
+    if (icon) icon.className = 'fa-regular fa-eye';
+  });
+
+  modal.style.display = 'flex';
+  setTimeout(() => {
+    document.getElementById('cp_passwordActual')?.focus();
+  }, 100);
+};
+
+window.cerrarModalCambiarPassword = function() {
+  const modal = document.getElementById('modalCambiarPassword');
+  if (modal) modal.style.display = 'none';
+};
+
+window.toggleVerPassword = function(inputId, iconId) {
+  const input = document.getElementById(inputId);
+  const icon = document.getElementById(iconId);
+  if (!input) return;
+
+  if (input.type === 'password') {
+    input.type = 'text';
+    if (icon) icon.className = 'fa-regular fa-eye-slash';
+  } else {
+    input.type = 'password';
+    if (icon) icon.className = 'fa-regular fa-eye';
+  }
+};
+
+window.guardarCambioPassword = async function(e) {
+  if (e) e.preventDefault();
+
+  const alerta = document.getElementById('alertaCambioPassword');
+  const btnSubmit = document.getElementById('btnSubmitCambioPassword');
+  const inputActual = document.getElementById('cp_passwordActual');
+  const inputNueva = document.getElementById('cp_passwordNueva');
+  const inputConfirmar = document.getElementById('cp_confirmarPassword');
+
+  const passwordActual = (inputActual?.value || '').trim();
+  const passwordNueva = (inputNueva?.value || '').trim();
+  const confirmarPassword = (inputConfirmar?.value || '').trim();
+
+  const mostrarAlerta = (mensaje, esExito = false) => {
+    if (!alerta) return;
+    alerta.style.display = 'block';
+    alerta.textContent = mensaje;
+    if (esExito) {
+      alerta.style.background = '#dcfce7';
+      alerta.style.color = '#15803d';
+      alerta.style.border = '1px solid #bbf7d0';
+    } else {
+      alerta.style.background = '#fee2e2';
+      alerta.style.color = '#991b1b';
+      alerta.style.border = '1px solid #fecaca';
+    }
+  };
+
+  // Validaciones del lado del cliente
+  if (!passwordActual) {
+    mostrarAlerta('Por favor ingresa tu contraseña actual.');
+    inputActual?.focus();
+    return;
+  }
+
+  if (passwordNueva.length < 8) {
+    mostrarAlerta('La nueva contraseña debe tener al menos 8 caracteres.');
+    inputNueva?.focus();
+    return;
+  }
+
+  if (passwordNueva !== confirmarPassword) {
+    mostrarAlerta('Las contraseñas no coinciden.');
+    inputConfirmar?.focus();
+    return;
+  }
+
+  if (passwordActual === passwordNueva) {
+    mostrarAlerta('La nueva contraseña no puede ser igual a la anterior.');
+    inputNueva?.focus();
+    return;
+  }
+
+  const token = localStorage.getItem('psicolau_token');
+  if (!token) {
+    mostrarAlerta('Tu sesión ha expirado. Por favor recarga e inicia sesión.');
+    return;
+  }
+
+  try {
+    if (btnSubmit) {
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right: 4px;"></i> Guardando...';
+    }
+
+    const res = await fetch(`${API_URL}/auth/cambiar-password`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        passwordActual,
+        passwordNueva,
+        confirmarPassword
+      })
+    });
+
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      // Renovar el token en localStorage para que la sesión continúe viva sin interrupciones
+      if (data.token) {
+        localStorage.setItem('psicolau_token', data.token);
+      }
+
+      mostrarAlerta('¡Contraseña actualizada exitosamente!', true);
+
+      setTimeout(() => {
+        window.cerrarModalCambiarPassword();
+      }, 1500);
+
+    } else {
+      mostrarAlerta(data.message || 'No se pudo actualizar la contraseña.');
+    }
+  } catch (error) {
+    mostrarAlerta('Error de conexión con el servidor. Intenta de nuevo.');
+  } finally {
+    if (btnSubmit) {
+      btnSubmit.disabled = false;
+      btnSubmit.innerHTML = '<i class="fa-solid fa-floppy-disk" style="margin-right: 4px;"></i> Guardar Contraseña';
+    }
+  }
+};
+

@@ -51,9 +51,9 @@
         <span class="btn-text">Notas</span>
       </button>
 
-      <button class="btn btn-header-action btn-print-desktop" onclick="imprimirAgenda()" title="Imprimir o guardar en PDF">
-        <i class="fa-solid fa-print"></i>
-        <span class="btn-text">Imprimir</span>
+      <button class="btn btn-header-action" onclick="abrirModalCambiarPassword()" title="Seguridad y cambio de contraseña personal">
+        <i class="fa-solid fa-key" style="color: #6366f1;"></i>
+        <span class="btn-text">Seguridad</span>
       </button>
       <button class="btn-logout" id="logoutBtn" title="Cerrar sesión segura">
         <i class="fa-solid fa-arrow-right-from-bracket"></i>
@@ -477,6 +477,67 @@
         <div style="display: flex; gap: 0.8rem; margin-top: 1.2rem;">
           <button type="submit" class="btn" style="flex: 1.5;"><i class="fa-solid fa-floppy-disk" style="margin-right: 4px;"></i> Guardar Datos de Cobro</button>
           <button type="button" class="btn" style="flex: 1; background: var(--gris-calido);" onclick="cerrarModalDatosPago()">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal / Seguridad y Cambio de Contraseña -->
+  <div id="modalCambiarPassword" onclick="if (event.target === this) cerrarModalCambiarPassword();" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; padding: 1rem;">
+    <div style="background: #ffffff; padding: 1.8rem; border-radius: 14px; width: 100%; max-width: 480px; max-height: 92vh; overflow-y: auto; box-shadow: 0 16px 40px rgba(0,0,0,0.25);">
+      <!-- Cabecera -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.8rem;">
+        <h3 style="color: var(--rosa-coral); font-size: 1.25rem; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fa-solid fa-key" style="color: #6366f1;"></i> Seguridad y Contraseña
+        </h3>
+        <button type="button" class="btn-close-modal" onclick="cerrarModalCambiarPassword()" title="Cerrar modal">&times;</button>
+      </div>
+
+      <div class="datos-pago-tip-box" style="background: #eef2ff; border-left: 4px solid #6366f1; color: #3730a3; margin-bottom: 1.2rem; padding: 0.75rem 1rem; border-radius: 6px; font-size: 0.85rem; line-height: 1.4;">
+        <i class="fa-solid fa-shield-halved" style="margin-right: 4px;"></i>
+        Tu nueva contraseña se almacena con cifrado irreversible. Solo tú tendrás acceso a ella.
+      </div>
+
+      <!-- Alerta de Error o Éxito -->
+      <div id="alertaCambioPassword" style="display: none; padding: 0.75rem 1rem; border-radius: 6px; font-size: 0.85rem; margin-bottom: 1rem; font-weight: 600;"></div>
+
+      <form id="formCambiarPassword" onsubmit="guardarCambioPassword(event)">
+        <div class="form-group">
+          <label for="cp_passwordActual"><i class="fa-solid fa-lock" style="color: #6366f1; margin-right: 4px;"></i> Contraseña Actual</label>
+          <div class="password-input-wrapper">
+            <input type="password" id="cp_passwordActual" placeholder="Ingresa tu contraseña actual" required autocomplete="current-password" style="width: 100%;">
+            <button type="button" class="btn-toggle-pwd" onclick="toggleVerPassword('cp_passwordActual', 'icon_cp_actual')" title="Mostrar / Ocultar contraseña">
+              <i class="fa-regular fa-eye" id="icon_cp_actual"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="cp_passwordNueva"><i class="fa-solid fa-key" style="color: var(--turquesa); margin-right: 4px;"></i> Nueva Contraseña</label>
+          <div class="password-input-wrapper">
+            <input type="password" id="cp_passwordNueva" placeholder="Mínimo 8 caracteres" required minlength="8" autocomplete="new-password" style="width: 100%;">
+            <button type="button" class="btn-toggle-pwd" onclick="toggleVerPassword('cp_passwordNueva', 'icon_cp_nueva')" title="Mostrar / Ocultar contraseña">
+              <i class="fa-regular fa-eye" id="icon_cp_nueva"></i>
+            </button>
+          </div>
+          <small style="color: #64748b; font-size: 0.75rem; display: block; margin-top: 3px;">Debe tener al menos 8 caracteres libres.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="cp_confirmarPassword"><i class="fa-solid fa-check-double" style="color: var(--turquesa); margin-right: 4px;"></i> Confirmar Nueva Contraseña</label>
+          <div class="password-input-wrapper">
+            <input type="password" id="cp_confirmarPassword" placeholder="Vuelve a escribir la nueva contraseña" required minlength="8" autocomplete="new-password" style="width: 100%;">
+            <button type="button" class="btn-toggle-pwd" onclick="toggleVerPassword('cp_confirmarPassword', 'icon_cp_confirmar')" title="Mostrar / Ocultar contraseña">
+              <i class="fa-regular fa-eye" id="icon_cp_confirmar"></i>
+            </button>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.8rem; margin-top: 1.4rem;">
+          <button type="submit" id="btnSubmitCambioPassword" class="btn" style="flex: 1.5; background: #6366f1;">
+            <i class="fa-solid fa-floppy-disk" style="margin-right: 4px;"></i> Guardar Contraseña
+          </button>
+          <button type="button" class="btn" style="flex: 1; background: var(--gris-calido);" onclick="cerrarModalCambiarPassword()">Cancelar</button>
         </div>
       </form>
     </div>
