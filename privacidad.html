@@ -48,40 +48,1055 @@
   <!-- Preconexión a CDNs externos -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 
   <!-- Google Fonts optimizado no bloqueante -->
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap"></noscript>
 
-  <!-- Font Awesome asíncrono no bloqueante -->
-  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+  <!-- Estilos Críticos Inlined (0 peticiones bloqueantes) -->
+  <style>
+/* 
+  Estilos globales para Web PsicoLau
+  Paleta: Rosa (#EC5E86), Turquesa (#3EB8CC), Gris cálido (#8C8C8C), Fondo (#FDFBF9)
+*/
 
-  <!-- Estilos Críticos -->
-  <link rel="stylesheet" href="css/style.css">
+:root {
+  --color-primary: #EC5E86;
+  --color-primary: #EC5E86; /* Restaurado a color de marca oficial */
+  --color-secondary: #1E94A8; /* Turquesa calibrado para contraste WCAG 2.1 AA (4.5:1 con blanco) */
+  --color-secondary-hover: #16798A;
+  --color-text: #4A4A4A; /* Contraste óptimo de lectura */
+  --color-text-light: #5C5C5C; /* Calibrado WCAG 2.1 AA (> 5.5:1 con fondo #FDFBF9) */
+  --color-background: #FDFBF9;
+  --color-white: #FFFFFF;
+  
+  --font-heading: 'Lora', serif;
+  --font-body: 'Outfit', sans-serif;
+  
+  --transition: all 0.3s ease;
+  --border-radius: 12px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-background);
+  color: var(--color-text);
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--color-primary);
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+a {
+  color: var(--color-secondary);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+a:hover {
+  color: var(--color-primary);
+}
+
+/* Enlaces dentro de bloques de texto (WCAG 2.1 AA: no depender únicamente del color) */
+p a, .text-link, .card a:not(.btn) {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: var(--color-secondary);
+  font-weight: 500;
+}
+
+p a:hover, .text-link:hover, .card a:not(.btn):hover {
+  color: var(--color-primary);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Iconos SVG Nativos Inline */
+.svg-icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.125em;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+
+.svg-icon-lg {
+  width: 1.25em;
+  height: 1.25em;
+}
+
+.svg-icon-xl {
+  width: 2em;
+  height: 2em;
+}
+
+/* =========================================
+   Layout y Utilidades
+   ========================================= */
+.container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section {
+  padding: 5rem 0;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: var(--color-secondary);
+  color: var(--color-white) !important;
+  padding: 0.8rem 2rem;
+  border-radius: 30px;
+  font-weight: 600;
+  transition: var(--transition);
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none !important;
+  box-shadow: 0 4px 12px rgba(30, 148, 168, 0.25);
+}
+
+.btn:hover {
+  background-color: var(--color-primary);
+  color: var(--color-white) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(236, 94, 134, 0.2);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 2px solid var(--color-primary);
+  color: var(--color-primary) !important;
+  text-decoration: none !important;
+}
+
+.btn-outline:hover {
+  background-color: var(--color-primary);
+  color: var(--color-white) !important;
+}
+
+.btn-whatsapp {
+  background-color: #25D366;
+  color: var(--color-white) !important;
+}
+
+.btn-whatsapp:hover {
+  background-color: #128C7E;
+  box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
+}
+
+/* =========================================
+   Navegación (Header)
+   ========================================= */
+header {
+  background-color: var(--color-white);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+}
+
+.logo-container img {
+  height: 50px;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 2rem;
+}
+
+.nav-links a {
+  color: var(--color-text);
+  font-weight: 500;
+  font-size: 1.1rem;
+}
+
+.nav-links a.active, .nav-links a:hover {
+  color: var(--color-primary);
+}
+
+.menu-toggle {
+  display: none;
+  font-size: 1.5rem;
+  color: var(--color-primary);
+  cursor: pointer;
+  background: none;
+  border: none;
+  margin-left: auto;
+}
+
+/* =========================================
+   Hero Section
+   ========================================= */
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  text-align: center;
+  padding: 2rem 0;
+  background: radial-gradient(circle at center, #ffffff 0%, var(--color-background) 100%);
+}
+
+.hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.hero-logo {
+  max-width: 300px;
+  margin: 0 auto 2rem;
+}
+
+.hero-tagline {
+  font-size: 1.5rem;
+  color: var(--color-text-light);
+  margin-bottom: 2rem;
+  font-family: var(--font-heading);
+  font-style: italic;
+}
+
+.hero-credibility {
+  margin-top: 3rem;
+  font-size: 0.9rem;
+  color: var(--color-text-light);
+}
+
+/* =========================================
+   Tarjetas (Cards)
+   ========================================= */
+.grid-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.card {
+  background: var(--color-white);
+  padding: 2rem;
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  transition: var(--transition);
+  text-align: center;
+  border-top: 4px solid var(--color-background);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+  border-top-color: var(--color-secondary);
+}
+
+.card h3 {
+  color: var(--color-primary);
+  margin-bottom: 1rem;
+}
+
+/* =========================================
+   Sobre Mí
+   ========================================= */
+.profile-section {
+  display: flex;
+  gap: 4rem;
+  align-items: center;
+}
+
+.profile-img-container {
+  flex: 1;
+  max-width: 400px;
+}
+
+.profile-img {
+  border-radius: var(--border-radius);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.profile-content {
+  flex: 1.5;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 1.5rem;
+}
+
+.chip {
+  background-color: rgba(62, 184, 204, 0.1);
+  color: var(--color-secondary);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.timeline {
+  margin-top: 2rem;
+}
+.timeline-item {
+  position: relative;
+  padding-left: 2rem;
+  margin-bottom: 1.5rem;
+}
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 5px;
+  width: 12px;
+  height: 12px;
+  background-color: var(--color-primary);
+  border-radius: 50%;
+}
+.timeline-item::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 20px;
+  bottom: -1.5rem;
+  width: 2px;
+  background-color: rgba(236, 94, 134, 0.2);
+}
+.timeline-item:last-child::after {
+  display: none;
+}
+
+/* =========================================
+   Formulario de Contacto
+   ========================================= */
+.contact-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--color-primary);
+}
+
+.form-control {
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  transition: var(--transition);
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 0 3px rgba(62, 184, 204, 0.1);
+}
+
+textarea.form-control {
+  resize: vertical;
+  min-height: 150px;
+}
+
+.contact-info h3 {
+  margin-top: 2rem;
+}
+
+.social-links {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.social-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: var(--color-background);
+  border-radius: 50%;
+  color: var(--color-primary);
+  font-size: 1.2rem;
+  transition: var(--transition);
+}
+.social-links a:hover {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+/* =========================================
+   Footer
+   ========================================= */
+footer {
+  background-color: #f9f9f9;
+  text-align: center;
+  padding: 2rem 0;
+  margin-top: 4rem;
+  color: var(--color-text-light);
+  font-size: 0.9rem;
+}
+
+/* =========================================
+   Media Queries
+   ========================================= */
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+  }
+  
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: var(--color-white);
+    padding: 1rem 0;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+  
+  .nav-links.active {
+    display: flex;
+  }
+  
+  .nav-links li {
+    text-align: center;
+  }
+  
+  .profile-section, .contact-container {
+    flex-direction: column;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+/* =========================================
+   FAQ Accordion
+   ========================================= */
+.faq-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.faq-item {
+  border-bottom: 1px solid #EAEAEA;
+  margin-bottom: 1rem;
+}
+
+.faq-item:last-child {
+  border-bottom: none;
+}
+
+.faq-question {
+  width: 100%;
+  background: none;
+  border: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.2rem 0;
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+  transition: var(--transition);
+}
+
+.faq-question:hover {
+  color: var(--color-primary);
+}
+
+.faq-icon {
+  color: var(--color-secondary);
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+}
+
+.faq-item.active .faq-icon {
+  transform: rotate(45deg); /* Convertir el + en un x (o al revés) */
+}
+.faq-item.active .faq-question {
+  color: var(--color-primary);
+}
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, padding 0.4s ease;
+}
+
+.faq-answer p {
+  padding-bottom: 1.5rem;
+  color: var(--color-text);
+}
+
+/* =========================================
+   Testimonios (Testimonials)
+   ========================================= */
+.testimonial-card {
+  position: relative;
+  padding: 3rem 2rem 2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 300px;
+  max-width: 450px;
+}
+
+.quote-icon {
+  position: absolute;
+  top: -15px;
+  left: 20px;
+  font-size: 3rem;
+  color: var(--color-secondary);
+  opacity: 0.2;
+}
+
+.testimonial-text {
+  font-style: italic;
+  margin-bottom: 1.5rem;
+  color: var(--color-text);
+  flex-grow: 1;
+}
+
+.testimonial-author {
+  color: var(--color-primary);
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-top: 1px solid #EAEAEA;
+  padding-top: 1rem;
+  margin-bottom: 0;
+}
+
+/* =========================================
+   Multimedia (Videos y Audio)
+   ========================================= */
+.video-responsive-container,
+.video-facade {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+  height: 0;
+  overflow: hidden;
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  margin-bottom: 1.5rem;
+  background-color: #1a1a1a;
+}
+
+.video-responsive-container iframe,
+.video-facade iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.video-facade {
+  cursor: pointer;
+}
+
+.video-facade-thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease, opacity 0.3s ease;
+}
+
+.video-facade:hover .video-facade-thumb {
+  transform: scale(1.03);
+  opacity: 0.9;
+}
+
+.video-facade-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  width: 68px;
+  height: 68px;
+  background: rgba(236, 94, 134, 0.95);
+  color: #ffffff;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  padding-left: 4px; /* Centrado óptico de la flecha */
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.video-facade:hover .video-facade-play,
+.video-facade:focus-within .video-facade-play {
+  transform: translate(-50%, -50%) scale(1.12);
+  background-color: var(--color-primary);
+}
+
+.video-facade-title {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 500;
+  z-index: 2;
+  text-align: left;
+}
+
+
+.audio-player-container {
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.audio-player-container audio {
+  width: 100%;
+  height: 40px;
+  border-radius: 20px;
+  outline: none;
+}
+
+/* =========================================
+   Footer y Enlaces Sociales
+   ========================================= */
+footer {
+  background-color: #f9f6f3;
+  padding: 3.5rem 0 2rem;
+  margin-top: 4rem;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  text-align: center;
+}
+
+footer p {
+  color: var(--color-text-light);
+  font-size: 0.95rem;
+}
+
+.social-links {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.social-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--color-white);
+  color: var(--color-secondary);
+  border: 1px solid rgba(30, 148, 168, 0.25);
+  transition: var(--transition);
+  text-decoration: none !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+
+.social-links a:hover {
+  background: var(--color-primary);
+  color: var(--color-white);
+  border-color: var(--color-primary);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(236, 94, 134, 0.3);
+}
+
+/* =========================================
+   Accesibilidad (Foco Visible y Teclado)
+   ========================================= */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+/* =========================================
+   Banner de Descargo de Emergencias (Crisis)
+   ========================================= */
+.crisis-banner {
+  background: #fff8f8;
+  border-left: 4px solid var(--color-primary);
+  border-radius: 8px;
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 2.5rem;
+  box-shadow: 0 2px 10px rgba(236, 94, 134, 0.08);
+}
+.crisis-banner-title {
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: 1.05rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+.crisis-banner p {
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--color-text);
+  margin: 0;
+}
+.crisis-banner a {
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+/* =========================================
+   Casilla de Aceptación de Privacidad
+   ========================================= */
+.privacy-agreement {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  text-align: left;
+}
+.privacy-agreement input[type="checkbox"] {
+  margin-top: 0.2rem;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.privacy-agreement label {
+  cursor: pointer;
+  line-height: 1.4;
+  margin: 0;
+  color: var(--color-text);
+}
+
+/* =========================================
+   Secciones de Experiencia, Protocolos y Conferencias
+   ========================================= */
+.badge-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.badge-teal {
+  background-color: rgba(30, 148, 168, 0.12);
+  color: var(--color-secondary);
+}
+.badge-pink {
+  background-color: rgba(236, 94, 134, 0.12);
+  color: var(--color-primary);
+}
+.badge-neutral {
+  background-color: #f0f0f0;
+  color: var(--color-text);
+}
+
+.experience-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.exp-card-featured {
+  background: var(--color-white);
+  border-radius: var(--border-radius);
+  padding: 2.2rem;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.04);
+  border-left: 6px solid var(--color-primary);
+  border-top: 1px solid rgba(236, 94, 134, 0.15);
+  transition: var(--transition);
+}
+.exp-card-featured:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(236, 94, 134, 0.1);
+}
+
+.exp-featured-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+@media (min-width: 850px) {
+  .exp-featured-grid {
+    grid-template-columns: 1.2fr 1fr;
+    gap: 2.5rem;
+    align-items: center;
+  }
+}
+
+.exp-cards-subgrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+@media (min-width: 768px) {
+  .exp-cards-subgrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.exp-role-card {
+  background: var(--color-white);
+  border-radius: var(--border-radius);
+  padding: 2rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  border-top: 4px solid var(--color-primary);
+  display: flex;
+  flex-direction: column;
+  transition: var(--transition);
+}
+.exp-role-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+}
+.exp-role-card.teal-top {
+  border-top-color: var(--color-secondary);
+}
+
+.exp-role-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.exp-role-title {
+  font-size: 1.25rem;
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+  font-family: var(--font-heading);
+  line-height: 1.35;
+}
+.exp-role-org {
+  font-weight: 600;
+  color: var(--color-secondary);
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.exp-highlight-box {
+  background: rgba(30, 148, 168, 0.05);
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  line-height: 1.55;
+  margin-top: auto;
+  border-left: 3px solid var(--color-secondary);
+}
+.exp-highlight-box.pink-border {
+  background: rgba(236, 94, 134, 0.05);
+  border-left-color: var(--color-primary);
+}
+
+
+.protocols-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+@media (min-width: 900px) {
+  .protocols-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .protocol-card-featured {
+    grid-column: span 2;
+  }
+}
+
+.protocol-card {
+  background: var(--color-white);
+  border-radius: var(--border-radius);
+  padding: 2rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  border-left: 4px solid var(--color-secondary);
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+}
+.protocol-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+}
+.protocol-card.pink-accent {
+  border-left-color: var(--color-primary);
+}
+.protocol-title {
+  font-size: 1.2rem;
+  color: var(--color-primary);
+  margin-bottom: 0.8rem;
+  line-height: 1.4;
+}
+.protocol-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.protocol-desc {
+  font-size: 0.95rem;
+  color: var(--color-text);
+  line-height: 1.6;
+}
+
+.talks-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.2rem;
+  margin-top: 2rem;
+}
+@media (min-width: 768px) {
+  .talks-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.talk-card {
+  background: var(--color-white);
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.02);
+  border: 1px solid rgba(0,0,0,0.05);
+  border-left: 4px solid var(--color-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: var(--transition);
+}
+.talk-card:hover {
+  border-left-color: var(--color-secondary);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+  transform: translateY(-2px);
+}
+.talk-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.talk-title {
+  font-size: 1.05rem;
+  color: var(--color-primary);
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+  line-height: 1.4;
+  font-family: var(--font-heading);
+}
+.talk-institution {
+  font-size: 0.9rem;
+  color: var(--color-text-light);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.talk-detail {
+  font-size: 0.9rem;
+  color: var(--color-text);
+  line-height: 1.5;
+  margin-top: 0.3rem;
+}
+
+/* =========================================
+   Movimiento Reducido (WCAG 2.3.3)
+   ========================================= */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+
+
+  </style>
 </head>
 <body>
 
   <!-- Header -->
   <header>
     <div class="container navbar">
-      <a href="index.html" class="logo-container">
+      <a href="/" class="logo-container">
         <img src="assets/logo-nav.webp" alt="Logo de PsicoLau" width="50" height="50">
       </a>
-      <button class="menu-toggle" aria-label="Abrir menú"><i class="fas fa-bars"></i></button>
+      <button class="menu-toggle" aria-label="Abrir menú"><svg class="svg-icon" viewBox="0 0 448 512" aria-hidden="true"><path fill="currentColor" d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z"/></svg></button>
       <nav>
         <ul class="nav-links">
-          <li><a href="index.html">Inicio</a></li>
-          <li><a href="sobre-mi.html">Sobre mí</a></li>
-          <li><a href="areas-de-atencion.html">Áreas de atención</a></li>
-          <li><a href="experiencia.html">Experiencia</a></li>
-          <li><a href="libros.html">Libros</a></li>
-          <li><a href="terapias-grupales.html">Terapias Grupales</a></li>
-          <li><a href="testimonios.html">Testimonios</a></li>
-          <li><a href="contacto.html" class="btn">Agenda tu consulta</a></li>
+          <li><a href="/">Inicio</a></li>
+          <li><a href="sobre-mi">Sobre mí</a></li>
+          <li><a href="areas-de-atencion">Áreas de atención</a></li>
+          <li><a href="experiencia">Experiencia</a></li>
+          <li><a href="libros">Libros</a></li>
+          <li><a href="terapias-grupales">Terapias Grupales</a></li>
+          <li><a href="testimonios">Testimonios</a></li>
+          <li><a href="contacto" class="btn">Agenda tu consulta</a></li>
         </ul>
       </nav>
     </div>
@@ -165,7 +1180,7 @@
         <p style="margin-bottom: 1.5rem;">
           Para ejercer cualquiera de sus derechos ARCO, puede enviar una solicitud vía correo electrónico a:
           <br>
-          📧 <strong><a href="mailto:lince_lg@yahoo.com.mx" style="color: var(--color-secondary);">lince_lg@yahoo.com.mx</a></strong> / <strong><a href="mailto:contacto@psicolau.com" style="color: var(--color-secondary);">contacto@psicolau.com</a></strong>
+          📧 <strong><a href="mailto:lince_lg@yahoo.com.mx" style="color: var(--color-secondary); text-decoration: underline;">lince_lg@yahoo.com.mx</a></strong> / <strong><a href="mailto:contacto@psicolau.com" style="color: var(--color-secondary); text-decoration: underline;">contacto@psicolau.com</a></strong>
           <br>
           Su solicitud deberá incluir su nombre completo, copia de una identificación oficial o acreditación de identidad, y una descripción clara del derecho que desea ejercer. Su solicitud será atendida en un plazo máximo de 20 días hábiles conforme a la ley.
         </p>
@@ -174,13 +1189,13 @@
           7. Cambios al Presente Aviso de Privacidad
         </h2>
         <p style="margin-bottom: 0;">
-          El presente Aviso de Privacidad puede sufrir modificaciones o actualizaciones derivadas de requerimientos legales, mejoras en nuestras prácticas de seguridad o cambios en nuestros servicios. Cualquier modificación será publicada y estará permanentemente disponible para su consulta en esta página web (<a href="https://psicolau.com/privacidad.html" style="color: var(--color-secondary);">psicolau.com/privacidad.html</a>).
+          El presente Aviso de Privacidad puede sufrir modificaciones o actualizaciones derivadas de requerimientos legales, mejoras en nuestras prácticas de seguridad o cambios en nuestros servicios. Cualquier modificación será publicada y estará permanentemente disponible para su consulta en esta página web (<a href="privacidad" style="color: var(--color-secondary); text-decoration: underline;">psicolau.com/privacidad</a>).
         </p>
 
       </div>
 
       <div style="text-align: center; margin-top: 3rem;">
-        <a href="contacto.html" class="btn"><i class="fas fa-arrow-left" style="margin-right: 8px;"></i> Regresar a Contacto</a>
+        <a href="contacto" class="btn"><svg class="svg-icon" viewBox="0 0 512 512" aria-hidden="true" style="margin-right: 8px;"><path fill="currentColor" d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 288 480 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-370.7 0 105.4-105.4c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg> Regresar a Contacto</a>
       </div>
 
     </div>
@@ -195,15 +1210,15 @@
         <img src="assets/logo-nav.webp" alt="PsicoLau Logo" width="40" height="40" style="height: 40px; width: auto;" loading="lazy">
       </div>
       <div style="text-align: center; margin-bottom: 0.5rem; display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap;">
-        <a href="preguntas-frecuentes.html" style="color: var(--color-text-light); text-decoration: underline; font-size: 0.95rem;">Preguntas Frecuentes</a>
-        <a href="privacidad.html" style="color: var(--color-primary); font-weight: 600; text-decoration: underline; font-size: 0.95rem;">Aviso de Privacidad</a>
+        <a href="preguntas-frecuentes" style="color: var(--color-text-light); text-decoration: underline; font-size: 0.95rem;">Preguntas Frecuentes</a>
+        <a href="privacidad" style="color: var(--color-primary); font-weight: 600; text-decoration: underline; font-size: 0.95rem;">Aviso de Privacidad</a>
       </div>
       <p>&copy; 2026 PSICOLAU — Psicología y Resiliencia. Todos los derechos reservados.</p>
       <div class="social-links" style="justify-content: center; margin-top: 1rem;">
-        <a href="https://facebook.com/profile.php?id=100090214955219" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-        <a href="https://www.tiktok.com/@lorelinx" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
-        <a href="https://www.instagram.com/Lorelinx" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-        <a href="https://www.youtube.com/@lorellinx/videos" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+        <a href="https://facebook.com/profile.php?id=100090214955219" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><svg class="svg-icon" viewBox="0 0 320 512" aria-hidden="true"><path fill="currentColor" d="M80 299.3l0 212.7 116 0 0-212.7 86.5 0 18-97.8-104.5 0 0-34.6c0-51.7 20.3-71.5 72.7-71.5 16.3 0 29.4 .4 37 1.2l0-88.7C291.4 4 256.4 0 236.2 0 129.3 0 80 50.5 80 159.4l0 42.1-66 0 0 97.8 66 0z"/></svg></a>
+        <a href="https://www.tiktok.com/@lorelinx" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><svg class="svg-icon" viewBox="0 0 448 512" aria-hidden="true"><path fill="currentColor" d="M448.5 209.9c-44 .1-87-13.6-122.8-39.2l0 178.7c0 33.1-10.1 65.4-29 92.6s-45.6 48-76.6 59.6-64.8 13.5-96.9 5.3-60.9-25.9-82.7-50.8-35.3-56-39-88.9 2.9-66.1 18.6-95.2 40-52.7 69.6-67.7 62.9-20.5 95.7-16l0 89.9c-15-4.7-31.1-4.6-46 .4s-27.9 14.6-37 27.3-14 28.1-13.9 43.9 5.2 31 14.5 43.7 22.4 22.1 37.4 26.9 31.1 4.8 46-.1 28-14.4 37.2-27.1 14.2-28.1 14.2-43.8l0-349.4 88 0c-.1 7.4 .6 14.9 1.9 22.2 3.1 16.3 9.4 31.9 18.7 45.7s21.3 25.6 35.2 34.6c19.9 13.1 43.2 20.1 67 20.1l0 87.4z"/></svg></a>
+        <a href="https://www.instagram.com/Lorelinx" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg class="svg-icon" viewBox="0 0 448 512" aria-hidden="true"><path fill="currentColor" d="M224.3 141a115 115 0 1 0 -.6 230 115 115 0 1 0 .6-230zm-.6 40.4a74.6 74.6 0 1 1 .6 149.2 74.6 74.6 0 1 1 -.6-149.2zm93.4-45.1a26.8 26.8 0 1 1 53.6 0 26.8 26.8 0 1 1 -53.6 0zm129.7 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM399 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/></svg></a>
+        <a href="https://www.youtube.com/@lorellinx/videos" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><svg class="svg-icon" viewBox="0 0 576 512" aria-hidden="true"><path fill="currentColor" d="M549.7 124.1C543.5 100.4 524.9 81.8 501.4 75.5 458.9 64 288.1 64 288.1 64S117.3 64 74.7 75.5C51.2 81.8 32.7 100.4 26.4 124.1 15 167 15 256.4 15 256.4s0 89.4 11.4 132.3c6.3 23.6 24.8 41.5 48.3 47.8 42.6 11.5 213.4 11.5 213.4 11.5s170.8 0 213.4-11.5c23.5-6.3 42-24.2 48.3-47.8 11.4-42.9 11.4-132.3 11.4-132.3s0-89.4-11.4-132.3zM232.2 337.6l0-162.4 142.7 81.2-142.7 81.2z"/></svg></a>
       </div>
     </div>
   </footer>

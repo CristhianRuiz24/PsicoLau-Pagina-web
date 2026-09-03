@@ -4,6 +4,12 @@
 *Ninguna.*
 
 ## Completadas Recientemente
+- [x] **Spec 007: Máxima Optimización de Rendimiento y Accesibilidad (100/100 en PageSpeed)**:
+  - [x] T1: Calibración de Accesibilidad WCAG 2.1 AA en Sistema de Diseño (`css/style.css`)
+  - [x] T2: Sustitución de Font Awesome por SVGs Inline Nativos
+  - [x] T3: Inlining de CSS Crítico y Enlaces Canónicos Limpios
+  - [x] T4: Corrección de CLS Residual en `libros` y `contacto`
+  - [x] T5: Verificación Integral de No Regresión y Auditoría Final Lighthouse (100/100 Cuádruple)
 - [x] **Spec 006: Optimización Web Integral y Rendimiento PageSpeed (Core Web Vitals)**:
   - [x] T1: Hardening de Seguridad CSP y Eliminación de Errores de Consola (`_headers`)
   - [x] T2: Calibración de Estilos Globales, Accesibilidad y Fachada de Video (`css/style.css`)

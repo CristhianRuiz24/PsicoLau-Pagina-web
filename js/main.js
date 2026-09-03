@@ -62,11 +62,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Marcar enlace activo según la URL
-  const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+  // Marcar enlace activo según la URL (soporta rutas canónicas limpias y extensiones .html)
+  let currentPath = window.location.pathname.split('/').pop().replace(/\.html$/, '');
+  if (!currentPath || currentPath === 'index') currentPath = '';
   const menuItems = document.querySelectorAll('.nav-links a');
   menuItems.forEach(link => {
-    const linkHref = link.getAttribute('href');
+    let linkHref = (link.getAttribute('href') || '').replace(/\.html$/, '').replace(/^\//, '');
+    if (linkHref === 'index') linkHref = '';
     if (linkHref === currentPath) {
       link.classList.add('active');
     }

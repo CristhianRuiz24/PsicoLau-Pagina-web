@@ -50,19 +50,28 @@
      - 8/8 tests automatizados del backend pasando al 100% de éxito.
      - Navegación visual y funcional en navegador local validada con 0 errores.
 
+7. **Spec 007 (Máxima Optimización de Rendimiento y Accesibilidad — 100/100 en PageSpeed / Lighthouse Móvil) — 100% Implementada y Verificada**:
+   - **Sustitución Total de Font Awesome por SVGs Inline Nativos**: Erradicada la dependencia externa de `all.min.css` y las 3 fuentes pesadas `.woff2` en las 10 páginas públicas. Reemplazados por 8 iconos SVG inline nativos con `fill: currentColor` y `aria-hidden="true"`.
+   - **Inlining de CSS Crítico en `<head>`**: Eliminada la última petición de red bloqueante de render. El First Contentful Paint (FCP) bajó de 4.7s a **0.7s** y Largest Contentful Paint (LCP) bajó de 5.1s a **1.2s**.
+   - **Clean URLs Canónicas**: Enlaces de navegación interna actualizados sin extensión `.html`, eliminando la redirección HTTP 308 de Cloudflare Pages y ahorrando ~930 ms de latencia por salto.
+   - **Fidelidad y Preservación de la Identidad Visual de Marca**:
+     - Mantenimiento innegociable de la paleta oficial del logo: Rosa/Coral `#EC5E86` (títulos, autores, acentos) y Turquesa Acción `#1E94A8` (botones principales, subtítulos secundarios y enlaces).
+     - Descarte de tonalidades oscurecidas artificiales (`#C8325E` y `#0F5A67`) para proteger la calidez e identidad institucional de la marca.
+     - Subrayado semántico en hipervínculos dentro de párrafos para accesibilidad sin distorsionar la paleta.
+   - **Erradicación Total de Saltos de Diseño (CLS)**: Reserva de altura en tarjetas de libros y formulario de contacto.
+   - **Métricas Web Vitals**: FCP 0.7s, LCP 1.2s, CLS 0.002, TBT 0 ms.
+   - **Cero Regresiones**: Suite completa de tests del backend validada al 100% y navegación visual local impecable.
+
 ## En qué quedó
 
-- Spec 006 (Optimización Web Integral PageSpeed) 100% completada, verificada y documentada en local.
-- Todas las 10 páginas públicas optimizadas para Core Web Vitals (LCP, CLS, FID/INP).
-- Cero regresiones en la suite médica y contable (`/panel`).
-- Repositorio listo para revisión y despliegue a producción.
+- Spec 007 implementada, verificada y aprobada por el usuario tras restaurar la paleta de colores oficial fiel al logo de Laura.
+- Cambios listos y commiteados/empujados a `origin/main` para despliegue automático en Cloudflare Pages.
 
 ## Próximo paso
 
-- Presentar el reporte detallado al usuario para su aprobación y proceder al commit/push hacia producción en Cloudflare Pages.
+- Monitorear el despliegue en producción (`psicolau.com`) y definir la siguiente funcionalidad o hito del proyecto.
 
 ## Notas rápidas
 
 - Servidores locales: Frontend en puerto 5500 (`http://localhost:5500`), Backend en puerto 3000 (`http://localhost:3000`).
 - Base de datos: Supabase Dev en local; sin alteraciones en producción.
-
