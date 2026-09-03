@@ -73,5 +73,5 @@
 
 ## Notas rápidas
 
-- Servidores locales: Frontend en puerto 5500 (`http://localhost:5500`), Backend en puerto 3000 (`http://localhost:3000`).
-- Base de datos: Supabase Dev en local; sin alteraciones en producción.
+- Servidores locales: Servidor de pruebas y backend cerrados limpiamente; listos para reiniciar con Live Server o `npx serve -l 5500` y `npm start` en el puerto 3000.
+- Base de datos: Supabase Dev en local intacto; sin alteraciones en producción.
