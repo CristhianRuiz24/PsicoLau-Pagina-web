@@ -65,6 +65,8 @@ El proyecto sigue rigurosamente el flujo SDD para cualquier funcionalidad o camb
 - **Fondo General**: `#FDFBF9` — Tono marfil suave y cálido.
 - **Tipografía**: Sans-serif moderna, legible y accesible (Google Fonts: Outfit / Inter).
 
+> **Prioridad innegociable de la paleta oficial sobre contrastes automáticos**: La identidad visual oficial de Laura (rosa `#EC5E86`, turquesa `#1E94A8`) debe preservarse intacta y prevalecer sobre sugerencias de contraste algorítmicas (Lighthouse/WCAG) que oscurezcan o apaguen los colores del logotipo y alteren la calidez de marca.
+
 ---
 
 ## 💻 5. Comandos de Desarrollo
@@ -96,3 +98,4 @@ Ningún cambio o tarea se da por terminado sin comprobar:
 3. **Verificación de la Spec**: Cada Requisito Funcional (`RF-x`) de la spec activa cuenta con su prueba (script o verificación guiada) superada.
 4. **Validación de tests backend**: Ejecutar los scripts de verificación en `backend/scripts/` relevantes.
 5. **Revisión de no-exposición de secretos**: Ningún secreto, token o variable sensible queda expuesta en código ni commits.
+6. **Limpieza obligatoria en scripts de test**: Todo script de prueba o verificación en `backend/scripts/` que inserte registros temporales en base de datos debe incluir un bloque `finally` con limpieza automática (`delete`) o ejecutarse en transacción revertida para evitar registros huérfanos o duplicados en el entorno de desarrollo que confundan el directorio clínico.

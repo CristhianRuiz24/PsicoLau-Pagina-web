@@ -34,3 +34,10 @@ El resto (contexto de proyecto, comandos, estilo) vive en AGENTS.md.
 - Nunca modifiques `docs/constitution.md` sin que yo lo pida explícitamente.
 - Ante cualquier cambio de comportamiento ya especificado: primero se
   actualiza la spec correspondiente en `specs/`, después el código.
+- Prohibición de timers en bucle (`schedule`) durante comandos CLI: Cuando se
+  ejecute un comando de desarrollo o auditoría que genere notificaciones
+  reactivas automáticas, no se deben encadenar temporizadores de sondeo `schedule`
+  para evitar generar mensajes repetitivos en la interfaz de usuario.
+- Prioridad innegociable de la paleta oficial de marca sobre contrastes automáticos:
+  La identidad visual oficial de Laura (rosa `#EC5E86`, turquesa `#1E94A8`) debe
+  preservarse intacta y prevalecer sobre sugerencias algorítmicas de contraste.

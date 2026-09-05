@@ -58,10 +58,8 @@
   <!-- Preload de imagen crítica LCP -->
   <link rel="preload" as="image" href="assets/foto-laura.webp" type="image/webp" fetchpriority="high">
 
-  <!-- Google Fonts optimizado no bloqueante -->
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap"></noscript>
+  <!-- Google Fonts optimizado -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap">
 
   <!-- Estilos Críticos Inlined (0 peticiones bloqueantes) -->
   <style>
@@ -1121,7 +1119,7 @@ textarea:focus-visible {
       
       <div class="profile-section">
         <div class="profile-img-container">
-          <img src="assets/foto-laura.webp" alt="Retrato de la Psicóloga Ana Laura Gómez Díaz" class="profile-img" width="400" height="551" fetchpriority="high" onerror="this.src='assets/logo-nav.webp'; this.style.boxShadow='none';">
+          <img src="assets/foto-laura.webp" alt="Retrato de la Psicóloga Ana Laura Gómez Díaz" class="profile-img" width="400" height="551" fetchpriority="high">
         </div>
         
         <div class="profile-content">

@@ -10,13 +10,14 @@ async function testContabilidadSuite() {
   let cita2 = null;
 
   try {
+    const PORT = process.env.PORT || 3001;
     // 1. Generar token de prueba
     const token = jwt.sign({ id: 1, email: 'test.admin@psicolau.com' }, process.env.JWT_SECRET || 'secret', { expiresIn: '1h' });
     console.log('✓ Token JWT de prueba generado.');
 
     // 2. Crear paciente con tarifa personalizada mediante API interna
     const emailTest = `paciente.contable.${Date.now()}@test.com`;
-    const resCrear = await fetch('http://localhost:3000/api/agenda/citas', {
+    const resCrear = await fetch(`http://localhost:${PORT}/api/agenda/citas`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -45,7 +46,7 @@ async function testContabilidadSuite() {
     console.log(`✓ Paciente creado con tarifaDefecto: $${pacienteEnDB.tarifaDefecto} (Esperado: 1200)`);
 
     // 3. Crear segunda cita para el mismo paciente sin especificar monto -> debe heredar 1200
-    const resCrear2 = await fetch('http://localhost:3000/api/agenda/citas', {
+    const resCrear2 = await fetch(`http://localhost:${PORT}/api/agenda/citas`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -65,7 +66,7 @@ async function testContabilidadSuite() {
     console.log(`✓ Cita 2 hereda tarifa del paciente con Monto: $${cita2.monto} (Esperado: 1200)`);
 
     // 4. Probar actualización rápida de monto vía PATCH /citas/:id/monto a $0 (Cortesía)
-    const resPatch = await fetch(`http://localhost:3000/api/agenda/citas/${cita2.id}/monto`, {
+    const resPatch = await fetch(`http://localhost:${PORT}/api/agenda/citas/${cita2.id}/monto`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -79,7 +80,7 @@ async function testContabilidadSuite() {
     console.log(`✓ Cita 2 actualizada vía PATCH a Monto: $${dataPatch.data.monto} (Esperado: 0)`);
 
     // 5. Validar que se rechacen montos negativos (< 0)
-    const resError = await fetch(`http://localhost:3000/api/agenda/citas/${cita1.id}/monto`, {
+    const resError = await fetch(`http://localhost:${PORT}/api/agenda/citas/${cita1.id}/monto`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',

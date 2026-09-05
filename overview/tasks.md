@@ -4,6 +4,20 @@
 *Ninguna.*
 
 ## Completadas Recientemente
+- [x] **Auditoría de Seguridad Dinámica (DAST) con OWASP ZAP**:
+  - [x] Configuración de entorno local aislado en puertos 3001 y 5500 con usuario de prueba dedicado.
+  - [x] Mapeo y Active Scan sobre `/panel`, `/panel/agenda` y API autenticada (`2026-09-05-ZAP-Report-.md`).
+  - [x] Análisis exhaustivo de alertas (0 críticas/altas, 95% bloqueos defensivos con 4xx).
+  - [x] Limpieza del entorno local (cierre de daemons y eliminación de usuario temporal).
+- [x] **Spec 008: Hardening de Seguridad Web y Cabeceras (Mozilla Observatory Grade A+)**:
+  - [x] T1: Desacoplamiento de Atributos Inline en Frontend Público (`js/main.js` y 10 páginas HTML)
+  - [x] T2: Segmentación y Hardening de Cabeceras HTTP (`_headers`)
+  - [x] T3: Script de Verificación Automatizada de Seguridad y Redirección HTTPS (`verifySecurityHeaders.js`)
+  - [x] T4: Verificación Integral de No Regresión, Consola y Pila Clínica (8/8 tests backend OK, 0 errores consola)
+- [x] **Promoción de Reglas Operativas e Integración Local (`learning.md`)**:
+  - [x] Regla 1: Limpieza obligatoria (`finally`) en scripts de test promovida a `AGENTS.md` (§7.6).
+  - [x] Regla 2: Prohibición de timers en bucle (`schedule`) en tareas CLI promovida a `GEMINI.md`.
+  - [x] Regla 3: Prioridad innegociable de la paleta institucional (#EC5E86 / #1E94A8) promovida a `AGENTS.md` (§4) y `GEMINI.md`.
 - [x] **Spec 007: Máxima Optimización de Rendimiento y Accesibilidad (100/100 en PageSpeed)**:
   - [x] T1: Calibración de Accesibilidad WCAG 2.1 AA en Sistema de Diseño (`css/style.css`)
   - [x] T2: Sustitución de Font Awesome por SVGs Inline Nativos

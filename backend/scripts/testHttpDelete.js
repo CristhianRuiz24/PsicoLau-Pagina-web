@@ -4,7 +4,8 @@ const jwt = require('jsonwebtoken');
 async function testHttpDelete() {
   const token = jwt.sign({ id: 1, email: 'admin@psicolau.com' }, process.env.JWT_SECRET, { expiresIn: '24h' });
   
-  const res = await fetch('http://localhost:3000/api/pacientes/4', {
+  const PORT = process.env.PORT || 3001;
+  const res = await fetch(`http://localhost:${PORT}/api/pacientes/4`, {
     method: 'DELETE',
     headers: {
 

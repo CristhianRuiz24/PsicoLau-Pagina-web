@@ -62,16 +62,46 @@
    - **Métricas Web Vitals**: FCP 0.7s, LCP 1.2s, CLS 0.002, TBT 0 ms.
    - **Cero Regresiones**: Suite completa de tests del backend validada al 100% y navegación visual local impecable.
 
+8. **Promoción de Reglas Operativas y Entorno Local Limpio**:
+   - Identificación y resolución de colisión en puerto 3000 con proyectos personales externos del desarrollador; preparación del backend para operar en puerto 3001 en local con soporte en scripts de prueba.
+   - Promoción formal de las 3 reglas aprobadas por el usuario desde `overview/learning.md`:
+     1. **Limpieza en tests**: Incorporada en `AGENTS.md` (§7.6) para blindar el entorno Dev de Supabase frente a pacientes huérfanos.
+     2. **Prohibición de timers en bucle (`schedule`)**: Integrada en `GEMINI.md` para evitar ruido en ejecuciones CLI.
+     3. **Prioridad innegociable de la paleta oficial de marca**: Blindada en `AGENTS.md` (§4) y `GEMINI.md` (Reglas fijas) para preservar el rosa `#EC5E86` y turquesa `#1E94A8`.
+   - Lista de propuestas pendientes en `learning.md` vaciada y actualizada.
+   - Respetada la instrucción de no realizar commit ni push a producción. Servidores locales cerrados limpiamente.
+
+9. **Spec 008 (Hardening de Seguridad Web y Cabeceras — Mozilla Observatory Grade A+) — 100% Implementada y Verificada**:
+   - **Desacoplamiento Total de Eventos Inline**: Retirados todos los atributos `onload` de fuentes y `onerror` en imágenes en las 10 páginas HTML públicas. Fallback de imagen centralizado limpiamente en `js/main.js`. 0 eventos `on*` en todo el frontend público.
+   - **Segmentación de Cabeceras en `_headers`**:
+     - Sitio público (`/*`): CSP estricto (`script-src 'self' https://static.cloudflareinsights.com;` sin `'unsafe-inline'`), aislamiento `Cross-Origin-Opener-Policy: same-origin-allow-popups`, `Cross-Origin-Resource-Policy: same-origin`, y `font-src`/`style-src` restringidos sin dependencias redundantes de CDN.
+     - Suite clínica (`/panel/*`): Regla dedicada e independiente que preserva la funcionalidad completa de la agenda interactiva de Laura, Web Audio API y Font Awesome sin degradar la seguridad pública.
+   - **Script Automatizado de Auditoría**: Creado `backend/scripts/verifySecurityHeaders.js` con 16/16 verificaciones estáticas y de red superadas (calificación proyectada Grado A+).
+   - **Cero Regresiones**: Suite completa de 8 tests backend pasando al 100%, navegación local en navegador con 0 errores de consola y procesos de desarrollo cerrados limpiamente.
+
+10. **Auditoría de Seguridad Dinámica (DAST) con OWASP ZAP — 100% Superada con 0 Vulnerabilidades Críticas**:
+    - **Entorno Aislado Local**: Backend ejecutado en puerto 3001 con usuario temporal exclusivo de auditoría (`zap-audit@psicolau.local`) y frontend en puerto 5500.
+    - **Exploración Activa Autenticada**: Mapeo y ataque activo focalizado sobre `/panel`, `/panel/agenda` y endpoints de API interna (`/api/auth`, `/api/pacientes`, `/api/agenda/citas`, etc.).
+    - **Resultado del Reporte DAST (`2026-09-05-ZAP-Report-.md`)**:
+      - **0 Vulnerabilidades Altas / Críticas**: Inmune contra SQL Injection, Broken Authentication, IDOR, RCE y Directory Traversal.
+      - **Bloqueo Defensivo del 95%**: El 95% de las solicitudes de inyección y fuzzing fueron cortadas en seco con códigos `4xx` (Zod validation, rate limiter y JWT middleware).
+      - **5 Alertas Medias Auditadas**: 4 falsos positivos del entorno local/CDNs (CSP y Anti-Clickjacking ausentes en servidor local `serve`, CORS permisivo sólo en desarrollo y Google Fonts sin SRI por diseño) + 1 comportamiento estándar SPA (JWT en `localStorage` con sesión acotada).
+    - **Higiene y Limpieza**: Servidores locales detenidos y usuario temporal de auditoría eliminado limpiamente de la base de datos de desarrollo.
+
 ## En qué quedó
 
-- Spec 007 implementada, verificada y aprobada por el usuario tras restaurar la paleta de colores oficial fiel al logo de Laura.
-- Cambios listos y commiteados/empujados a `origin/main` para despliegue automático en Cloudflare Pages.
+- Spec 008 100% completada, verificada y documentada en `spec.md`, `plan.md`, `tasks.md` y `walkthrough.md`.
+- Auditoría DAST con OWASP ZAP concluida exitosamente con 0 vulnerabilidades críticas.
+- Archivo `_headers` listo para emitir cabeceras de Grado A+ en Cloudflare Pages.
+- Entorno local limpio: servidores detenidos, usuario temporal borrado, Supabase dev intacto.
+- Cero commits y cero pushes realizados a producción.
 
 ## Próximo paso
 
-- Monitorear el despliegue en producción (`psicolau.com`) y definir la siguiente funcionalidad o hito del proyecto.
+- Activar "Always Use HTTPS" en Cloudflare Dashboard (Edge Certificates) y autorizar el commit/push de la Spec 008 cuando el usuario lo disponga.
 
 ## Notas rápidas
 
-- Servidores locales: Servidor de pruebas y backend cerrados limpiamente; listos para reiniciar con Live Server o `npx serve -l 5500` y `npm start` en el puerto 3000.
-- Base de datos: Supabase Dev en local intacto; sin alteraciones en producción.
+- Servidores locales: Procesos de `serve` y `npm start` cerrados limpiamente.
+- Base de datos: Usuario de auditoría eliminado; Supabase Dev limpio de registros huérfanos; producción sin alteraciones.
+

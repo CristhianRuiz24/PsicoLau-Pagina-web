@@ -14,6 +14,7 @@ const prisma = require('../src/config/db');
 async function runTests() {
   console.log('🧪 Iniciando pruebas de blindaje contra error 500 por colisión de correo...\n');
 
+  const PORT = process.env.PORT || 3001;
   const token = jwt.sign({ id: 1, email: 'test@psicolau.com' }, process.env.JWT_SECRET);
   const authHeader = {
     'Content-Type': 'application/json',
@@ -68,7 +69,7 @@ async function runTests() {
   // 1. Probar enviar el correo del Paciente 2 a la cita del Paciente 1
   console.log(`Intentando asignar a la cita (paciente "${pacientes[0].nombre}") el correo de "${pacientes[1].nombre}" (${pacientes[1].email})...`);
   
-  const resDup = await fetch(`http://localhost:3000/api/agenda/citas/${cita.id}`, {
+  const resDup = await fetch(`http://localhost:${PORT}/api/agenda/citas/${cita.id}`, {
     method: 'PUT',
     headers: authHeader,
     body: JSON.stringify({
@@ -91,7 +92,7 @@ async function runTests() {
 
   // 2. Probar guardar con correo vacío ("")
   console.log('\nIntentando guardar cita con correo vacío ("")...');
-  const resEmpty = await fetch(`http://localhost:3000/api/agenda/citas/${cita.id}`, {
+  const resEmpty = await fetch(`http://localhost:${PORT}/api/agenda/citas/${cita.id}`, {
     method: 'PUT',
     headers: authHeader,
     body: JSON.stringify({

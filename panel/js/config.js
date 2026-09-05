@@ -9,7 +9,7 @@ const isLocal = window.location.hostname === 'localhost' ||
   !window.location.hostname;
 
 const API_URL = isLocal
-  ? `http://${window.location.hostname || 'localhost'}:3000/api`
+  ? `http://${window.location.hostname || 'localhost'}:3001/api`
   : (window.PSICOLAU_API_URL || 'https://api.psicolau.com/api');
 
 

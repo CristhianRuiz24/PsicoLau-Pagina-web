@@ -35,7 +35,7 @@ async function testSearchBySession() {
   });
 
   try {
-    const port = 3000;
+    const port = process.env.PORT || 3001;
     
     // Probar búsqueda: "sesión 2"
     const resSesionConTilde = await fetch(`http://localhost:${port}/api/pacientes/${paciente.id}/expediente/buscar?q=sesi%C3%B3n%202`, {
