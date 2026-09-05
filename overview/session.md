@@ -92,16 +92,17 @@
 
 - Spec 008 100% completada, verificada y documentada en `spec.md`, `plan.md`, `tasks.md` y `walkthrough.md`.
 - Auditoría DAST con OWASP ZAP concluida exitosamente con 0 vulnerabilidades críticas.
-- Archivo `_headers` listo para emitir cabeceras de Grado A+ en Cloudflare Pages.
-- Entorno local limpio: servidores detenidos, usuario temporal borrado, Supabase dev intacto.
-- Cero commits y cero pushes realizados a producción.
+- Despliegue a producción ejecutado con éxito: Commit `dae29f0` pusheado a `origin/main`.
+- Cloudflare Pages desplegando automáticamente cabeceras de Grado A+ y frontend optimizado.
+- Entorno local limpio: servidores detenidos, usuario temporal de prueba borrado, Supabase dev intacto.
 
 ## Próximo paso
 
-- Activar "Always Use HTTPS" en Cloudflare Dashboard (Edge Certificates) y autorizar el commit/push de la Spec 008 cuando el usuario lo disponga.
+- Verificar en vivo la calificación en Mozilla Observatory (`https://observatory.mozilla.org/analyze/psicolau.com`) una vez que Cloudflare Pages complete la propagación CDN.
 
 ## Notas rápidas
 
 - Servidores locales: Procesos de `serve` y `npm start` cerrados limpiamente.
 - Base de datos: Usuario de auditoría eliminado; Supabase Dev limpio de registros huérfanos; producción sin alteraciones.
+- Git: Rama `main` limpia y sincronizada con `origin/main`.
 
