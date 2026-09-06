@@ -9,9 +9,9 @@ graph TD
     end
 
     subgraph Suite_Clinica ["Panel Administrativo (/panel)"]
-        D[panel/index.html - Login JWT]
+        D[panel/index.html + js/login.js - Login JWT Desacoplado]
         E[panel/agenda.html - Easy Table Semanal]
-        F[panel/js/ Modules: config, agenda, expedientes, pagos, whatsapp, audio, app]
+        F[panel/js/ Modules: config, agenda, expedientes, pagos, whatsapp, audio, app, login]
     end
 
     subgraph Backend_API ["Backend API (Node.js + Express)"]
@@ -63,6 +63,7 @@ graph TD
 - **Cambio Seguro de Contraseña in-app con Rate Limiting y Renovación JWT (2026-09-02, Spec 005)**: Endpoint `PUT /api/auth/cambiar-password` protegido con `verificarToken`, `cambiarPasswordLimiter` (5 req / 15 min), validación Zod y hash `bcrypt` (costo 10). Renovación transparente de JWT en `localStorage` manteniendo la sesión activa sin forzar relogin y modal con alternancia de visibilidad 👁️.
 - **Optimización Web Integral y Core Web Vitals (2026-09-02, Spec 006)**: Activos WebP de alto rendimiento (`assets/*.webp`), fachadas Click-to-Play con `youtube-nocookie.com` para testimonios (ahorro de 2 MB y cookies), dimensionado geométrico de imágenes para erradicar CLS y autorización de Cloudflare Web Analytics en CSP de `_headers`.
 - **Hardening de Seguridad Web y Segmentación de Cabeceras HTTP (2026-09-05, Spec 008)**: Segmentación perimetral en `_headers` entre el sitio público (`/*`) con CSP estricto (eliminación total de `'unsafe-inline'` en `script-src`), `Cross-Origin-Opener-Policy: same-origin-allow-popups`, `Cross-Origin-Resource-Policy: same-origin` y supresión de dependencias de CDN no utilizadas, mientras que la suite clínica (`/panel/*`) conserva una política dedicada e independiente que preserva la funcionalidad de la agenda interactiva y Web Audio API sin degradar la seguridad pública. Desacoplamiento total de eventos inline hacia `js/main.js` y script automatizado `verifySecurityHeaders.js` para certificar el Grado A+ en Mozilla Observatory.
+- **Segmentación Estricta de CSP y Desacoplamiento de Login en Suite Clínica (2026-09-05)**: Corrección de la herencia acumulativa de Cloudflare Pages mediante la asignación de la CSP estricta exclusivamente a rutas públicas (`/`, `/sobre-mi*`, etc.) y una CSP independiente para `/panel` y `/panel/*` (permitiendo Font Awesome y scripts interactivos). Desacoplamiento de la lógica de autenticación a `panel/js/login.js` como script propio `'self'`, erradicando por completo los scripts inline del formulario de login.
 
 
 

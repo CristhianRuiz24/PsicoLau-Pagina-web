@@ -6,7 +6,8 @@ aplicarlo solo, lo anota aquí para que tú decidas si lo promueves.
 
 ## Propuestas pendientes
 
-*Ninguna.*
+- [ ] **Aislamiento explícito de CSP en Cloudflare Pages para suites privadas**: En proyectos de Cloudflare Pages, nunca declarar directivas restrictivas de `Content-Security-Policy` (como la ausencia de `'unsafe-inline'` o restricción de CDNs de iconos/fuentes) bajo el comodín global `/*` si existen subdirectorios con requerimientos interactivos (como `/panel`). Dado que Cloudflare Pages hereda y concatena cabeceras aditivamente y los navegadores ejecutan la intersección más estricta, la CSP pública y la CSP del panel deben definirse explícitamente en bloques de ruta separados.
+
 
 ## Reglas promovidas y aplicadas
 
