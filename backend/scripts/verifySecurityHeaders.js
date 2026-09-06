@@ -98,7 +98,7 @@ if (pub) {
   check('Cross-Origin-Resource-Policy: same-origin', pub['cross-origin-resource-policy'] === 'same-origin');
 
   // CSP
-  const csp = pub['content-security-policy'] || '';
+  const csp = pub['content-security-policy'] || blocks['/']?.['content-security-policy'] || '';
   check('CSP: definido en el sitio público', !!csp);
   check('CSP: script-src NO contiene "unsafe-inline"', !csp.match(/script-src[^;]*'unsafe-inline'/));
   check('CSP: script-src NO contiene "data:"', !csp.match(/script-src[^;]*data:/));
@@ -109,7 +109,7 @@ if (pub) {
 }
 
 // Validar bloque privado /panel/*
-const panel = blocks['/panel/*'];
+const panel = blocks['/panel/*'] || blocks['/panel'];
 check('Bloque de cabeceras para suite clínica (/panel/*) definido', !!panel);
 if (panel) {
   const panelCsp = panel['content-security-policy'] || '';

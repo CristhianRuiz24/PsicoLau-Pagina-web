@@ -33,46 +33,6 @@
   </div>
 
   <script src="/panel/js/config.js"></script>
-  <script>
-    // Redirigir si ya hay un token
-    if (localStorage.getItem('psicolau_token')) {
-      window.location.href = '/panel/agenda.html';
-    }
-
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const errorMsg = document.getElementById('errorMessage');
-      const btn = document.getElementById('loginBtn');
-      
-      errorMsg.style.display = 'none';
-      btn.innerText = 'Autenticando...';
-      btn.disabled = true;
-
-      try {
-        const response = await fetch(`${API_URL}/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
-
-        const data = await response.json();
-
-        if (data.success && data.token) {
-          localStorage.setItem('psicolau_token', data.token);
-          window.location.href = '/panel/agenda.html';
-        } else {
-          throw new Error(data.message || 'Error de autenticación');
-        }
-      } catch (error) {
-        errorMsg.innerText = error.message;
-        errorMsg.style.display = 'block';
-        btn.innerText = 'Ingresar';
-        btn.disabled = false;
-      }
-    });
-  </script>
+  <script src="/panel/js/login.js"></script>
 </body>
 </html>
