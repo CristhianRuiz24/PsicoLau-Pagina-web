@@ -4,6 +4,11 @@
 *Ninguna.*
 
 ## Completadas Recientemente
+- [x] **Hotfix Crítico: Desacoplamiento de Login y Segmentación de CSP en Cloudflare Pages**:
+  - [x] Extracción de lógica de formulario de login a script modular externo `panel/js/login.js`.
+  - [x] Corrección de colisión de CSP en `_headers`: aislamiento entre rutas públicas y suite médica `/panel`.
+  - [x] Auditoría de seguridad (18/18 checks pasados) y prueba en navegador real (sin recargas de página).
+  - [x] Despliegue en producción verificado en vivo (`psicolau.com/panel/js/login.js` HTTP 200, CSP limpia).
 - [x] **Auditoría de Seguridad Dinámica (DAST) con OWASP ZAP**:
   - [x] Configuración de entorno local aislado en puertos 3001 y 5500 con usuario de prueba dedicado.
   - [x] Mapeo y Active Scan sobre `/panel`, `/panel/agenda` y API autenticada (`2026-09-05-ZAP-Report-.md`).

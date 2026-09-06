@@ -88,21 +88,26 @@
       - **5 Alertas Medias Auditadas**: 4 falsos positivos del entorno local/CDNs (CSP y Anti-Clickjacking ausentes en servidor local `serve`, CORS permisivo sólo en desarrollo y Google Fonts sin SRI por diseño) + 1 comportamiento estándar SPA (JWT en `localStorage` con sesión acotada).
     - **Higiene y Limpieza**: Servidores locales detenidos y usuario temporal de auditoría eliminado limpiamente de la base de datos de desarrollo.
 
+11. **Hotfix Crítico de Acceso al Panel Clínico (Segmentación CSP y Desacoplamiento de Login) — 100% Resuelto y Desplegado en Producción**:
+    - **Diagnóstico del síntoma de Laura**: La regla `/*` en Cloudflare Pages combinaba la CSP pública con la suite clínica. Al no incluir `'unsafe-inline'` ni `cdnjs`, el navegador bloqueaba el `<script>` inline de `panel/index.html` y los eventos `onclick` de la agenda. Al dar clic en *"Ingresar"*, el formulario realizaba una sumisión HTML nativa en recarga GET, borrando los campos.
+    - **Desacoplamiento de Login**: Extraída toda la lógica de autenticación a `panel/js/login.js` e invocada como script externo `'self'` en `panel/index.html`.
+    - **Segmentación de `_headers`**: Cabeceras base en `/*`, CSP pública estricta asignada a rutas públicas (`/`, `/sobre-mi*`, etc.) y CSP dedicada con `cdnjs` y `'unsafe-inline'` asignada a `/panel` y `/panel/*`.
+    - **Verificación y Despliegue en Vivo**: Commit `fa76b19` pusheado y desplegado por Cloudflare Pages. Comprobado en vivo: `panel/js/login.js` HTTP 200, CSP del panel aislada y sin conflictos, CSP pública estricta intacta (Grado A+).
+
 ## En qué quedó
 
-- Spec 008 100% completada, verificada y documentada en `spec.md`, `plan.md`, `tasks.md` y `walkthrough.md`.
-- Auditoría DAST con OWASP ZAP concluida exitosamente con 0 vulnerabilidades críticas.
-- Despliegue a producción ejecutado con éxito: Commit `dae29f0` pusheado a `origin/main`.
-- Cloudflare Pages desplegando automáticamente cabeceras de Grado A+ y frontend optimizado.
-- Entorno local limpio: servidores detenidos, usuario temporal de prueba borrado, Supabase dev intacto.
+- Hotfix de acceso al panel clínico resuelto y verificado en producción al 100%. Laura ya puede iniciar sesión con normalidad.
+- Grado A+ de seguridad y Core Web Vitals preservados intactos.
+- Repositorio limpio y sincronizado con `origin/main` (commit `fa76b19`).
+- Ninguna credencial, contraseña ni token filtrado.
 
 ## Próximo paso
 
-- Verificar en vivo la calificación en Mozilla Observatory (`https://observatory.mozilla.org/analyze/psicolau.com`) una vez que Cloudflare Pages complete la propagación CDN.
+- Solicitar a Laura que recargue la página (`https://psicolau.com/panel`) e ingrese con sus credenciales habituales.
 
 ## Notas rápidas
 
-- Servidores locales: Procesos de `serve` y `npm start` cerrados limpiamente.
-- Base de datos: Usuario de auditoría eliminado; Supabase Dev limpio de registros huérfanos; producción sin alteraciones.
+- Servidores locales: Cerrados limpiamente.
+- Base de datos: Intacta y protegida.
 - Git: Rama `main` limpia y sincronizada con `origin/main`.
 
