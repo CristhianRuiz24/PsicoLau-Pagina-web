@@ -115,5 +115,5 @@
 
 - Servidores locales: Cerrados limpiamente.
 - Base de datos: Intacta y protegida.
-- Git: Preparado para commit y push.
+- Git: Rama `main` limpia y sincronizada con `origin/main` (commit `6ec6567`).
 
