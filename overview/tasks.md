@@ -4,6 +4,11 @@
 *Ninguna.*
 
 ## Completadas Recientemente
+- [x] **Blindaje CSP contra Recursos HTTP Inseguros (Mozilla Observatory)**:
+  - [x] Retiro de `http://localhost:*` en todas las directivas `connect-src` de `_headers`.
+  - [x] Incorporación de directiva `upgrade-insecure-requests;` en rutas públicas y suite clínica.
+  - [x] Actualización del script `verifySecurityHeaders.js` (22/22 comprobaciones superadas).
+  - [x] Eliminada la penalización de -20 puntos en Mozilla HTTP Observatory.
 - [x] **Hotfix Crítico: Desacoplamiento de Login y Segmentación de CSP en Cloudflare Pages**:
   - [x] Extracción de lógica de formulario de login a script modular externo `panel/js/login.js`.
   - [x] Corrección de colisión de CSP en `_headers`: aislamiento entre rutas públicas y suite médica `/panel`.

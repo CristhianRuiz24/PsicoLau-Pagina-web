@@ -106,6 +106,8 @@ if (pub) {
   check('CSP: base-uri es "self"', csp.includes("base-uri 'self'"));
   check('CSP: frame-ancestors es "none"', csp.includes("frame-ancestors 'none'"));
   check('CSP: img-src no tiene comodín https:', !csp.match(/img-src[^;]*\bhttps:\b/));
+  check('CSP: no permite recursos sobre HTTP no cifrado (cero "http://")', !csp.includes('http://'));
+  check('CSP: incluye directiva upgrade-insecure-requests', csp.includes('upgrade-insecure-requests'));
 }
 
 // Validar bloque privado /panel/*
@@ -114,6 +116,8 @@ check('Bloque de cabeceras para suite clínica (/panel/*) definido', !!panel);
 if (panel) {
   const panelCsp = panel['content-security-policy'] || '';
   check('Panel CSP: definido y preserva compatibilidad con suite médica', panelCsp.includes('api.psicolau.com'));
+  check('Panel CSP: no permite recursos sobre HTTP no cifrado (cero "http://")', !panelCsp.includes('http://'));
+  check('Panel CSP: incluye directiva upgrade-insecure-requests', panelCsp.includes('upgrade-insecure-requests'));
 }
 
 // 2. Auditoría de HTMLs públicos (cero eventos inline)

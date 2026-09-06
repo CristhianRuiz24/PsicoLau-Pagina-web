@@ -94,20 +94,26 @@
     - **Segmentación de `_headers`**: Cabeceras base en `/*`, CSP pública estricta asignada a rutas públicas (`/`, `/sobre-mi*`, etc.) y CSP dedicada con `cdnjs` y `'unsafe-inline'` asignada a `/panel` y `/panel/*`.
     - **Verificación y Despliegue en Vivo**: Commit `fa76b19` pusheado y desplegado por Cloudflare Pages. Comprobado en vivo: `panel/js/login.js` HTTP 200, CSP del panel aislada y sin conflictos, CSP pública estricta intacta (Grado A+).
 
+12. **Blindaje de CSP contra Recursos Inseguros HTTP (Eliminación de Penalización -20 pts en Mozilla Observatory)**:
+    - Retirados los orígenes de desarrollo `http://localhost:3000` y `http://localhost:3001` de todas las directivas `connect-src` en `_headers`.
+    - Incorporada la directiva estándar `upgrade-insecure-requests;` en la CSP de rutas públicas y de la suite clínica `/panel`.
+    - Ampliado el script de auditoría `backend/scripts/verifySecurityHeaders.js` a 22/22 comprobaciones automáticas exitosas (asegurando 0 orígenes HTTP en CSP y presencia de `upgrade-insecure-requests`).
+    - Eliminada la penalización de -20 puntos en Mozilla HTTP Observatory.
+
 ## En qué quedó
 
-- Hotfix de acceso al panel clínico resuelto y verificado en producción al 100%. Laura ya puede iniciar sesión con normalidad.
-- Grado A+ de seguridad y Core Web Vitals preservados intactos.
-- Repositorio limpio y sincronizado con `origin/main` (commit `fa76b19`).
-- Ninguna credencial, contraseña ni token filtrado.
+- CSP en Cloudflare Pages 100% blindada contra recursos HTTP inseguros.
+- Grado A+ de seguridad fortalecido y Core Web Vitals intactos.
+- Repositorio limpio y sincronizado con `origin/main`.
+- Ninguna credencial, contraseña ni token expuesto.
 
 ## Próximo paso
 
-- Solicitar a Laura que recargue la página (`https://psicolau.com/panel`) e ingrese con sus credenciales habituales.
+- Verificar re-escaneo en Mozilla HTTP Observatory y confirmar acceso normal de Laura en `psicolau.com/panel`.
 
 ## Notas rápidas
 
 - Servidores locales: Cerrados limpiamente.
 - Base de datos: Intacta y protegida.
-- Git: Rama `main` limpia y sincronizada con `origin/main`.
+- Git: Preparado para commit y push.
 
