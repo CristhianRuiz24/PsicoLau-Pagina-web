@@ -100,20 +100,74 @@
     - Ampliado el script de auditoría `backend/scripts/verifySecurityHeaders.js` a 22/22 comprobaciones automáticas exitosas (asegurando 0 orígenes HTTP en CSP y presencia de `upgrade-insecure-requests`).
     - Eliminada la penalización de -20 puntos en Mozilla HTTP Observatory.
 
+13. **Spec 009 (Plantilla Base y Clon Demo Comercial PsicoTemplate / PsicoDemo) — 100% Implementada y Verificada**:
+    - **Aislamiento Total y Repositorio Propio**: Creada la carpeta `demo/` aislada en `.gitignore` con su propio repositorio Git local (`git init -b main`) y 3 commits limpios de producto. Cero impacto en `psicolau.com` ni en Supabase.
+    - **Anonimización e Identidad Ficticia ("Dra. Sofía Ramos")**: Sustitución sistemática en las 10 páginas HTML, controladores y servicios de correo; teléfonos seguros (`+52 55 0000 0000`) y correos demo. 0 menciones de Laura o PsicoLau en la demo.
+    - **Acceso Demo en 1 Clic**: Botón `[ 🚀 Probar Demo en 1 Clic ]` en `panel/index.html` con autocompletado en `panel/js/login.js` (`demo@psicoclinica.com` / `Demo2026!`) y banner superior de entorno interactivo en `panel/agenda.html`.
+    - **Backend Demo, Coolify Docker y Scripts de Semilla/Reset**:
+      - `seedDemo.js`: Genera 1 usuario demo, 6 pacientes simulados, expedientes con 8 campos cifrados en AES-256-GCM y 15 citas distribuidas en la semana activa.
+      - `resetDemo.js` (`npm run demo:reset`): Reinicio de fábrica en 1 comando.
+      - `Dockerfile` y `docker-compose.yml`: Preparados para despliegue inmediato en Coolify / VPS Docker.
+      - `README.md`: Guía de uso comercial y técnico paso a paso.
+    - **Cero Regresiones**: La suite de auditoría de seguridad de PsicoLau (`verifySecurityHeaders.js`) superó 22/22 comprobaciones (Grado A+ intacto).
+
+14. **Despersonalización Integral y Sustitución de Activos en Demo Comercial (PsicoClínica / Dra. Sofía Ramos)**:
+    - **Identidad Visual y Activos Vectoriales SVG**: Creación de logotipo e isotipo propios (`demo/assets/logo.svg`, `demo/assets/logo-nav.svg`), avatar profesional ilustrado (`demo/assets/foto-perfil.svg`) y portadas de libros/manuales en SVG (`demo/assets/libro-1.svg`, `demo/assets/libro-2.svg`). Eliminados todos los activos raster antiguos con el rostro de Laura o portadas de libros físicos.
+    - **Reescritura de Biografía y Formación**: Biografía clínica genérica de alto nivel en `sobre-mi.html` con formación académica en la Universidad Nacional Autónoma y especialidades en TCC, ACT, DBT y enfoque neuroafirmativo; eliminación de menciones personales a Colima, ISEO, etc.
+    - **Sustitución de Libros y Retiro de Enlaces a Amazon**: Reemplazados los títulos personales por "Guía Práctica de Regulación Emocional" y "Manual de Resiliencia y Vínculos Seguros" en `libros.html` y `experiencia.html`. Retirados los enlaces directos a Amazon y sustituidos por botones de contacto/solicitud de muestra.
+    - **Protección de Datos Personales y Testimonios**:
+      - Eliminación de videos testimoniales reales de YouTube y archivos de audio en `testimonios.html`.
+      - Anonimización de nombres de consultantes.
+      - Sustitución de teléfono personal (+52 1 663...) y correo privado por datos seguros demo (`+52 55 0000 0000` y `contacto@psicoclinica.com`) en `contacto.html`, `terapias-grupales.html` y `privacidad.html`.
+      - Cédula profesional oficial sustituida por Cédula demo (`12345678`).
+    - **Repositorio Remoto y Versionado Independiente**:
+      - Conectado a repositorio remoto privado en GitHub: `https://github.com/CristhianRuiz24/psico-demo.git`.
+      - Cambios versionados, confirmados y subidos (`git push origin main`).
+    - **Verificación en Navegador**: Capturas de pantalla tomadas en `http://localhost:5500/sobre-mi` y `http://localhost:5500/libros` comprobando el renderizado impecable de vectores y textos sin regresiones.
+
+15. **Purga Total de Datos Personales, Retiro de Libros/Terapias Grupales y Universalización de la Demo Comercial**:
+    - **Retiro de Páginas y Activos**: Eliminadas por completo `demo/libros.html`, `demo/terapias-grupales.html`, `demo/assets/libro-1.svg` y `demo/assets/libro-2.svg`. Menús de navegación de las 8 páginas restantes homogeneizados y sitemap/CSP actualizados.
+    - **Áreas de Atención Universales**: Sustituidas las especialidades de nicho por 6 áreas clásicas de consulta privada (Ansiedad, Autoestima, Relaciones, Depresión, Duelo y Burnout).
+    - **Experiencia y Trayectoria Despersonalizada**: Eliminadas conferencias de victimología, ISEO y participaciones en TV Azteca / Televisa; reemplazadas por trayectoria clínica de excelencia (consulta privada, docencia universitaria y talleres de gestión del estrés).
+    - **Testimonios Inventados**: Creadas 6 reseñas verosímiles y auténticas de pacientes simulados (ansiedad laboral, límites asertivos, apego seguro, burnout y duelo).
+    - **Preguntas Frecuentes Universales**: 10 FAQs prácticas sobre costos, enfoque, duración, confidencialidad, cancelación y modalidad online.
+    - **Auditoría de Residuos (0 Coincidencias)**: Grep estricto arrojó 0 menciones de Laura, Gómez, Colima, autismo, neurodivergencia, victimología, cédulas o teléfonos personales.
+    - **Sincronización en GitHub**: Commit `5ce5d69` pusheado exitosamente a `https://github.com/CristhianRuiz24/psico-demo.git` en la rama `main`.
+    - **Verificación en Vivo**: Navegación en vivo validada en `http://localhost:5500` con capturas de pantalla de Portada, Áreas de Atención, Testimonios y FAQs.
+
+16. **Integración del Ecosistema SDD Completo en la Plantilla Maestra (`demo/`)**:
+    - **Independencia Operativa y Metodológica**: Configurado el sistema Spec-Driven Development (SDD) completo directamente dentro del repositorio comercial `CristhianRuiz24/psico-demo`, asegurando que cualquier agente de IA o desarrollador cuente con las mismas directrices de excelencia.
+    - **Archivos Incorporados y Sincronizados**:
+      - `docs/constitution.md`: 6 principios innegociables (cifrado AES-256-GCM, aislamiento monotenant por cliente, frontend vanilla ultrarrápido, autenticación JWT sin bypasses, defense in depth y compatibilidad de módulos base).
+      - `docs/sdd-workflow.md`: Ciclo de 7 fases SDD, notación EARS y guía de personalización paso a paso para nuevos clientes.
+      - `docs/historial.md`: Bitácora histórica completa desde la génesis en la Spec 009 hasta el desacoplamiento y empaquetado en Coolify.
+      - `overview/architecture.md`, `overview/session.md`, `overview/tasks.md`, `overview/learning.md`: Memoria persistente y arquitectura técnica viva.
+      - `AGENTS.md` y `GEMINI.md`: Reglas operativas contextualizadas al stack de la demo.
+      - `.agents/skills/spec-generator/SKILL.md`: Generador asistido de especificaciones adaptado a la plantilla.
+    - **Rol como Golden Master Template para Nuevos Clientes**:
+      - Se estableció documentalmente que `psico-demo` es la **plantilla maestra ("llave en mano")** lista para clonar y adaptar a futuros psicólogos clientes, con una checklist de onboarding de 5 pasos (identidad/biografía, colores de `:root`, WhatsApp, base de datos dedicada y seed de usuario admin).
+    - **Sincronización Git Remota**: Commit `c1eb425` subido con éxito a la rama `main` de `https://github.com/CristhianRuiz24/psico-demo.git`.
+
+17. **Formulario de Contacto Inteligente Asistido por WhatsApp (100% Serverless / Costo $0 MXN)**:
+    - **Desacoplamiento de Backend para Paquete 1**: Implementado el canal de contacto directo hacia WhatsApp en `demo/contacto.html` y `demo/js/main.js`, eliminando la necesidad de servicios de correo (Resend) o servidores backend para recibir prospectos de pacientes.
+    - **Formateo Enriquecido de Mensaje**: Estructuración automática con datos del consultante (Nombre, Motivo de consulta, Correo opcional, Teléfono opcional y Mensaje con formato en negritas para WhatsApp).
+    - **Verificación en Vivo con Navegador**: Comprobación interactiva mediante Playwright; 0 errores de consola, redirección fluida a `https://wa.me/5215500000000?text=...` y mensaje amigable de confirmación.
+    - **Spec SDD y Sincronización Remota**: Documentado bajo `demo/specs/001-formulario-contacto-whatsapp/spec.md` y pusheado con el commit `c5ef7ea` a `origin/main` en `CristhianRuiz24/psico-demo`.
+
 ## En qué quedó
 
-- CSP en Cloudflare Pages 100% blindada contra recursos HTTP inseguros.
-- Grado A+ de seguridad fortalecido y Core Web Vitals intactos.
-- Repositorio limpio y sincronizado con `origin/main`.
-- Ninguna credencial, contraseña ni token expuesto.
+- Repositorio [CristhianRuiz24/psico-demo](https://github.com/CristhianRuiz24/psico-demo) configurado como **Plantilla Maestra (Golden Master)** y demo comercial en vivo, con su propio ecosistema SDD completo y árbol de trabajo 100% limpio.
+- Proyecto principal de Laura (`Web PsicoLau`) completamente limpio, aislado y seguro.
+- Servidores locales activos: Frontend demo en `http://localhost:5500`, Backend demo en `http://localhost:3001` y contenedor Docker `psicoclinica_db`.
 
 ## Próximo paso
 
-- Verificar re-escaneo en Mozilla HTTP Observatory y confirmar acceso normal de Laura en `psicolau.com/panel`.
+- Desplegar `psico-demo` en Cloudflare Pages y Coolify (VPS) para contar con la URL pública comercial o, en su momento, realizar el spawn/clonado del primer cliente siguiendo la guía de onboarding de `AGENTS.md`.
 
 ## Notas rápidas
 
-- Servidores locales: Cerrados limpiamente.
-- Base de datos: Intacta y protegida.
-- Git: Rama `main` limpia y sincronizada con `origin/main` (commit `6ec6567`).
+- Servidores demo: Frontend en puerto 5500, Backend en puerto 3001, DB en contenedor Docker `psicoclinica_db`.
+- Repositorio remoto demo: `https://github.com/CristhianRuiz24/psico-demo` (rama `main`).
+- Repositorio principal de Laura: Intacto, limpio y seguro.
+
 

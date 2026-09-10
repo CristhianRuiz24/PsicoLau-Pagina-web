@@ -4,6 +4,15 @@
 *Ninguna.*
 
 ## Completadas Recientemente
+- [x] **Spec 009: Plantilla Base y Clon Demo Comercial (PsicoTemplate / PsicoDemo)**:
+  - [x] T1: Inicialización del Directorio Aislado y Copia Base (`demo/` con `.git` propio).
+  - [x] T2: Anonimización y Nueva Identidad Ficticia ("Dra. Sofía Ramos" en 10 páginas HTML y backend).
+  - [x] T3: Adaptación del Panel Clínico con Acceso Demo en 1 Clic (`btnDemoQuickLogin` y banner de entorno interactivo).
+  - [x] T4: Backend Demo, Dockerfile para Coolify y Scripts de Semilla/Reset (`seedDemo.js`, `resetDemo.js`, `docker-compose.yml`, `README.md`).
+  - [x] T5: Verificación Integral de la Demo y No-Regresión en PsicoLau (22/22 checks de seguridad intactos).
+  - [x] T6: Purga Total de Datos Personales, Retiro de Libros y Terapias Grupales, Testimonios Inventados y FAQs Universales (commit `5ce5d69` en `psico-demo`).
+  - [x] T7: Ecosistema SDD Completo en Repositorio Comercial y Rol como Plantilla Maestra (Golden Master) para Nuevos Clientes (commit `c1eb425` en `psico-demo`).
+  - [x] T8: Formulario de Contacto Inteligente Asistido por WhatsApp (100% Serverless / Costo $0 MXN en Cloudflare Pages, commit `c5ef7ea` en `psico-demo`).
 - [x] **Blindaje CSP contra Recursos HTTP Inseguros (Mozilla Observatory)**:
   - [x] Retiro de `http://localhost:*` en todas las directivas `connect-src` de `_headers`.
   - [x] Incorporación de directiva `upgrade-insecure-requests;` en rutas públicas y suite clínica.

@@ -37,3 +37,17 @@ coverage/
 # Borradores y Plantillas Temporales en Raíz
 /prompts.md
 /spec.md
+
+# Carpeta de Demostración Aislada (Repositorio Independiente)
+/demo/
+
+# Entornos Virtuales y Herramientas Python
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+
+# Reportes Locales de Auditoría y Escaneo
+reports/
+.pentest-ai/
