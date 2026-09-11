@@ -1,27 +1,25 @@
+const { test } = require('node:test');
+const assert = require('node:assert');
 require('dotenv').config();
 const prisma = require('../src/config/db');
-const jwt = require('jsonwebtoken');
 const { cifrar, descifrar } = require('../src/utils/crypto');
 
-async function testFullSuite() {
+test('Verificación integral de endpoints y almacenamiento cifrado', async () => {
   console.log('=== VERIFICACIÓN INTEGRAL DE ENDPOINTS Y BASE DE DATOS ===\n');
 
   let paciente = null;
-  try {
-    // 1. Crear o buscar paciente real de prueba
-    paciente = await prisma.paciente.findFirst({
-      where: { email: 'expediente.demo@psicolau.com' }
-    });
+  let notaCreada = null;
+  const testEmail = `expediente.demo.${Date.now()}@psicolau.com`;
 
-    if (!paciente) {
-      paciente = await prisma.paciente.create({
-        data: {
-          nombre: 'Elena Morales Rivera',
-          telefono: '+52 55 9876 5432',
-          email: 'expediente.demo@psicolau.com'
-        }
-      });
-    }
+  try {
+    // 1. Crear paciente real de prueba
+    paciente = await prisma.paciente.create({
+      data: {
+        nombre: 'Elena Morales Rivera',
+        telefono: '+52 55 9876 5432',
+        email: testEmail
+      }
+    });
 
     console.log(`✓ Paciente: ${paciente.nombre} (ID: ${paciente.id})`);
 
@@ -50,7 +48,7 @@ async function testFullSuite() {
       pendientesProximaSesion: cifrar(payload.pendientesProximaSesion)
     };
 
-    const notaCreada = await prisma.expediente.create({
+    notaCreada = await prisma.expediente.create({
       data: {
         pacienteId: paciente.id,
         fechaSesion: payload.fechaSesion,
@@ -65,11 +63,8 @@ async function testFullSuite() {
       where: { id: notaCreada.id }
     });
 
-    console.log('\n======================================================');
-    console.log('REGISTRO GUARDADO DIRECTAMENTE EN LA TABLA "Expediente"');
-    console.log('======================================================');
-    console.log(JSON.stringify(registroCrudoEnDB, null, 2));
-    console.log('======================================================\n');
+    assert.ok(registroCrudoEnDB, 'El registro debe existir en base de datos');
+    assert.notStrictEqual(registroCrudoEnDB.resumenBreve, payload.resumenBreve, 'El resumen debe estar cifrado');
 
     // 4. Verificación de lectura descifrada
     const notaLeida = {
@@ -84,12 +79,9 @@ async function testFullSuite() {
       pendientesProximaSesion: descifrar(registroCrudoEnDB.pendientesProximaSesion)
     };
 
-    console.log('--- LECTURA DESCIFRADA PARA EL FRONTEND ---');
-    console.log('Fecha:', notaLeida.fechaSesion);
-    console.log('Resumen:', notaLeida.resumenBreve);
-    console.log('Estado Actual:', notaLeida.estadoActual);
-    console.log('Insight:', notaLeida.insightPaciente);
-    console.log('Intervenciones:', notaLeida.intervenciones);
+    assert.strictEqual(notaLeida.resumenBreve, payload.resumenBreve);
+    assert.strictEqual(notaLeida.estadoActual, payload.estadoActual);
+    assert.strictEqual(notaLeida.insightPaciente, payload.insightPaciente);
 
     // 5. Verificación de búsqueda in-memory
     const q = 'burnout';
@@ -104,18 +96,16 @@ async function testFullSuite() {
       notaLeida.pendientesProximaSesion
     ];
     const match = campos.some(c => c && c.toLowerCase().includes(q));
-    console.log(`\nBúsqueda por "${q}": ${match ? '✅ Encontrado con éxito' : '❌ No encontrado'}`);
+    assert.strictEqual(match, true, 'Búsqueda de burnout debe coincidir');
+    console.log(`Búsqueda por "${q}": ✅ Encontrado con éxito`);
 
-  } catch (error) {
-    console.error('Error:', error);
   } finally {
-    // Limpiar paciente y notas de prueba creados para evitar registros duplicados en el directorio
-    if (paciente && paciente.email === 'expediente.demo@psicolau.com') {
-      await prisma.expediente.deleteMany({ where: { pacienteId: paciente.id } });
-      await prisma.paciente.delete({ where: { id: paciente.id } });
+    if (notaCreada) {
+      await prisma.expediente.delete({ where: { id: notaCreada.id } }).catch(() => {});
+    }
+    if (paciente) {
+      await prisma.paciente.delete({ where: { id: paciente.id } }).catch(() => {});
     }
     await prisma.$disconnect();
   }
-}
-
-testFullSuite();
+});

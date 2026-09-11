@@ -1,8 +1,13 @@
+const { test } = require('node:test');
+const assert = require('node:assert');
 require('dotenv').config();
 const prisma = require('../src/config/db');
 
-async function testZoomAndAutocomplete() {
+test('Flujo de Zoom y autocompletado de pacientes', async () => {
   console.log('=== TEST: FLUJO DE ZOOM Y AUTOCOMPLETADO DE PACIENTES ===\n');
+
+  let paciente = null;
+  let cita1 = null;
 
   try {
     const testEmail = `zoom.test.${Date.now()}@test.com`;
@@ -12,7 +17,7 @@ async function testZoomAndAutocomplete() {
 
     // 1. Crear Cita 1 con Zoom
     console.log('1. Creando cita con enlace de Zoom 1...');
-    let paciente = await prisma.paciente.create({
+    paciente = await prisma.paciente.create({
       data: {
         nombre: testNombre,
         telefono: '+52 222 123 4567',
@@ -21,7 +26,7 @@ async function testZoomAndAutocomplete() {
       }
     });
 
-    const cita1 = await prisma.cita.create({
+    cita1 = await prisma.cita.create({
       data: {
         pacienteId: paciente.id,
         fechaHora: new Date('2026-09-01T10:00:00Z'),
@@ -31,9 +36,7 @@ async function testZoomAndAutocomplete() {
     });
 
     console.log(`✓ Paciente creado con ID ${paciente.id} y Zoom: ${cita1.paciente.enlaceZoom}`);
-    if (cita1.paciente.enlaceZoom !== testZoom1) {
-      throw new Error('El enlace de Zoom no coincide con el esperado');
-    }
+    assert.strictEqual(cita1.paciente.enlaceZoom, testZoom1, 'El enlace de Zoom no coincide');
 
     // 2. Simular edición actualizando el link de Zoom
     console.log('\n2. Actualizando enlace de Zoom a Zoom 2...');
@@ -47,24 +50,15 @@ async function testZoomAndAutocomplete() {
     });
 
     console.log(`✓ Enlace de Zoom actualizado a: ${pacienteActualizado.enlaceZoom}`);
-    if (pacienteActualizado.enlaceZoom !== testZoom2) {
-      throw new Error('El enlace actualizado no coincide con Zoom 2');
-    }
-
-    // 3. Limpiar datos de prueba
-    await prisma.cita.delete({ where: { id: cita1.id } });
-    await prisma.paciente.delete({ where: { id: paciente.id } });
-    console.log('\n✓ Limpieza completada con éxito.');
+    assert.strictEqual(pacienteActualizado.enlaceZoom, testZoom2, 'El enlace actualizado no coincide con Zoom 2');
 
     console.log('\n=========================================');
     console.log('🎉 TODOS LOS TESTS DE ZOOM PASARON CON ÉXITO');
     console.log('=========================================');
-  } catch (error) {
-    console.error('❌ Error en el test de Zoom:', error);
-    process.exit(1);
   } finally {
+    if (cita1) await prisma.cita.delete({ where: { id: cita1.id } }).catch(() => {});
+    if (paciente) await prisma.paciente.delete({ where: { id: paciente.id } }).catch(() => {});
     await prisma.$disconnect();
+    console.log('✓ Limpieza completada.');
   }
-}
-
-testZoomAndAutocomplete();
+});

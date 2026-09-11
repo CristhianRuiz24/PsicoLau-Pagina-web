@@ -1,0 +1,45 @@
+/* ==========================================================================
+   PSICOLAU CLINICAL SUITE - MAIN STYLESHEET ENTRY POINT
+   ========================================================================== */
+
+@import url('./components/login.css');
+@import url('./components/header.css');
+@import url('./components/agenda-controls.css');
+@import url('./components/easy-table.css');
+@import url('./components/modals.css');
+@import url('./components/expedientes-directorio.css');
+@import url('./components/expedientes-paciente.css');
+@import url('./components/expedientes-notas.css');
+@import url('./components/expedientes-detalle.css');
+@import url('./components/auditoria-pagos.css');
+@import url('./components/datos-pago.css');
+@import url('./components/cambiar-password.css');
+@import url('./components/notas-semana.css');
+@import url('./components/responsive.css');
+@import url('./components/print.css');
+
+:root {
+  --rosa-coral: #EC5E86;
+  --turquesa: #3EB8CC;
+  --turquesa-hover: #33a1b3;
+  --gris-calido: #8C8C8C;
+  --gris-claro: #f5f5f5;
+  --blanco: #ffffff;
+  --texto-oscuro: #333333;
+  --rojo-alerta: #ff4d4f;
+  --verde-exito: #52c41a;
+  --amarillo-pendiente: #faad14;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', 'Roboto', sans-serif;
+  color: var(--texto-oscuro);
+  background-color: var(--gris-claro);
+  line-height: 1.6;
+}

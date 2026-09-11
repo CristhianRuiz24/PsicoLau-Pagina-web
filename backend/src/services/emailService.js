@@ -1,14 +1,63 @@
 const { escapeHtml } = require('../utils/sanitizer');
+const logger = require('../utils/logger');
 
 // Remitente y Destinatario oficial
 const REMITENTE = process.env.REMITENTE || 'PsicoLau <contacto@psicolau.com>';
 const CORREO_DESTINO = process.env.CORREO_LAURA || 'lince_lg@yahoo.com.mx';
 
 /**
+ * Determina si una dirección de correo pertenece a un dominio ficticio o de prueba.
+ * @param {string} email
+ * @returns {boolean}
+ */
+const esDominioFicticio = (email) => {
+  if (!email || typeof email !== 'string') return true;
+  const limpio = email.trim().toLowerCase();
+  return /@(local\.com|test\.com|example\.com|fake\.com|invalid)$/i.test(limpio) ||
+         /\.local$/i.test(limpio) ||
+         limpio.startsWith('sin-email-');
+};
+
+/**
  * Envío de correos mediante la API REST oficial de Resend (HTTPS / Puerto 443).
  * Evita bloqueos de puertos SMTP (465/587) en proveedores como Render y responde en <200ms.
  */
 const enviarEmailResend = async ({ to, subject, html, replyTo }) => {
+  const destinatarios = Array.isArray(to) ? to : [to];
+
+  // 1. Aislamiento estricto en entorno de pruebas (Spec 016 - RF-1)
+  if (process.env.NODE_ENV === 'test') {
+    return {
+      success: true,
+      simulated: true,
+      id: 'test-mock-id',
+      message: 'Envío simulado en entorno de pruebas'
+    };
+  }
+
+  // 2. Filtro anti-rebote: Detectar dominios ficticios o de prueba (Spec 016 - RF-2)
+  if (destinatarios.some(d => esDominioFicticio(d))) {
+    return {
+      success: true,
+      simulated: true,
+      id: 'test-ficticio-mock-id',
+      message: 'Envío simulado para dominio de prueba (anti-rebote)'
+    };
+  }
+
+  // 3. Protección de la bandeja de Laura en desarrollo local (Spec 016 - RF-3)
+  if (process.env.NODE_ENV !== 'production' && process.env.ENABLE_REAL_EMAILS_DEV !== 'true') {
+    const destinoLauraNormalizado = CORREO_DESTINO.trim().toLowerCase();
+    if (destinatarios.some(d => (d || '').trim().toLowerCase() === destinoLauraNormalizado)) {
+      return {
+        success: true,
+        simulated: true,
+        id: 'dev-laura-mock-id',
+        message: 'Aviso a Laura simulado en desarrollo local'
+      };
+    }
+  }
+
   const apiKey = process.env.RESEND_API_KEY ? process.env.RESEND_API_KEY.trim() : '';
   if (!apiKey) {
     console.warn('[Resend API] RESEND_API_KEY no está configurada en las variables de entorno. Omitiendo envío de correo.');
@@ -17,7 +66,7 @@ const enviarEmailResend = async ({ to, subject, html, replyTo }) => {
 
   const payload = {
     from: REMITENTE,
-    to: Array.isArray(to) ? to : [to],
+    to: destinatarios,
     subject,
     html
   };
@@ -39,13 +88,13 @@ const enviarEmailResend = async ({ to, subject, html, replyTo }) => {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('[Resend API Error]:', data);
+      logger.error('[Resend API Error]', data);
       throw new Error(data.message || `Error en Resend API (${response.status})`);
     }
 
     return data;
   } catch (error) {
-    console.error('[Resend Network Error]:', error.message);
+    logger.error('[Resend Network Error]', error);
     throw error;
   }
 };
@@ -135,5 +184,7 @@ const enviarMensajeContacto = async (datos) => {
 module.exports = {
   enviarConfirmacionPaciente,
   enviarAvisoLaura,
-  enviarMensajeContacto
+  enviarMensajeContacto,
+  enviarEmailResend,
+  esDominioFicticio
 };

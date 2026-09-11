@@ -1,0 +1,52 @@
+<!-- Modal / Vista Cómoda y Agrandada de Sesión Individual -->
+  <div id="modalDetalleSesionExpediente" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); z-index: 1020; justify-content: center; align-items: center; padding: 1.2rem; backdrop-filter: blur(4px);">
+    <div id="dialogoDetalleSesion" style="background: #ffffff; padding: 2rem; border-radius: 16px; width: 100%; max-width: 960px; max-height: 94vh; display: flex; flex-direction: column; box-shadow: 0 25px 60px rgba(0,0,0,0.35); transition: all 0.25s ease;">
+      
+      <!-- Cabecera de la Vista de Sesión -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #f1f5f9; padding-bottom: 1rem; margin-bottom: 1.2rem; gap: 1rem; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 260px;">
+          <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+            <span id="detalleSesionBadgeNum" style="background: var(--rosa-coral); color: white; font-weight: 800; font-size: 0.85rem; padding: 3px 10px; border-radius: 6px;">Sesión #</span>
+            <h3 id="detalleSesionFecha" style="color: #0f172a; font-size: 1.3rem; margin: 0; font-weight: 800;">Fecha de la Sesión</h3>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.8rem; margin-top: 0.4rem; font-size: 0.88rem; color: #64748b; flex-wrap: wrap;">
+            <span id="detalleSesionPaciente" style="font-weight: 700; color: var(--turquesa);"><i class="fa-solid fa-user-check"></i> Paciente</span>
+            <span><i class="fa-solid fa-lock" style="color: #16a34a;"></i> Cifrado AES-256-GCM</span>
+          </div>
+        </div>
+
+        <!-- Acciones Individuales de la Sesión -->
+        <div id="detalleSesionAccionesTop" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+          <button type="button" class="btn" style="width: auto; padding: 0.55rem 0.95rem; font-size: 0.85rem; background: #0284c7; color: white;" onclick="imprimirNotaActualDetalle()" title="Imprimir o guardar en PDF únicamente esta sesión">
+            <i class="fa-solid fa-file-pdf" style="margin-right: 4px;"></i> Imprimir PDF
+          </button>
+          <button type="button" class="btn" style="width: auto; padding: 0.55rem 0.95rem; font-size: 0.85rem; background: #475569; color: white;" onclick="descargarNotaActualTxt()" title="Descargar nota en archivo de texto (.txt)">
+            <i class="fa-solid fa-file-lines" style="margin-right: 4px;"></i> Guardar .txt
+          </button>
+          <button type="button" class="btn" style="width: auto; padding: 0.55rem 0.95rem; font-size: 0.85rem; background: #f8fafc; color: var(--texto-oscuro); border: 1px solid #cbd5e1;" onclick="editarNotaDesdeDetalle()" title="Editar nota clínica en esta misma vista">
+            <i class="fa-solid fa-pen-to-square" style="color: var(--turquesa); margin-right: 4px;"></i> Editar
+          </button>
+          <button type="button" class="btn" style="width: auto; padding: 0.55rem 0.85rem; font-size: 0.85rem; background: #f8fafc; color: #475569; border: 1px solid #cbd5e1;" onclick="toggleAgrandarDetalleSesion()" title="Agrandar o reducir tamaño para mayor comodidad visual">
+            <i class="fa-solid fa-expand" id="iconAgrandarDetalle"></i>
+          </button>
+          <button type="button" class="btn-close-modal" onclick="cerrarDetalleSesion()" title="Cerrar vista">&times;</button>
+        </div>
+      </div>
+
+      <!-- Contenido Amplio y Cómodo de la Sesión -->
+      <div id="detalleSesionContenido" style="flex: 1; overflow-y: auto; padding-right: 6px;">
+        <!-- Se genera dinámicamente -->
+      </div>
+
+      <!-- Pie de la Vista de Sesión -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.8rem; border-top: 1px solid #f1f5f9; margin-top: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+        <span style="font-size: 0.8rem; color: #94a3b8;">
+          <i class="fa-solid fa-shield-halved" style="color: #16a34a; margin-right: 3px;"></i> Documento médico confidencial sujeto a secreto profesional · PsicoLau
+        </span>
+        <button type="button" class="btn" style="background: #f8fafc; color: #334155; border: 1px solid #cbd5e1; width: auto; padding: 0.5rem 1.4rem;" onclick="cerrarDetalleSesion()">
+          <i class="fa-solid fa-arrow-left" style="margin-right: 4px;"></i> Volver al Historial
+        </button>
+      </div>
+
+    </div>
+  </div>

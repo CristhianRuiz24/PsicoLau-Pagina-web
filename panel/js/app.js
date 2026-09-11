@@ -46,6 +46,9 @@ async function initAgenda() {
     const data = await response.json();
     if (data.success) {
       citasCache = data.data || [];
+      if (typeof window !== 'undefined') {
+        window.citasCache = citasCache;
+      }
       if (loader) loader.style.display = 'none';
       if (wrapper) wrapper.style.display = 'block';
       if (window.actualizarDatalistPacientes) {
@@ -58,6 +61,7 @@ async function initAgenda() {
     if (loader) loader.innerText = 'Error al cargar la agenda. Verifica tu conexión.';
   }
 }
+window.initAgenda = initAgenda;
 
 // Helper para normalizar cadenas (sin acentos, minúsculas, espacios recortados)
 function normalizarTexto(str) {
@@ -73,6 +77,9 @@ function normalizarTexto(str) {
 window.filtrarCitasEnTabla = function(query) {
   const queryLimpia = (query || '').trim();
   terminoBusqueda = normalizarTexto(queryLimpia);
+  if (typeof window !== 'undefined') {
+    window.terminoBusqueda = terminoBusqueda;
+  }
   const btnLimpiar = document.getElementById('btnLimpiarBusqueda');
   const panel = document.getElementById('panelResultadosBusqueda');
   
@@ -270,185 +277,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Manejo del formulario de creación y edición de citas
-  const formNuevaCita = document.getElementById('formNuevaCita');
-  if (formNuevaCita) {
-    formNuevaCita.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const token = localStorage.getItem('psicolau_token');
-      const btn = formNuevaCita.querySelector('button[type="submit"]');
-      const id = document.getElementById('nc_id').value;
-      const esEdicion = Boolean(id);
-
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
-
-      const fecha = document.getElementById('nc_fecha').value;
-      const hora = document.getElementById('nc_hora').value;
-      
-      const [yyyy, mm, dd] = fecha.split('-').map(Number);
-      const [hh, min] = (hora || '07:00').split(':').map(Number);
-      const fechaLocal = new Date(yyyy, mm - 1, dd, hh, min, 0);
-      const fechaHora = fechaLocal.toISOString();
-
-      let tipoEfectivo = tipoRegistroActual;
-      if (esEdicion && typeof citasCache !== 'undefined') {
-        const citaOriginal = citasCache.find(c => c.id === parseInt(id));
-        if (citaOriginal) {
-          const eraBloqueo = (citaOriginal.categoria && citaOriginal.categoria.startsWith('[BLOQUEO]')) || (citaOriginal.paciente && citaOriginal.paciente.nombre.startsWith('[BLOQUEO]'));
-          const eraGrupal = (citaOriginal.categoria && citaOriginal.categoria.startsWith('[GRUPAL]')) || (citaOriginal.paciente && citaOriginal.paciente.nombre.startsWith('[GRUPAL]'));
-          const eraEvaluacion = (citaOriginal.categoria && citaOriginal.categoria.startsWith('[EVALUACION]')) || (citaOriginal.paciente && citaOriginal.paciente.nombre.startsWith('[EVALUACION]'));
-          tipoEfectivo = eraBloqueo ? 'BLOQUEO' : (eraGrupal ? 'GRUPAL' : (eraEvaluacion ? 'EVALUACION' : 'CITA'));
-        }
-      }
-
-      let nombre = document.getElementById('nc_nombre').value.trim();
-      let notas = document.getElementById('nc_notas').value.trim();
-
-      // Limpiar prefijos antes de asignar estrictamente según el tipo efectivo
-      nombre = nombre.replace(/^\[(BLOQUEO|GRUPAL|EVALUACION)\]\s*/i, '').trim();
-      notas = notas.replace(/^\[(BLOQUEO|GRUPAL|EVALUACION)\]\s*/i, '').trim();
-
-      if (tipoEfectivo === 'BLOQUEO') {
-        nombre = `[BLOQUEO] ${nombre}`;
-        notas = `[BLOQUEO] ${notas}`.trim();
-      } else if (tipoEfectivo === 'GRUPAL') {
-        nombre = `[GRUPAL] ${nombre}`;
-        notas = `[GRUPAL] ${notas}`.trim();
-      } else if (tipoEfectivo === 'EVALUACION') {
-        notas = `[EVALUACION] ${notas}`.trim();
-      }
-
-      const prefijo = document.getElementById('nc_prefijo')?.value || '';
-      const telInput = document.getElementById('nc_telefono')?.value.trim() || '';
-      let telefonoFinal = '';
-      if (telInput && tipoEfectivo !== 'BLOQUEO' && tipoEfectivo !== 'GRUPAL') {
-        if (telInput.startsWith('+')) {
-          telefonoFinal = telInput;
-        } else if (prefijo) {
-          telefonoFinal = `${prefijo} ${telInput}`;
-        } else {
-          telefonoFinal = telInput;
-        }
-      }
-
-      const zoomInput = document.getElementById('nc_enlace_zoom');
-      let enlaceZoomVal = (zoomInput && tipoEfectivo !== 'BLOQUEO') ? zoomInput.value.trim() : '';
-      if (enlaceZoomVal && !enlaceZoomVal.startsWith('http://') && !enlaceZoomVal.startsWith('https://')) {
-        enlaceZoomVal = `https://${enlaceZoomVal}`;
-      }
-
-      let emailFinal = '';
-      if (tipoEfectivo === 'BLOQUEO') {
-        emailFinal = '';
-      } else if (tipoEfectivo === 'GRUPAL') {
-        emailFinal = `grupal-${Date.now()}@psicolau.com`;
-      } else {
-        emailFinal = document.getElementById('nc_email').value.trim();
-      }
-
-      const montoVal = document.getElementById('nc_monto')?.value;
-      let montoFinal = (tipoEfectivo === 'EVALUACION') ? 4000 : 500;
-      if (tipoEfectivo === 'BLOQUEO') {
-        montoFinal = 0;
-      } else if (montoVal !== undefined && montoVal !== null && montoVal !== '') {
-        const parsed = parseFloat(montoVal);
-        if (isNaN(parsed) || parsed < 0) {
-          alert('Por favor introduce un monto de tarifa válido (mayor o igual a 0).');
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fa-solid fa-check" style="margin-right: 4px;"></i> Confirmar y Guardar';
-          return;
-        }
-        montoFinal = parsed;
-      }
-
-      const data = {
-        nombre: nombre,
-        email: emailFinal,
-        telefono: telefonoFinal,
-        enlaceZoom: enlaceZoomVal,
-        fechaHora: fechaHora,
-        categoria: notas,
-        notas: notas,
-        color: document.getElementById('nc_color').value,
-        monto: montoFinal
-      };
-
-      if (!esEdicion && document.getElementById('nc_repetir') && document.getElementById('nc_repetir').checked) {
-        data.repeticiones = parseInt(document.getElementById('nc_repeticiones').value) || 1;
-        data.frecuencia = document.getElementById('nc_frecuencia').value || 'SEMANAL';
-      }
-
-      if (esEdicion && tipoEfectivo !== 'BLOQUEO') {
-        const estadoCitaVal = document.getElementById('nc_estado_cita')?.value;
-        if (estadoCitaVal) {
-          data.estado_cita = estadoCitaVal;
-        }
-      }
-
-      if (esEdicion && typeof citasCache !== 'undefined') {
-        const citaOriginal = citasCache.find(c => c.id === parseInt(id));
-        if (citaOriginal) {
-          const futuras = window.detectarCitasFuturasEnMemoria ? window.detectarCitasFuturasEnMemoria(citaOriginal) : [];
-          if (futuras.length > 0) {
-            const alcanceElegido = await window.pedirAlcanceSerie('EDITAR', futuras.length);
-            if (!alcanceElegido) {
-              btn.disabled = false;
-              btn.innerHTML = '<i class="fa-solid fa-check" style="margin-right: 4px;"></i> Guardar Cambios';
-              return;
-            }
-            data.alcance = alcanceElegido;
-          }
-        }
-      }
-
-      try {
-        const url = esEdicion ? `${API_URL}/agenda/citas/${id}` : `${API_URL}/agenda/citas`;
-        const method = esEdicion ? 'PUT' : 'POST';
-
-        const response = await fetch(url, {
-          method: method,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(data)
-        });
-        const resData = await response.json();
-        if (resData.success) {
-          if (data.color && window.guardarColorPersonalizado) {
-            window.guardarColorPersonalizado(data.color);
-          }
-          window.cerrarModal();
-          await initAgenda();
-          if (window.cargarDirectorioEnSegundoPlano) {
-            window.cargarDirectorioEnSegundoPlano();
-          }
-          
-          if (data.repeticiones && data.repeticiones > 1) {
-            alert(`✅ Se han programado con éxito las ${data.repeticiones} sesiones recurrentes (${data.frecuencia === 'QUINCENAL' ? 'quincenales' : 'semanales'}).`);
-          }
-
-          const queryActual = (document.getElementById('busquedaInput')?.value || '').trim();
-          if (queryActual) {
-            window.filtrarCitasEnTabla(queryActual);
-          }
-        } else {
-          alert(resData.message || 'Error al guardar la cita');
-        }
-      } catch (err) {
-        alert('Error de conexión con el servidor');
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-check" style="margin-right: 4px;"></i> Confirmar y Guardar';
-      }
-    });
-  }
+  // Nota: El manejo del formulario #formNuevaCita ha sido modularizado
+  // hacia panel/js/agenda/form/submitHandler.js (Spec 018).
 });
 
 // --- GESTIÓN DE SEGURIDAD Y CAMBIO DE CONTRASEÑA (SPEC 005) ---
 
-window.abrirModalCambiarPassword = function() {
+window.abrirModalCambiarPassword = async function() {
+  if (typeof window.asegurarModal === 'function') {
+    await window.asegurarModal('modalCambiarPassword', '/panel/partials/modals/modal-cambiar-password.html');
+  }
   const modal = document.getElementById('modalCambiarPassword');
   if (!modal) return;
   const form = document.getElementById('formCambiarPassword');

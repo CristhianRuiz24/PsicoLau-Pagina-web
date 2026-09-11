@@ -1,8 +1,13 @@
+const { test } = require('node:test');
+const assert = require('node:assert');
 require('dotenv').config();
 const prisma = require('../src/config/db');
 
-async function testGrupalFlow() {
+test('Flujo de terapias grupales en suite clínica', async () => {
   console.log('=== TEST: FLUJO DE TERAPIAS GRUPALES EN SUITE CLÍNICA ===\n');
+
+  let pacienteGrupal = null;
+  const citasCreadas = [];
 
   try {
     const testNombreGrupo = 'Terapia Grupal para Autistas Adultos';
@@ -14,7 +19,7 @@ async function testGrupalFlow() {
     console.log('1. Creando registro de grupo y 4 sesiones recurrentes...');
     
     // Crear o vincular paciente grupal
-    let pacienteGrupal = await prisma.paciente.create({
+    pacienteGrupal = await prisma.paciente.create({
       data: {
         nombre: `[GRUPAL] ${testNombreGrupo}`,
         email: testEmail,
@@ -26,7 +31,6 @@ async function testGrupalFlow() {
     console.log(`✓ Paciente grupal creado con ID: ${pacienteGrupal.id}`);
 
     // Crear 4 sesiones recurrentes
-    const citasCreadas = [];
     const fechaBase = new Date();
     fechaBase.setHours(18, 0, 0, 0);
 
@@ -50,6 +54,7 @@ async function testGrupalFlow() {
     }
 
     console.log(`✓ Creadas ${citasCreadas.length} sesiones recurrentes con numeración (Sesión X/${numSesiones}).`);
+    assert.strictEqual(citasCreadas.length, 4);
 
     // 2. Verificar que el directorio de pacientes clínicos individuales excluye el grupo
     console.log('\n2. Verificando aislamiento del directorio de expedientes...');
@@ -59,9 +64,7 @@ async function testGrupalFlow() {
     const filtradosDirectorio = todosPacientes.filter(p => !p.nombre.startsWith('[BLOQUEO]') && !p.nombre.startsWith('[GRUPAL]'));
 
     const grupoEnDirectorio = filtradosDirectorio.find(p => p.id === pacienteGrupal.id);
-    if (grupoEnDirectorio) {
-      throw new Error('El paciente grupal NO debe aparecer en el directorio de expedientes individuales.');
-    }
+    assert.strictEqual(grupoEnDirectorio, undefined, 'El paciente grupal NO debe aparecer en el directorio');
     console.log('✓ Correcto: El grupo está aislado y no contamina los expedientes individuales.');
 
     // 3. Simular actualización de la sala de Zoom del grupo
@@ -75,28 +78,21 @@ async function testGrupalFlow() {
     const grupoActualizado = await prisma.paciente.findUnique({
       where: { id: pacienteGrupal.id }
     });
-    if (grupoActualizado.enlaceZoom !== nuevoZoom) {
-      throw new Error('El enlace de Zoom grupal no se actualizó correctamente.');
-    }
+    assert.strictEqual(grupoActualizado.enlaceZoom, nuevoZoom);
     console.log(`✓ Enlace de Zoom grupal actualizado a: ${grupoActualizado.enlaceZoom}`);
-
-    // 4. Limpieza
-    console.log('\n4. Limpiando datos de prueba...');
-    for (const c of citasCreadas) {
-      await prisma.cita.delete({ where: { id: c.id } });
-    }
-    await prisma.paciente.delete({ where: { id: pacienteGrupal.id } });
-    console.log('✓ Limpieza completada con éxito.');
 
     console.log('\n======================================================');
     console.log('🎉 TODOS LOS TESTS DE TERAPIA GRUPAL PASARON AL 100%');
     console.log('======================================================');
-  } catch (error) {
-    console.error('❌ Error en el test de terapia grupal:', error);
-    process.exit(1);
   } finally {
+    console.log('\n4. Limpiando datos de prueba...');
+    for (const c of citasCreadas) {
+      await prisma.cita.delete({ where: { id: c.id } }).catch(() => {});
+    }
+    if (pacienteGrupal) {
+      await prisma.paciente.delete({ where: { id: pacienteGrupal.id } }).catch(() => {});
+    }
     await prisma.$disconnect();
+    console.log('✓ Limpieza completada con éxito.');
   }
-}
-
-testGrupalFlow();
+});

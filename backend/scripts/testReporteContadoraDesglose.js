@@ -6,7 +6,8 @@
  * cálculo matemático exacto ($22,500.00 MXN en 37 sesiones) y exportaciones.
  */
 
-const assert = require('assert');
+const { test } = require('node:test');
+const assert = require('node:assert');
 
 // 1. Replicar la función pura de detección de tipo
 function detectarTipoCita(c) {
@@ -106,8 +107,7 @@ function generarCsvContabilidad(citas) {
   return csv;
 }
 
-// Ejecutar Suite de Tests
-async function runTests() {
+test('Desglose contable por tarifas, tipos y exportaciones (Spec 004)', () => {
   console.log('🧪 Iniciando verificación automatizada de Spec 004...\n');
 
   // Construir el dataset real de Laura: 37 sesiones, $22,500.00 MXN
@@ -137,7 +137,7 @@ async function runTests() {
     });
   }
 
-  // 2 grupales = $4,000 ($2,000 cada una por ejemplo)
+  // 2 grupales = $4,000
   datasetLaura.push({
     id: 26,
     paciente: { nombre: '[GRUPAL] Taller Manejo Ansiedad - Grupo 1', email: 'grupal-123@psicolau.com' },
@@ -193,7 +193,6 @@ async function runTests() {
   console.log('✅ Test 3: Ingreso total de $22,500.00 MXN verificado con exactitud.');
 
   // Test 4: Verificación de líneas del desglose para contadora
-  console.log('--- TEXTO GENERADO: ---\n', resultado.texto);
   assert.ok(resultado.texto.includes('20 sesiones individuales de $600.00 = $12,000.00'), 'Línea de 20 sesiones de $600 faltante');
   assert.ok(resultado.texto.includes('5 sesiones individuales de $500.00 = $2,500.00'), 'Línea de 5 sesiones de $500 faltante');
   assert.ok(resultado.texto.includes('2 sesiones grupales = $4,000.00 total'), 'Línea de 2 grupales faltante');
@@ -221,11 +220,4 @@ async function runTests() {
   console.log('✅ Test 6: Validación de backend con Zod para montos y estado_pago superada.');
 
   console.log('\n🎉 ¡TODAS LAS PRUEBAS DE LA SPEC 004 HAN SIDO SUPERADAS EXITOSAMENTE!');
-  console.log('\n--- VISTA PREVIA DEL TEXTO COPIADO PARA CONTADORA ---');
-  console.log(resultado.texto);
-}
-
-runTests().catch(err => {
-  console.error('❌ Error en test:', err);
-  process.exit(1);
 });

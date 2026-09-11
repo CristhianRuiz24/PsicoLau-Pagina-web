@@ -17,10 +17,11 @@ model Usuario {
 
 model Paciente {
   id            Int          @id @default(autoincrement())
-  nombre        String
-  telefono      String
-  email         String       @unique
-  enlaceZoom    String?
+  nombre        String       // Cifrado con AES-256-GCM
+  telefono      String       // Cifrado con AES-256-GCM
+  email         String       // Cifrado con AES-256-GCM
+  emailHash     String?      @unique // Blind index HMAC-SHA256 para unicidad y búsquedas O(1)
+  enlaceZoom    String?      // Cifrado con AES-256-GCM
   tarifaDefecto Float?       @default(500)
   citas         Cita[]
   expedientes   Expediente[]

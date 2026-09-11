@@ -1,0 +1,17 @@
+<!-- Modal / Bloc de Notas Semanales -->
+  <div id="modalNotasSemana" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; padding: 1rem;">
+    <div style="background: #fffef2; padding: 1.8rem; border-radius: 12px; width: 100%; max-width: 480px; box-shadow: 0 12px 35px rgba(0,0,0,0.25); border-top: 6px solid #eab308;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 style="color: #854d0e; font-size: 1.25rem; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fa-solid fa-note-sticky"></i> Bloc de Notas del Consultorio
+        </h3>
+        <button onclick="toggleNotasSemana()" style="background:none; border:none; font-size:1.5rem; color:#aaa; cursor:pointer;">&times;</button>
+      </div>
+      <p style="font-size: 0.85rem; color: #713f12; margin-bottom: 0.8rem;">Escribe recordatorios clínicos, tareas pendientes o pendientes de materiales. Se guardan automáticamente.</p>
+      <textarea id="textoNotasConsultorio" rows="7" placeholder="Ej:&#10;- Entregar reporte neuropsicológico el jueves&#10;- Enviar escalas de TEA a paciente nuevo&#10;- Revisar lecturas del grupo de adultos..." style="width: 100%; padding: 0.8rem; border: 1px solid #fde047; border-radius: 8px; font-family: inherit; font-size: 0.95rem; line-height: 1.5; background: #ffffff;" oninput="guardarNotasConsultorio(this.value)"></textarea>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.8rem;">
+        <span id="labelNotasGuardadas" style="font-size: 0.78rem; color: #16a34a; display: flex; align-items: center; gap: 4px;"><i class="fa-solid fa-check"></i> Guardado automáticamente</span>
+        <button class="btn" style="padding: 0.4rem 1rem; width: auto; font-size: 0.85rem;" onclick="toggleNotasSemana()">Listo</button>
+      </div>
+    </div>
+  </div>

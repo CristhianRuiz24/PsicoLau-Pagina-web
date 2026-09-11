@@ -8,7 +8,8 @@
  * Y que la validación de teléfono exija al menos 10 dígitos.
  */
 
-const assert = require('assert');
+const { test } = require('node:test');
+const assert = require('node:assert');
 
 function generarMensajeRecordatorio({ nombrePaciente, esEvaluacion, esGrupal, diaTexto, diaNum, mesTexto, horaLimpia, enlaceZoom }) {
   if (esGrupal) {
@@ -44,62 +45,63 @@ function validarYLimpiarTelefono(telRaw) {
   return telLimpio;
 }
 
-// Tests
-console.log('🧪 Ejecutando pruebas de generación de mensajes de WhatsApp...\n');
+test('Generación de mensajes WhatsApp para evaluaciones, terapias y teléfonos', () => {
+  console.log('🧪 Ejecutando pruebas de generación de mensajes de WhatsApp...\n');
 
-// 1. Evaluación: Recordatorio
-const msgEval = generarMensajeRecordatorio({
-  nombrePaciente: 'natalia',
-  esEvaluacion: true,
-  esGrupal: false,
-  diaTexto: 'jueves',
-  diaNum: 3,
-  mesTexto: 'septiembre',
-  horaLimpia: '07:00 a.m',
-  enlaceZoom: 'https://zoom.us/j/123456'
+  // 1. Evaluación: Recordatorio
+  const msgEval = generarMensajeRecordatorio({
+    nombrePaciente: 'natalia',
+    esEvaluacion: true,
+    esGrupal: false,
+    diaTexto: 'jueves',
+    diaNum: 3,
+    mesTexto: 'septiembre',
+    horaLimpia: '07:00 a.m',
+    enlaceZoom: 'https://zoom.us/j/123456'
+  });
+
+  assert.ok(msgEval.includes('nuestra sesión de evaluación agendada'), 'El mensaje de evaluación debe decir "nuestra sesión de evaluación"');
+  assert.ok(!msgEval.includes('nuestra sesión de terapia agendada'), 'El mensaje de evaluación NO debe decir "sesión de terapia"');
+  assert.ok(msgEval.includes('*Enlace para conectarte a tu evaluación (Zoom):*'), 'Debe indicar que el enlace es para la evaluación');
+  console.log('✅ Test 1: Recordatorio de WhatsApp para Evaluación validado con éxito.');
+
+  // 2. Individual: Recordatorio
+  const msgInd = generarMensajeRecordatorio({
+    nombrePaciente: 'Carlos',
+    esEvaluacion: false,
+    esGrupal: false,
+    diaTexto: 'viernes',
+    diaNum: 4,
+    mesTexto: 'septiembre',
+    horaLimpia: '10:00 a.m',
+    enlaceZoom: 'https://zoom.us/j/999'
+  });
+
+  assert.ok(msgInd.includes('nuestra sesión de terapia agendada'), 'El mensaje individual debe decir "sesión de terapia"');
+  console.log('✅ Test 2: Recordatorio de WhatsApp para Cita Individual validado con éxito.');
+
+  // 3. Evaluación: Cobro
+  const msgCobroEval = generarMensajeCobro({
+    nombrePaciente: 'natalia',
+    esEvaluacion: true,
+    esGrupal: false,
+    diaTexto: 'jueves',
+    diaNum: 3,
+    mesTexto: 'septiembre',
+    horaLimpia: '07:00 a.m',
+    bloqueDatos: '\n• Aportación: $4,000.00 MXN'
+  });
+
+  assert.ok(msgCobroEval.includes('respecto a tu sesión de evaluación del'), 'El cobro de evaluación debe decir "sesión de evaluación"');
+  assert.ok(!msgCobroEval.includes('respecto a tu sesión de terapia del'), 'El cobro de evaluación NO debe decir "sesión de terapia"');
+  console.log('✅ Test 3: Solicitud de pago de WhatsApp para Evaluación validado con éxito.');
+
+  // 4. Validación de teléfono
+  assert.strictEqual(validarYLimpiarTelefono('+52 55 1234 5678'), '525512345678');
+  assert.strictEqual(validarYLimpiarTelefono('5512345678'), '525512345678');
+  assert.strictEqual(validarYLimpiarTelefono('+52'), null, 'Solo "+52" debe ser rechazado como inválido');
+  assert.strictEqual(validarYLimpiarTelefono('123'), null, 'Menos de 10 dígitos debe ser rechazado');
+  console.log('✅ Test 4: Validación de teléfono (mínimo 10 dígitos y descarte de solo prefijo) validada con éxito.');
+
+  console.log('\n🎉 ¡TODOS LOS TESTS DE WHATSAPP PASARON CON 100% DE ÉXITO!');
 });
-
-assert.ok(msgEval.includes('nuestra sesión de evaluación agendada'), 'El mensaje de evaluación debe decir "nuestra sesión de evaluación"');
-assert.ok(!msgEval.includes('nuestra sesión de terapia agendada'), 'El mensaje de evaluación NO debe decir "sesión de terapia"');
-assert.ok(msgEval.includes('*Enlace para conectarte a tu evaluación (Zoom):*'), 'Debe indicar que el enlace es para la evaluación');
-console.log('✅ Test 1: Recordatorio de WhatsApp para Evaluación validado con éxito.');
-
-// 2. Individual: Recordatorio
-const msgInd = generarMensajeRecordatorio({
-  nombrePaciente: 'Carlos',
-  esEvaluacion: false,
-  esGrupal: false,
-  diaTexto: 'viernes',
-  diaNum: 4,
-  mesTexto: 'septiembre',
-  horaLimpia: '10:00 a.m',
-  enlaceZoom: 'https://zoom.us/j/999'
-});
-
-assert.ok(msgInd.includes('nuestra sesión de terapia agendada'), 'El mensaje individual debe decir "sesión de terapia"');
-console.log('✅ Test 2: Recordatorio de WhatsApp para Cita Individual validado con éxito.');
-
-// 3. Evaluación: Cobro
-const msgCobroEval = generarMensajeCobro({
-  nombrePaciente: 'natalia',
-  esEvaluacion: true,
-  esGrupal: false,
-  diaTexto: 'jueves',
-  diaNum: 3,
-  mesTexto: 'septiembre',
-  horaLimpia: '07:00 a.m',
-  bloqueDatos: '\n• Aportación: $4,000.00 MXN'
-});
-
-assert.ok(msgCobroEval.includes('respecto a tu sesión de evaluación del'), 'El cobro de evaluación debe decir "sesión de evaluación"');
-assert.ok(!msgCobroEval.includes('respecto a tu sesión de terapia del'), 'El cobro de evaluación NO debe decir "sesión de terapia"');
-console.log('✅ Test 3: Solicitud de pago de WhatsApp para Evaluación validado con éxito.');
-
-// 4. Validación de teléfono
-assert.strictEqual(validarYLimpiarTelefono('+52 55 1234 5678'), '525512345678');
-assert.strictEqual(validarYLimpiarTelefono('5512345678'), '525512345678');
-assert.strictEqual(validarYLimpiarTelefono('+52'), null, 'Solo "+52" debe ser rechazado como inválido');
-assert.strictEqual(validarYLimpiarTelefono('123'), null, 'Menos de 10 dígitos debe ser rechazado');
-console.log('✅ Test 4: Validación de teléfono (mínimo 10 dígitos y descarte de solo prefijo) validada con éxito.');
-
-console.log('\n🎉 ¡TODOS LOS TESTS DE WHATSAPP PASARON CON 100% DE ÉXITO!');

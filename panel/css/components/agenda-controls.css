@@ -1,0 +1,109 @@
+/* Barra de Controles y Resumen */
+.agenda-controls {
+  padding: 0.8rem 1.8rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--blanco);
+  border-bottom: 1px solid #e2e8f0;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.stats-center-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stats-pills-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.stat-pill {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #475569;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* Filtro de Días */
+.day-filter-switch {
+  display: inline-flex;
+  background: #f1f5f9;
+  padding: 2px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+}
+
+.day-filter-switch .filter-opt {
+  background: transparent;
+  border: none;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.day-filter-switch .filter-opt.active {
+  background: #ffffff;
+  color: var(--turquesa);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.btn-nueva-cita {
+  background: var(--turquesa);
+  color: #ffffff;
+  padding: 0.45rem 1rem;
+  font-size: 0.85rem;
+  border-radius: 8px;
+  font-weight: 700;
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btn-icon-refresh {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+  padding: 0.45rem 0.75rem;
+  border-radius: 8px;
+  width: auto;
+}
+.btn-icon-refresh:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+/* Botones de navegación */
+.btn-nav {
+  background: #f8fafc;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  padding: 0.45rem 0.8rem;
+  font-size: 0.85rem;
+  width: auto;
+  border-radius: 8px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.btn-nav:hover {
+  background: #e2e8f0;
+}
+

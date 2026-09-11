@@ -1,0 +1,44 @@
+<!-- Modal / Configuración de Datos Bancarios y Enlaces de Pago -->
+  <div id="modalDatosPago" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; padding: 1rem;">
+    <div style="background: #ffffff; padding: 1.8rem; border-radius: 14px; width: 100%; max-width: 500px; max-height: 92vh; overflow-y: auto; box-shadow: 0 16px 40px rgba(0,0,0,0.25);">
+      <!-- Cabecera -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.8rem;">
+        <h3 style="color: var(--rosa-coral); font-size: 1.25rem; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fa-solid fa-credit-card" style="color: var(--turquesa);"></i> Datos de Cobro
+        </h3>
+        <button type="button" class="btn-close-modal" onclick="cerrarModalDatosPago()" title="Cerrar modal">&times;</button>
+      </div>
+
+      <div class="datos-pago-tip-box">
+        <i class="fa-solid fa-circle-info" style="margin-right: 4px;"></i>
+        Estos datos se insertarán automáticamente en los mensajes de WhatsApp cuando envíes recordatorios de cobro o pidas comprobantes.
+      </div>
+
+      <form id="formDatosPago" onsubmit="guardarDatosPago(event)">
+        <div class="form-group">
+          <label for="dp_banco"><i class="fa-solid fa-building-columns" style="color: var(--turquesa); margin-right: 4px;"></i> Banco / Institución</label>
+          <input type="text" id="dp_banco" placeholder="Ej: BBVA, Santander, Nu, Hey Banco, Banorte..." style="width: 100%;">
+        </div>
+
+        <div class="form-group">
+          <label for="dp_titular"><i class="fa-solid fa-user-check" style="color: var(--turquesa); margin-right: 4px;"></i> Titular de la Cuenta</label>
+          <input type="text" id="dp_titular" placeholder="Ej: Ana Laura Gómez Díaz" style="width: 100%;">
+        </div>
+
+        <div class="form-group">
+          <label for="dp_clabe"><i class="fa-solid fa-money-bill-transfer" style="color: var(--turquesa); margin-right: 4px;"></i> Cuenta CLABE (18 dígitos) o Tarjeta</label>
+          <input type="text" id="dp_clabe" placeholder="Ej: 012 180 01512345678 9" style="width: 100%;">
+        </div>
+
+        <div class="form-group">
+          <label for="dp_enlace"><i class="fa-brands fa-paypal" style="color: #0284c7; margin-right: 4px;"></i> Enlace Internacional (PayPal / Stripe / Wise)</label>
+          <input type="text" id="dp_enlace" placeholder="Ej: paypal.me/PsicoLau o https://buy.stripe.com/..." style="width: 100%;">
+        </div>
+
+        <div style="display: flex; gap: 0.8rem; margin-top: 1.2rem;">
+          <button type="submit" class="btn" style="flex: 1.5;"><i class="fa-solid fa-floppy-disk" style="margin-right: 4px;"></i> Guardar Datos de Cobro</button>
+          <button type="button" class="btn" style="flex: 1; background: var(--gris-calido);" onclick="cerrarModalDatosPago()">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>

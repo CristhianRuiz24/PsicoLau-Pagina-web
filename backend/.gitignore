@@ -1,5 +1,13 @@
 node_modules/
 .env
+.env.*
 dist/
 coverage/
 .DS_Store
+*.log
+*.sql
+*.dump
+*.backup
+*.sqlite
+*.db
+

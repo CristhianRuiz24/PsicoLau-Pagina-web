@@ -128,7 +128,7 @@ npx serve -p 5500 .
 | `FRONTEND_URL` | URL autorizada para CORS | `https://psicolau.com` |
 | `RESEND_API_KEY` | API Key para envíos de correo | `re_xxxxxxxxxxxx` |
 | `REMITENTE` | Remitente oficial de notificaciones | `PsicoLau <contacto@psicolau.com>` |
-| `CORREO_LAURA` | Correo receptor de avisos clínicos | `lince_lg@yahoo.com.mx` |
+| `CORREO_LAURA` | Correo receptor de avisos clínicos | `contacto@psicolau.com` |
 
 ---
 

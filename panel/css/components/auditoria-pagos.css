@@ -1,0 +1,153 @@
+/* === ESTILOS PARA AUDITORÍA DE PAGOS Y COBRANZA === */
+.stat-pill.clickable {
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.stat-pill.clickable:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(234, 88, 12, 0.2);
+  border-color: #ea580c;
+}
+
+.audit-tabs-row {
+  display: flex;
+  background: #f1f5f9;
+  padding: 3px;
+  border-radius: 8px;
+  gap: 4px;
+  margin-bottom: 1rem;
+}
+
+.audit-tab-btn {
+  flex: 1;
+  padding: 0.5rem 0.8rem;
+  border: none;
+  background: none;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #64748b;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.audit-tab-btn.active {
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.audit-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #ea580c;
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.audit-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  border-color: #cbd5e1;
+  border-left-color: #ea580c;
+}
+
+.audit-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.audit-card-title {
+  font-size: 0.96rem;
+  font-weight: 800;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.audit-card-meta {
+  font-size: 0.82rem;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.audit-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.btn-audit-whatsapp {
+  background: #16a34a;
+  color: #ffffff;
+  border: none;
+  padding: 0.55rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.btn-audit-whatsapp:hover {
+  background: #15803d;
+  transform: scale(1.02);
+}
+
+.btn-audit-pay-toggle {
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s ease;
+}
+
+.btn-audit-pay-toggle:hover {
+  background: #dcfce7;
+  color: #15803d;
+  border-color: #86efac;
+}
+
+.audit-empty-state {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  background: #f0fdf4;
+  border: 1px dashed #86efac;
+  border-radius: 12px;
+  color: #166534;
+}
+
+.audit-empty-state i {
+  font-size: 2.4rem;
+  color: #22c55e;
+  margin-bottom: 0.6rem;
+}
+

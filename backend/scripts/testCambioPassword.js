@@ -1,12 +1,14 @@
+const { test } = require('node:test');
+const assert = require('node:assert');
 require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const prisma = require('../src/config/db');
 const authRoutes = require('../src/routes/auth');
 
-async function runCambioPasswordTestSuite() {
+test('Cambio seguro de contraseña y autenticación (Spec 005)', async () => {
   console.log('🧪 Iniciando suite de pruebas automatizadas: Spec 005 (Cambio de Contraseña)...\n');
 
   // Iniciar servidor express temporal en puerto dinámico
@@ -57,11 +59,9 @@ async function runCambioPasswordTestSuite() {
       })
     });
     const data1 = await res1.json();
-    if (res1.status === 400 && data1.message.includes('incorrecta')) {
-      console.log('✅ Test 1 (RF-6): Contraseña actual errónea rechazada correctamente con 400 Bad Request.');
-    } else {
-      throw new Error(`Test 1 falló: status=${res1.status}, data=${JSON.stringify(data1)}`);
-    }
+    assert.strictEqual(res1.status, 400);
+    assert.ok(data1.message.includes('incorrecta'));
+    console.log('✅ Test 1 (RF-6): Contraseña actual errónea rechazada correctamente con 400 Bad Request.');
 
     // TEST 2 (RF-3): Nueva contraseña menor a 8 caracteres
     const res2 = await fetch(`${baseUrl}/cambiar-password`, {
@@ -77,11 +77,9 @@ async function runCambioPasswordTestSuite() {
       })
     });
     const data2 = await res2.json();
-    if (res2.status === 400 && data2.message.includes('al menos 8 caracteres')) {
-      console.log('✅ Test 2 (RF-3): Contraseña menor a 8 caracteres prevenida con 400 Bad Request.');
-    } else {
-      throw new Error(`Test 2 falló: status=${res2.status}, data=${JSON.stringify(data2)}`);
-    }
+    assert.strictEqual(res2.status, 400);
+    assert.ok(data2.message.includes('al menos 8 caracteres'));
+    console.log('✅ Test 2 (RF-3): Contraseña menor a 8 caracteres prevenida con 400 Bad Request.');
 
     // TEST 3 (RF-4): Confirmación no coincide
     const res3 = await fetch(`${baseUrl}/cambiar-password`, {
@@ -97,11 +95,9 @@ async function runCambioPasswordTestSuite() {
       })
     });
     const data3 = await res3.json();
-    if (res3.status === 400 && data3.message.includes('no coinciden')) {
-      console.log('✅ Test 3 (RF-4): Confirmación no coincidente rechazada con 400 Bad Request.');
-    } else {
-      throw new Error(`Test 3 falló: status=${res3.status}, data=${JSON.stringify(data3)}`);
-    }
+    assert.strictEqual(res3.status, 400);
+    assert.ok(data3.message.includes('no coinciden'));
+    console.log('✅ Test 3 (RF-4): Confirmación no coincidente rechazada con 400 Bad Request.');
 
     // TEST 4 (RF-5): Nueva contraseña idéntica a la anterior
     const res4 = await fetch(`${baseUrl}/cambiar-password`, {
@@ -117,11 +113,9 @@ async function runCambioPasswordTestSuite() {
       })
     });
     const data4 = await res4.json();
-    if (res4.status === 400 && data4.message.includes('no puede ser igual')) {
-      console.log('✅ Test 4 (RF-5): Nueva contraseña idéntica a la anterior rechazada con 400 Bad Request.');
-    } else {
-      throw new Error(`Test 4 falló: status=${res4.status}, data=${JSON.stringify(data4)}`);
-    }
+    assert.strictEqual(res4.status, 400);
+    assert.ok(data4.message.includes('no puede ser igual'));
+    console.log('✅ Test 4 (RF-5): Nueva contraseña idéntica a la anterior rechazada con 400 Bad Request.');
 
     // TEST 5 (RF-7): Cambio exitoso de contraseña
     const res5 = await fetch(`${baseUrl}/cambiar-password`, {
@@ -137,12 +131,11 @@ async function runCambioPasswordTestSuite() {
       })
     });
     const data5 = await res5.json();
-    if (res5.status === 200 && data5.success && data5.token) {
-      console.log('✅ Test 5 (RF-7): Cambio exitoso 200 OK con mensaje y nuevo token JWT generado.');
-      token = data5.token; // Actualizar token
-    } else {
-      throw new Error(`Test 5 falló: status=${res5.status}, data=${JSON.stringify(data5)}`);
-    }
+    assert.strictEqual(res5.status, 200);
+    assert.strictEqual(data5.success, true);
+    assert.ok(data5.token);
+    token = data5.token;
+    console.log('✅ Test 5 (RF-7): Cambio exitoso 200 OK con mensaje y nuevo token JWT generado.');
 
     // TEST 6: Login con la nueva contraseña
     const resLoginNuevo = await fetch(`${baseUrl}/login`, {
@@ -154,11 +147,9 @@ async function runCambioPasswordTestSuite() {
       })
     });
     const dataLoginNuevo = await resLoginNuevo.json();
-    if (resLoginNuevo.status === 200 && dataLoginNuevo.success) {
-      console.log('✅ Test 6: Inicio de sesión con la nueva contraseña verificado exitosamente (200 OK).');
-    } else {
-      throw new Error(`Test 6 falló: status=${resLoginNuevo.status}, data=${JSON.stringify(dataLoginNuevo)}`);
-    }
+    assert.strictEqual(resLoginNuevo.status, 200);
+    assert.strictEqual(dataLoginNuevo.success, true);
+    console.log('✅ Test 6: Inicio de sesión con la nueva contraseña verificado exitosamente (200 OK).');
 
     // TEST 7: Login con la contraseña vieja debe fallar
     const resLoginViejo = await fetch(`${baseUrl}/login`, {
@@ -169,17 +160,11 @@ async function runCambioPasswordTestSuite() {
         password: passwordInicial
       })
     });
-    const dataLoginViejo = await resLoginViejo.json();
-    if (resLoginViejo.status === 401) {
-      console.log('✅ Test 7: Inicio de sesión con la contraseña anterior rechazado con 401 Unauthorized.');
-    } else {
-      throw new Error(`Test 7 falló: status=${resLoginViejo.status}, data=${JSON.stringify(dataLoginViejo)}`);
-    }
+    assert.strictEqual(resLoginViejo.status, 401);
+    console.log('✅ Test 7: Inicio de sesión con la contraseña anterior rechazado con 401 Unauthorized.');
 
     console.log('\n🎉 ¡TODAS LAS PRUEBAS DE LA SPEC 005 PASARON CON 100% DE ÉXITO!');
-
   } finally {
-    // Limpieza obligatoria post-test (Regla de higiene)
     if (testUser && testUser.id) {
       await prisma.usuario.delete({ where: { id: testUser.id } }).catch(() => {});
       console.log('✓ Usuario de prueba eliminado de la base de datos.');
@@ -187,9 +172,4 @@ async function runCambioPasswordTestSuite() {
     await prisma.$disconnect();
     server.close();
   }
-}
-
-runCambioPasswordTestSuite().catch(err => {
-  console.error('❌ Error fatal en test suite:', err);
-  process.exit(1);
 });

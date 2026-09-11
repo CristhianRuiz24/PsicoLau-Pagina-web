@@ -1,0 +1,112 @@
+/* === ESTILOS PARA IMPRESIÓN Y PDF === */
+.print-only-header {
+  display: none;
+  padding: 1rem 0;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #EC5E86;
+}
+
+@media print {
+  body {
+    background: #ffffff !important;
+    font-size: 10pt;
+  }
+
+  .no-print, header.dashboard-header, section.agenda-controls, #modalNuevaCita, #modalNotasSemana, #modalDirectorioExpedientes, #modalExpedientePaciente, #modalAuditoriaPagos, #modalDatosPago {
+    display: none !important;
+  }
+
+  /* Si NO estamos imprimiendo el reporte mensual, ocultar modalReporteMensual */
+  body:not(.printing-reporte-mensual) #modalReporteMensual {
+    display: none !important;
+  }
+
+  /* Modo de impresión de Agenda Semanal */
+  body:not(.printing-reporte-mensual) .print-only-header {
+    display: block !important;
+  }
+
+  body:not(.printing-reporte-mensual) .agenda-container {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  body:not(.printing-reporte-mensual) .easytable-wrapper {
+    box-shadow: none !important;
+    border: 1px solid #000 !important;
+    overflow: visible !important;
+  }
+
+  body:not(.printing-reporte-mensual) .easytable {
+    min-width: 100% !important;
+    width: 100% !important;
+  }
+
+  body:not(.printing-reporte-mensual) .easytable th, body:not(.printing-reporte-mensual) .easytable td {
+    border: 1px solid #666 !important;
+    padding: 2px !important;
+  }
+
+  body:not(.printing-reporte-mensual) .appointment-block {
+    box-shadow: none !important;
+    border: 1px solid rgba(0,0,0,0.3) !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body:not(.printing-reporte-mensual) .card-btn, body:not(.printing-reporte-mensual) .mini-pay-btn {
+    display: none !important;
+  }
+
+  /* Modo de impresión exclusivo para Reporte Contable Mensual */
+  body.printing-reporte-mensual .print-only-header,
+  body.printing-reporte-mensual .agenda-container {
+    display: none !important;
+  }
+
+  body.printing-reporte-mensual #modalReporteMensual {
+    display: block !important;
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+    backdrop-filter: none !important;
+  }
+
+  body.printing-reporte-mensual #dialogoReporteMensual {
+    box-shadow: none !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+    border: none !important;
+  }
+
+  body.printing-reporte-mensual .btn-close-modal,
+  body.printing-reporte-mensual .btn-periodo-nav,
+  body.printing-reporte-mensual .btn-periodo-hoy,
+  body.printing-reporte-mensual .reporte-export-actions,
+  body.printing-reporte-mensual .btn-export-wa,
+  body.printing-reporte-mensual .btn-export-csv,
+  body.printing-reporte-mensual .btn-export-print,
+  body.printing-reporte-mensual .modal-dialog-reporte > div:last-child {
+    display: none !important;
+  }
+
+  body.printing-reporte-mensual .reporte-table {
+    border: 1px solid #334155 !important;
+  }
+
+  body.printing-reporte-mensual .reporte-table th,
+  body.printing-reporte-mensual .reporte-table td {
+    border: 1px solid #cbd5e1 !important;
+    padding: 5px 8px !important;
+  }
+
+  body.printing-reporte-mensual .kpi-card {
+    border: 1px solid #cbd5e1 !important;
+    background: #f8fafc !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+

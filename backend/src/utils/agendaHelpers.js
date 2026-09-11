@@ -52,6 +52,8 @@ const normalizarNombresYCategorias = ({ nombre, notas, categoria, eraBloqueo, er
   return { nombreFinal, categoriaFinal };
 };
 
+const { cifrarPaciente, descifrarPaciente, generarBlindIndex } = require('./crypto');
+
 /**
  * Valida la unicidad del correo electrónico al editar un paciente para prevenir error P2002
  * @param {Object} prisma - Cliente Prisma
@@ -63,17 +65,22 @@ const validarEmailUnicoPaciente = async (prisma, { eraBloqueo, eraGrupal, email,
 
   if (!eraBloqueo && !eraGrupal && email !== undefined) {
     if (emailLimpio) {
-      if (!pacienteActual || emailLimpio.toLowerCase() !== (pacienteActual.email || '').toLowerCase()) {
+      const emailHash = generarBlindIndex(emailLimpio);
+      if (!pacienteActual || emailHash !== pacienteActual.emailHash) {
         const pacienteExistente = await prisma.paciente.findFirst({
           where: {
-            email: { equals: emailLimpio, mode: 'insensitive' },
+            OR: [
+              { emailHash },
+              { email: { equals: emailLimpio, mode: 'insensitive' } }
+            ],
             ...(pacienteActual && { id: { not: pacienteActual.id } })
           }
         });
 
         if (pacienteExistente) {
+          const pacienteDesc = descifrarPaciente(pacienteExistente);
           return {
-            error: `El correo "${emailLimpio}" ya está registrado con el paciente "${pacienteExistente.nombre}". Por favor usa otro o déjalo vacío.`
+            error: `El correo "${emailLimpio}" ya está registrado con el paciente "${pacienteDesc.nombre}". Por favor usa otro o déjalo vacío.`
           };
         }
       }
@@ -93,7 +100,7 @@ const validarEmailUnicoPaciente = async (prisma, { eraBloqueo, eraGrupal, email,
  * Busca un paciente existente o crea uno nuevo al agendar una cita
  * @param {Object} prisma - Cliente Prisma
  * @param {Object} params
- * @returns {Promise<Object>} Paciente encontrado o creado
+ * @returns {Promise<Object>} Paciente encontrado o creado (descifrado en memoria)
  */
 const buscarOCrearPacienteParaCita = async (prisma, {
   nombreLimpio,
@@ -106,60 +113,68 @@ const buscarOCrearPacienteParaCita = async (prisma, {
 }) => {
   let paciente;
 
+  // 1. Buscar por emailHash (Blind index exacto O(1))
   if (emailLimpio) {
+    const emailHash = generarBlindIndex(emailLimpio);
     paciente = await prisma.paciente.findFirst({
-      where: { email: { equals: emailLimpio, mode: 'insensitive' } }
+      where: { emailHash }
     });
   }
 
-  if (!paciente && telefonoLimpio) {
-    paciente = await prisma.paciente.findFirst({
-      where: {
-        telefono: { equals: telefonoLimpio },
-        nombre: { equals: nombreLimpio, mode: 'insensitive' }
-      }
-    });
-  }
+  // 2. Si no se encontró por email, buscar por teléfono o nombre en memoria descifrada
+  if (!paciente && (telefonoLimpio || nombreLimpio)) {
+    const todos = await prisma.paciente.findMany();
+    const descifrados = todos.map(p => descifrarPaciente(p));
 
-  if (!paciente && !esBloqueo && !esGrupal) {
-    paciente = await prisma.paciente.findFirst({
-      where: { 
-        nombre: { equals: nombreLimpio, mode: 'insensitive' },
-        NOT: [
-          { nombre: { startsWith: '[BLOQUEO]' } },
-          { nombre: { startsWith: '[GRUPAL]' } }
-        ]
-      }
-    });
-  }
+    if (telefonoLimpio) {
+      paciente = descifrados.find(p => 
+        (p.telefono || '').trim() === telefonoLimpio &&
+        (p.nombre || '').trim().toLowerCase() === nombreLimpio.toLowerCase()
+      );
+    }
 
-  if (!paciente) {
-    const emailSeguro = emailLimpio || `sin-email-${Date.now()}-${Math.random().toString(36).substring(2, 9)}@local.com`;
-    paciente = await prisma.paciente.create({
-      data: {
-        nombre: nombreLimpio,
-        telefono: telefonoLimpio || '',
-        email: emailSeguro,
-        enlaceZoom: enlaceZoomLimpio || null,
-        tarifaDefecto: (!esBloqueo && !esGrupal && montoValido !== null) ? montoValido : 500
-      }
-    });
-  } else {
-    // Actualizar datos de contacto, Zoom y tarifa habitual si cambiaron
-    const dataUpdate = {};
-    if (telefonoLimpio && paciente.telefono !== telefonoLimpio) dataUpdate.telefono = telefonoLimpio;
-    if (emailLimpio && (!paciente.email || paciente.email.startsWith('sin-email-'))) dataUpdate.email = emailLimpio;
-    if (enlaceZoomLimpio) dataUpdate.enlaceZoom = enlaceZoomLimpio;
-    if (!esBloqueo && !esGrupal && montoValido !== null) dataUpdate.tarifaDefecto = montoValido;
-    if (Object.keys(dataUpdate).length > 0) {
-      paciente = await prisma.paciente.update({
-        where: { id: paciente.id },
-        data: dataUpdate
+    if (!paciente && !esBloqueo && !esGrupal) {
+      paciente = descifrados.find(p => {
+        const nom = (p.nombre || '').trim().toLowerCase();
+        return nom === nombreLimpio.toLowerCase() &&
+               !p.nombre.startsWith('[BLOQUEO]') &&
+               !p.nombre.startsWith('[GRUPAL]');
       });
     }
   }
 
-  return paciente;
+  if (!paciente) {
+    const emailSeguro = emailLimpio || `sin-email-${Date.now()}-${Math.random().toString(36).substring(2, 9)}@local.com`;
+    const datosCifrados = cifrarPaciente({
+      nombre: nombreLimpio,
+      telefono: telefonoLimpio || '',
+      email: emailSeguro,
+      enlaceZoom: enlaceZoomLimpio || null,
+      tarifaDefecto: (!esBloqueo && !esGrupal && montoValido !== null) ? montoValido : 500
+    });
+
+    const creado = await prisma.paciente.create({
+      data: datosCifrados
+    });
+    return descifrarPaciente(creado);
+  } else {
+    // Actualizar datos de contacto, Zoom y tarifa habitual si cambiaron
+    const updatePlano = {};
+    if (telefonoLimpio && paciente.telefono !== telefonoLimpio) updatePlano.telefono = telefonoLimpio;
+    if (emailLimpio && (!paciente.email || paciente.email.startsWith('sin-email-'))) updatePlano.email = emailLimpio;
+    if (enlaceZoomLimpio) updatePlano.enlaceZoom = enlaceZoomLimpio;
+    if (!esBloqueo && !esGrupal && montoValido !== null) updatePlano.tarifaDefecto = montoValido;
+
+    if (Object.keys(updatePlano).length > 0) {
+      const updateCifrado = cifrarPaciente(updatePlano);
+      const actualizado = await prisma.paciente.update({
+        where: { id: paciente.id },
+        data: updateCifrado
+      });
+      return descifrarPaciente(actualizado);
+    }
+    return descifrarPaciente(paciente);
+  }
 };
 
 /**

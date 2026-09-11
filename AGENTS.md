@@ -71,12 +71,13 @@ El proyecto sigue rigurosamente el flujo SDD para cualquier funcionalidad o camb
 
 ## 💻 5. Comandos de Desarrollo
 
-- **Frontend local**: Servidor estático en la raíz (ej. Live Server en `http://127.0.0.1:5500` o `npx serve -l 5500`).
-- **Backend local**: `cd backend && npm install && npm run dev` (o `npm start`, puerto `3000`).
+- **Iniciar Todo (Frontend + Backend)**: Doble clic en `scripts/iniciar.bat` en Windows, o ejecutar `node scripts/dev.js` (levanta ambos servidores en puertos 5500 y 3001 y abre el panel en el navegador).
+- **Frontend local**: Servidor estático en la raíz (ej. `npm start`, Live Server en `http://127.0.0.1:5500` o `npx serve -l 5500`).
+- **Backend local**: `cd backend && npm install && npm run dev` (o `npm start`, puerto `3001`).
 - **Generar cliente Prisma**: `cd backend && npx prisma generate`.
 - **Sincronizar esquema DB Dev**: `cd backend && npx prisma db push`.
 - **Crear/actualizar usuario admin real**: `node backend/scripts/seedUser.js <email> <password>`.
-- **Ejecutar tests automatizados**: `node backend/scripts/testContabilidad.js` (y scripts correspondientes en `backend/scripts/`).
+- **Ejecutar tests automatizados**: `cd backend && npm test` (o `node scripts/runTests.js` que orquesta la suite con `--test-concurrency=1`).
 
 ---
 
@@ -87,6 +88,10 @@ El proyecto sigue rigurosamente el flujo SDD para cualquier funcionalidad o camb
 4. **CORS explícito**: Lista blanca estricta (`psicolau.com`, `www.psicolau.com`, `api.psicolau.com` y `FRONTEND_URL` local). Sin `*` en producción.
 5. **Protección de Secretos**: `.env` completamente blindado en `.gitignore`. Nunca registrar credenciales ni datos clínicos en Git.
 6. **No push prematuro**: No ejecutar `git push` a `origin/main` sin verificación y aprobación explícita del usuario tras probar en local.
+7. **Aislamiento explícito de CSP en Cloudflare Pages**: En `_headers`, nunca aplicar directivas restrictivas de `Content-Security-Policy` bajo el comodín global `/*` si existen subdirectorios con requerimientos interactivos (como `/panel`). Dado que los navegadores aplican la intersección más restrictiva de cabeceras, la CSP pública y la CSP del panel deben definirse explícitamente en bloques de ruta separados para evitar romper la funcionalidad clínica.
+8. **Validación Semántica Estricta (Defensa en Profundidad)**: Todo campo de entrada público o administrativo debe contar con validación por lista blanca (ej. regex Unicode para nombres, validación estricta de dominios).
+9. **Descifrado Transparente y Búsqueda Ciega**: El backend siempre se encarga de descifrar la PII antes de enviarla al cliente autorizado. Las búsquedas en base de datos sobre PII cifrada deben utilizar índices ciegos (Blind Indexing) como `emailHash` vía HMAC-SHA256.
+10. **Carga Dinámica Asíncrona Obligatoria en Modales Desacoplados**: Cuando se extraigan modales HTML a partials independientes (lazy loading vía fetch), toda función global, helper o manejador de eventos que interactúe con el modal debe asegurar su existencia en el DOM mediante el helper asíncrono (`await asegurarModal(...)`) y jamás asumir la presencia estática del elemento en el HTML base. Asimismo, queda prohibido duplicar funciones de apertura o gestión de modales en scripts auxiliares (ej. `app.js`) que sobreescriban módulos ESM con salidas sincrónicas prematuras (`if (!modal) return;`).
 
 ---
 
@@ -96,6 +101,8 @@ Ningún cambio o tarea se da por terminado sin comprobar:
 1. **No-regresión en la suite clínica**: La agenda semanal, login, creación de citas, visualización de expedientes y cálculo de pagos continúan funcionando al 100%.
 2. **Cumplimiento de la Constitución**: Verificar cifrado, autenticación JWT, CORS y aislamiento dev/prod.
 3. **Verificación de la Spec**: Cada Requisito Funcional (`RF-x`) de la spec activa cuenta con su prueba (script o verificación guiada) superada.
-4. **Validación de tests backend**: Ejecutar los scripts de verificación en `backend/scripts/` relevantes.
+4. **Validación de tests backend**: Ejecutar la suite unificada con `npm test` dentro de `backend/`.
 5. **Revisión de no-exposición de secretos**: Ningún secreto, token o variable sensible queda expuesta en código ni commits.
 6. **Limpieza obligatoria en scripts de test**: Todo script de prueba o verificación en `backend/scripts/` que inserte registros temporales en base de datos debe incluir un bloque `finally` con limpieza automática (`delete`) o ejecutarse en transacción revertida para evitar registros huérfanos o duplicados en el entorno de desarrollo que confundan el directorio clínico.
+7. **Ejecución secuencial determinista (`--test-concurrency=1`)**: Al ejecutar pruebas automatizadas contra la base de datos de desarrollo, debe mantenerse la ejecución secuencial (`--test-concurrency=1` en `runTests.js`) para prevenir condiciones de carrera, falsos positivos por colisiones de datos y bloqueos en contadores globales.
+8. **Pruebas Adversarias Obligatorias**: La suite de pruebas de integración debe incluir pruebas adversarias negativas que simulen ataques (XSS, inyección CSV, payloads DAST) y aseguren que el servidor los bloquea con HTTP 400 sin alterar la base de datos.

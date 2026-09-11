@@ -1,8 +1,6 @@
 const prisma = require('../config/db');
-const { cifrar, descifrar } = require('../utils/crypto');
+const { cifrar, descifrar, descifrarPaciente } = require('../utils/crypto');
 const { parseId, notaExpedienteSchema } = require('../utils/validators');
-const logger = require('../utils/logger');
-
 
 // Lista de los 8 campos clínicos confidenciales que deben ser cifrados/descifrados
 const CAMPOS_CLINICOS = [
@@ -48,65 +46,73 @@ const cifrarPayloadExpediente = (body) => {
 };
 
 /**
+ * Normaliza un string para comparaciones y búsquedas flexibles (remueve acentos, minúsculas, espacios).
+ */
+const normalizar = (str) => {
+  if (!str) return '';
+  return String(str)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+};
+
+/**
  * GET /api/pacientes/:id/expediente
  * Obtiene todas las notas de sesión de un paciente, ordenadas por fecha descendente y descifradas en memoria.
  */
 const obtenerExpedientePaciente = async (req, res) => {
-  try {
-    const pacienteId = parseId(req.params.id);
-    if (!pacienteId) {
-      return res.status(400).json({ success: false, message: 'ID de paciente inválido' });
-    }
-
-    const paciente = await prisma.paciente.findUnique({
-      where: { id: pacienteId },
-      select: {
-        id: true,
-        nombre: true,
-        telefono: true,
-        email: true,
-        enlaceZoom: true,
-        createdAt: true
-      }
-    });
-
-    if (!paciente) {
-      return res.status(404).json({ success: false, message: 'Paciente no encontrado' });
-    }
-
-    const nomUpper = (paciente.nombre || '').toUpperCase().trim();
-    if (nomUpper.startsWith('[BLOQUEO]') || nomUpper.startsWith('[GRUPAL]')) {
-      return res.status(400).json({ success: false, message: 'Este registro corresponde a un evento de agenda y no posee expediente clínico' });
-    }
-
-    const notas = await prisma.expediente.findMany({
-      where: { pacienteId },
-      orderBy: [
-        { fechaSesion: 'desc' },
-        { id: 'desc' }
-      ]
-    });
-
-    // Descifrado en memoria de todas las notas con asignación de número de sesión histórico
-    const totalNotas = notas.length;
-    const notasDescifradas = notas.map((n, idx) => {
-      const desc = descifrarExpediente(n);
-      return {
-        ...desc,
-        numeroSesion: totalNotas - idx
-      };
-    });
-
-    res.json({
-      success: true,
-      paciente,
-      data: notasDescifradas,
-      total: notasDescifradas.length
-    });
-  } catch (error) {
-    logger.error('Error al obtener expediente del paciente', error);
-    res.status(500).json({ success: false, message: 'Error interno al consultar expediente' });
+  const pacienteId = parseId(req.params.id);
+  if (!pacienteId) {
+    return res.status(400).json({ success: false, message: 'ID de paciente inválido' });
   }
+
+  const paciente = await prisma.paciente.findUnique({
+    where: { id: pacienteId },
+    select: {
+      id: true,
+      nombre: true,
+      telefono: true,
+      email: true,
+      enlaceZoom: true,
+      createdAt: true
+    }
+  });
+
+  if (!paciente) {
+    return res.status(404).json({ success: false, message: 'Paciente no encontrado' });
+  }
+
+  const pacienteLimpio = descifrarPaciente(paciente);
+  const nomUpper = (pacienteLimpio.nombre || '').toUpperCase().trim();
+  if (nomUpper.startsWith('[BLOQUEO]') || nomUpper.startsWith('[GRUPAL]')) {
+    return res.status(400).json({ success: false, message: 'Este registro corresponde a un evento de agenda y no posee expediente clínico' });
+  }
+
+  const notas = await prisma.expediente.findMany({
+    where: { pacienteId },
+    orderBy: [
+      { fechaSesion: 'desc' },
+      { id: 'desc' }
+    ]
+  });
+
+  // Descifrado en memoria de todas las notas con asignación de número de sesión histórico
+  const totalNotas = notas.length;
+  const notasDescifradas = notas.map((n, idx) => {
+    const desc = descifrarExpediente(n);
+    return {
+      ...desc,
+      numeroSesion: totalNotas - idx
+    };
+  });
+
+  res.json({
+    success: true,
+    paciente: pacienteLimpio,
+    data: notasDescifradas,
+    total: notasDescifradas.length
+  });
 };
 
 /**
@@ -114,51 +120,42 @@ const obtenerExpedientePaciente = async (req, res) => {
  * Crea una nueva nota de sesión clínica cifrando todos los campos antes de guardar en BD.
  */
 const crearNotaExpediente = async (req, res) => {
-  try {
-    const pacienteId = parseId(req.params.id);
-    if (!pacienteId) {
-      return res.status(400).json({ success: false, message: 'ID de paciente inválido' });
-    }
-
-    const validData = notaExpedienteSchema.parse(req.body);
-    const fechaValida = new Date(validData.fechaSesion);
-
-    // Verificar que el paciente exista
-    const paciente = await prisma.paciente.findUnique({
-      where: { id: pacienteId }
-    });
-
-    if (!paciente) {
-      return res.status(404).json({ success: false, message: 'Paciente no encontrado' });
-    }
-
-    // Cifrar los 8 campos clínicos en memoria con AES-256-GCM
-    const datosCifrados = cifrarPayloadExpediente(validData);
-
-    const nuevaNota = await prisma.expediente.create({
-      data: {
-        pacienteId,
-        fechaSesion: fechaValida,
-        ...datosCifrados
-      }
-    });
-
-    // Descifrar para devolver la respuesta legible inmediatamente
-    const respuestaDescifrada = descifrarExpediente(nuevaNota);
-
-    res.status(201).json({
-      success: true,
-      message: 'Nota de sesión registrada y cifrada con AES-256-GCM exitosamente',
-      data: respuestaDescifrada
-    });
-  } catch (error) {
-    if (error.name === 'ZodError') {
-      const msg = error.errors.map(e => e.message).join(', ');
-      return res.status(400).json({ success: false, message: msg, errors: error.errors });
-    }
-    logger.error('Error al registrar nota en expediente', error);
-    res.status(500).json({ success: false, message: 'Error interno al guardar nota clínica' });
+  const pacienteId = parseId(req.params.id);
+  if (!pacienteId) {
+    return res.status(400).json({ success: false, message: 'ID de paciente inválido' });
   }
+
+  const validData = notaExpedienteSchema.parse(req.body);
+  const fechaValida = new Date(validData.fechaSesion);
+
+  // Verificar que el paciente exista
+  const paciente = await prisma.paciente.findUnique({
+    where: { id: pacienteId }
+  });
+
+  if (!paciente) {
+    return res.status(404).json({ success: false, message: 'Paciente no encontrado' });
+  }
+
+  // Cifrar los 8 campos clínicos en memoria con AES-256-GCM
+  const datosCifrados = cifrarPayloadExpediente(validData);
+
+  const nuevaNota = await prisma.expediente.create({
+    data: {
+      pacienteId,
+      fechaSesion: fechaValida,
+      ...datosCifrados
+    }
+  });
+
+  // Descifrar para devolver la respuesta legible inmediatamente
+  const respuestaDescifrada = descifrarExpediente(nuevaNota);
+
+  res.status(201).json({
+    success: true,
+    message: 'Nota de sesión registrada y cifrada con AES-256-GCM exitosamente',
+    data: respuestaDescifrada
+  });
 };
 
 /**
@@ -166,51 +163,41 @@ const crearNotaExpediente = async (req, res) => {
  * Actualiza una nota clínica existente re-cifrando los campos modificados.
  */
 const editarNotaExpediente = async (req, res) => {
-  try {
-    const pacienteId = parseId(req.params.id);
-    const notaId = parseId(req.params.notaId);
+  const notaId = parseId(req.params.id);
 
-    if (!pacienteId || !notaId) {
-      return res.status(400).json({ success: false, message: 'IDs inválidos' });
-    }
-
-    const validData = notaExpedienteSchema.parse(req.body);
-    const fechaValida = new Date(validData.fechaSesion);
-
-    const notaExistente = await prisma.expediente.findFirst({
-      where: { id: notaId, pacienteId }
-    });
-
-    if (!notaExistente) {
-      return res.status(404).json({ success: false, message: 'Nota clínica no encontrada' });
-    }
-
-    // Re-cifrar los 8 campos clínicos
-    const datosCifrados = cifrarPayloadExpediente(validData);
-
-    const notaActualizada = await prisma.expediente.update({
-      where: { id: notaId },
-      data: {
-        fechaSesion: fechaValida,
-        ...datosCifrados
-      }
-    });
-
-    const respuestaDescifrada = descifrarExpediente(notaActualizada);
-
-    res.json({
-      success: true,
-      message: 'Nota clínica actualizada exitosamente',
-      data: respuestaDescifrada
-    });
-  } catch (error) {
-    if (error.name === 'ZodError') {
-      const msg = error.errors.map(e => e.message).join(', ');
-      return res.status(400).json({ success: false, message: msg, errors: error.errors });
-    }
-    logger.error('Error al editar nota clínica', error);
-    res.status(500).json({ success: false, message: 'Error interno al actualizar nota clínica' });
+  if (!notaId) {
+    return res.status(400).json({ success: false, message: 'ID de nota clínica inválido' });
   }
+
+  const validData = notaExpedienteSchema.parse(req.body);
+  const fechaValida = new Date(validData.fechaSesion);
+
+  const notaExistente = await prisma.expediente.findUnique({
+    where: { id: notaId }
+  });
+
+  if (!notaExistente) {
+    return res.status(404).json({ success: false, message: 'Nota clínica no encontrada' });
+  }
+
+  // Re-cifrar los 8 campos clínicos
+  const datosCifrados = cifrarPayloadExpediente(validData);
+
+  const notaActualizada = await prisma.expediente.update({
+    where: { id: notaId },
+    data: {
+      fechaSesion: fechaValida,
+      ...datosCifrados
+    }
+  });
+
+  const respuestaDescifrada = descifrarExpediente(notaActualizada);
+
+  res.json({
+    success: true,
+    message: 'Nota clínica actualizada exitosamente',
+    data: respuestaDescifrada
+  });
 };
 
 /**
@@ -218,112 +205,99 @@ const editarNotaExpediente = async (req, res) => {
  * Busca dentro de las notas de sesión de un paciente descifrando en memoria y filtrando por coincidencia flexible.
  */
 const buscarEnExpediente = async (req, res) => {
-  try {
-    const pacienteId = parseId(req.params.id);
-    if (!pacienteId) {
-      return res.status(400).json({ success: false, message: 'ID de paciente inválido' });
-    }
-
-    const { q } = req.query;
-
-    const normalizar = (str) => {
-      if (!str) return '';
-      return String(str)
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase()
-        .trim();
-    };
-
-    const qNorm = normalizar(q);
-
-    const paciente = await prisma.paciente.findUnique({
-      where: { id: pacienteId },
-      select: { id: true, nombre: true, telefono: true, email: true }
-    });
-
-    if (!paciente) {
-      return res.status(404).json({ success: false, message: 'Paciente no encontrado' });
-    }
-
-    // Traemos todas las notas de este paciente ordenadas cronológicamente
-    const notas = await prisma.expediente.findMany({
-      where: { pacienteId },
-      orderBy: [
-        { fechaSesion: 'desc' },
-        { id: 'desc' }
-      ]
-    });
-
-    // Descifrado en memoria y asignación de número de sesión histórico
-    const totalNotas = notas.length;
-    const notasDescifradas = notas.map((n, idx) => {
-      const desc = descifrarExpediente(n);
-      return {
-        ...desc,
-        numeroSesion: totalNotas - idx
-      };
-    });
-
-    // Si no hay término de búsqueda, devolvemos todo
-    if (!qNorm) {
-      return res.json({
-        success: true,
-        paciente,
-        query: '',
-        data: notasDescifradas,
-        total: notasDescifradas.length
-      });
-    }
-
-    // Filtrar en memoria por coincidencia insensible a mayúsculas y acentos:
-    // 1. Por número de sesión: "sesion 2", "sesión 2", "#2", "# 2", "sesion2", "2"
-    // 2. Por fecha formateada de la sesión (ej: "26 de agosto", "agosto 2026", "miercoles", "miércoles")
-    // 3. En los 8 campos clínicos
-    const resultados = notasDescifradas.filter(nota => {
-      const numSesion = String(nota.numeroSesion || '');
-      const sesionTokens = [
-        `sesion ${numSesion}`,
-        `sesion${numSesion}`,
-        `#${numSesion}`,
-        `# ${numSesion}`,
-        `sesion #${numSesion}`,
-        `sesion # ${numSesion}`
-      ];
-
-      if (sesionTokens.some(tok => tok === qNorm || qNorm === numSesion)) {
-        return true;
-      }
-
-      // Búsqueda por fecha
-      const d = new Date(nota.fechaSesion);
-      const fechaStr = d.toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-      const fechaNorm = normalizar(fechaStr) + ' ' + nota.fechaSesion.toISOString().split('T')[0];
-      if (fechaNorm.includes(qNorm)) {
-        return true;
-      }
-
-      // Búsqueda en los 8 campos clínicos descifrados
-      return CAMPOS_CLINICOS.some(campo => {
-        const valor = nota[campo];
-        if (valor && typeof valor === 'string') {
-          return normalizar(valor).includes(qNorm);
-        }
-        return false;
-      });
-    });
-
-    res.json({
-      success: true,
-      paciente,
-      query: q,
-      data: resultados,
-      total: resultados.length
-    });
-  } catch (error) {
-    logger.error('Error al buscar en expediente', error);
-    res.status(500).json({ success: false, message: 'Error interno en la búsqueda de notas' });
+  const pacienteId = parseId(req.params.id);
+  if (!pacienteId) {
+    return res.status(400).json({ success: false, message: 'ID de paciente inválido' });
   }
+
+  const { q } = req.query;
+  const qNorm = normalizar(q);
+
+  const paciente = await prisma.paciente.findUnique({
+    where: { id: pacienteId },
+    select: { id: true, nombre: true, telefono: true, email: true }
+  });
+
+  if (!paciente) {
+    return res.status(404).json({ success: false, message: 'Paciente no encontrado' });
+  }
+
+  const pacienteLimpio = descifrarPaciente(paciente);
+
+  // Traemos todas las notas de este paciente ordenadas cronológicamente
+  const notas = await prisma.expediente.findMany({
+    where: { pacienteId },
+    orderBy: [
+      { fechaSesion: 'desc' },
+      { id: 'desc' }
+    ]
+  });
+
+  // Descifrado en memoria y asignación de número de sesión histórico
+  const totalNotas = notas.length;
+  const notasDescifradas = notas.map((n, idx) => {
+    const desc = descifrarExpediente(n);
+    return {
+      ...desc,
+      numeroSesion: totalNotas - idx
+    };
+  });
+
+  // Si no hay término de búsqueda, devolvemos todo
+  if (!qNorm) {
+    return res.json({
+      success: true,
+      paciente: pacienteLimpio,
+      query: '',
+      data: notasDescifradas,
+      total: notasDescifradas.length
+    });
+  }
+
+  // Filtrar en memoria por coincidencia insensible a mayúsculas y acentos:
+  // 1. Por número de sesión: "sesion 2", "sesión 2", "#2", "# 2", "sesion2", "2"
+  // 2. Por fecha formateada de la sesión (ej: "26 de agosto", "agosto 2026", "miercoles", "miércoles")
+  // 3. En los 8 campos clínicos
+  const resultados = notasDescifradas.filter(nota => {
+    const numSesion = String(nota.numeroSesion || '');
+    const sesionTokens = [
+      `sesion ${numSesion}`,
+      `sesion${numSesion}`,
+      `#${numSesion}`,
+      `# ${numSesion}`,
+      `sesion #${numSesion}`,
+      `sesion # ${numSesion}`
+    ];
+
+    if (sesionTokens.some(tok => tok === qNorm || qNorm === numSesion)) {
+      return true;
+    }
+
+    // Búsqueda por fecha
+    const d = new Date(nota.fechaSesion);
+    const fechaStr = d.toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const fechaNorm = normalizar(fechaStr) + ' ' + nota.fechaSesion.toISOString().split('T')[0];
+    if (fechaNorm.includes(qNorm)) {
+      return true;
+    }
+
+    // Búsqueda en los 8 campos clínicos descifrados
+    return CAMPOS_CLINICOS.some(campo => {
+      const valor = nota[campo];
+      if (valor && typeof valor === 'string') {
+        return normalizar(valor).includes(qNorm);
+      }
+      return false;
+    });
+  });
+
+  res.json({
+    success: true,
+    paciente: pacienteLimpio,
+    query: q,
+    data: resultados,
+    total: resultados.length
+  });
 };
 
 /**
@@ -331,32 +305,27 @@ const buscarEnExpediente = async (req, res) => {
  * Elimina una nota clínica específica.
  */
 const eliminarNotaExpediente = async (req, res) => {
-  try {
-    const expedienteId = parseId(req.params.id);
-    if (!expedienteId) {
-      return res.status(400).json({ success: false, message: 'ID de nota clínica inválido' });
-    }
-
-    const nota = await prisma.expediente.findUnique({
-      where: { id: expedienteId }
-    });
-
-    if (!nota) {
-      return res.status(404).json({ success: false, message: 'Nota clínica no encontrada' });
-    }
-
-    await prisma.expediente.delete({
-      where: { id: expedienteId }
-    });
-
-    res.json({
-      success: true,
-      message: 'Nota clínica eliminada correctamente'
-    });
-  } catch (error) {
-    logger.error('Error al eliminar nota clínica', error);
-    res.status(500).json({ success: false, message: 'Error interno al eliminar nota' });
+  const expedienteId = parseId(req.params.id);
+  if (!expedienteId) {
+    return res.status(400).json({ success: false, message: 'ID de nota clínica inválido' });
   }
+
+  const nota = await prisma.expediente.findUnique({
+    where: { id: expedienteId }
+  });
+
+  if (!nota) {
+    return res.status(404).json({ success: false, message: 'Nota clínica no encontrada' });
+  }
+
+  await prisma.expediente.delete({
+    where: { id: expedienteId }
+  });
+
+  res.json({
+    success: true,
+    message: 'Nota clínica eliminada correctamente'
+  });
 };
 
 /**
@@ -364,62 +333,55 @@ const eliminarNotaExpediente = async (req, res) => {
  * Directorio general de pacientes con métricas de sesiones y citas para el buscador del panel.
  */
 const listarDirectorioPacientes = async (req, res) => {
-  try {
-    const { q } = req.query;
-    const query = (q || '').trim();
+  const { q } = req.query;
+  const query = (q || '').trim();
 
-    let whereClause = {};
-    if (query) {
-      whereClause = {
-        OR: [
-          { nombre: { contains: query, mode: 'insensitive' } },
-          { telefono: { contains: query, mode: 'insensitive' } },
-          { email: { contains: query, mode: 'insensitive' } }
-        ]
-      };
-    }
-
-    const pacientes = await prisma.paciente.findMany({
-      where: whereClause,
-      select: {
-        id: true,
-        nombre: true,
-        telefono: true,
-        email: true,
-        enlaceZoom: true,
-        tarifaDefecto: true,
-        createdAt: true,
-        _count: {
-          select: {
-            expedientes: true,
-            citas: {
-              where: { estado_cita: { not: 'CANCELADA' } }
-            }
+  const pacientes = await prisma.paciente.findMany({
+    select: {
+      id: true,
+      nombre: true,
+      telefono: true,
+      email: true,
+      enlaceZoom: true,
+      tarifaDefecto: true,
+      createdAt: true,
+      _count: {
+        select: {
+          expedientes: true,
+          citas: {
+            where: { estado_cita: { not: 'CANCELADA' } }
           }
-        },
-        expedientes: {
-          take: 1,
-          orderBy: { fechaSesion: 'desc' },
-          select: { fechaSesion: true }
         }
       },
-      orderBy: { nombre: 'asc' }
-    });
+      expedientes: {
+        take: 1,
+        orderBy: { fechaSesion: 'desc' },
+        select: { fechaSesion: true }
+      }
+    },
+    orderBy: { id: 'asc' }
+  });
 
-    // Excluir registros automáticos que sean de bloqueos personales o terapias grupales
-    const filtrados = pacientes.filter(p => {
-      const nomUpper = (p.nombre || '').toUpperCase().trim();
-      return !nomUpper.startsWith('[BLOQUEO]') && !nomUpper.startsWith('[GRUPAL]');
-    });
+  const queryNorm = normalizar(query);
+  const descifrados = pacientes.map(p => descifrarPaciente(p));
 
-    res.json({
-      success: true,
-      data: filtrados
-    });
-  } catch (error) {
-    logger.error('Error al listar directorio de pacientes', error);
-    res.status(500).json({ success: false, message: 'Error interno al listar directorio' });
-  }
+  // Excluir registros automáticos de bloqueos o grupales y aplicar filtro de búsqueda en texto plano
+  const filtrados = descifrados.filter(p => {
+    const nomUpper = (p.nombre || '').toUpperCase().trim();
+    if (nomUpper.startsWith('[BLOQUEO]') || nomUpper.startsWith('[GRUPAL]')) return false;
+    if (!queryNorm) return true;
+    return normalizar(p.nombre || '').includes(queryNorm) ||
+           normalizar(p.telefono || '').includes(queryNorm) ||
+           normalizar(p.email || '').includes(queryNorm);
+  });
+
+  // Ordenar alfabéticamente por nombre descifrado
+  filtrados.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || '', 'es', { sensitivity: 'base' }));
+
+  res.json({
+    success: true,
+    data: filtrados
+  });
 };
 
 /**
@@ -427,71 +389,66 @@ const listarDirectorioPacientes = async (req, res) => {
  * Elimina un paciente completo y todos sus datos asociados (solo si no tiene citas activas).
  */
 const eliminarPaciente = async (req, res) => {
-  try {
-    const pacienteId = parseId(req.params.id);
-    if (!pacienteId) {
-      return res.status(400).json({ success: false, message: 'ID de paciente inválido' });
+  const pacienteId = parseId(req.params.id);
+  if (!pacienteId) {
+    return res.status(400).json({ success: false, message: 'ID de paciente inválido' });
+  }
+
+  const paciente = await prisma.paciente.findUnique({
+    where: { id: pacienteId }
+  });
+
+  if (!paciente) {
+    return res.status(404).json({ success: false, message: 'Paciente no encontrado' });
+  }
+
+  const pacienteDesc = descifrarPaciente(paciente);
+
+  // Regla de negocio estricta: Solo permitir eliminar expedientes de pacientes NO agendados (o con citas canceladas)
+  const citasActivas = await prisma.cita.count({
+    where: {
+      pacienteId,
+      estado_cita: { not: 'CANCELADA' }
+    }
+  });
+
+  if (citasActivas > 0) {
+    return res.status(400).json({
+      success: false,
+      message: `No se puede eliminar el expediente de "${pacienteDesc.nombre}" porque tiene ${citasActivas} cita(s) activa(s) en la agenda. Primero elimina o cancela sus citas en el calendario.`
+    });
+  }
+
+  // Transacción para eliminar notas de expediente, citas canceladas residuales y paciente
+  await prisma.$transaction(async (tx) => {
+    const citasResiduales = await tx.cita.findMany({
+      where: { pacienteId },
+      select: { id: true }
+    });
+    const citaIds = citasResiduales.map(c => c.id);
+
+    if (citaIds.length > 0) {
+      await tx.logNotificacion.deleteMany({
+        where: { citaId: { in: citaIds } }
+      });
+      await tx.cita.deleteMany({
+        where: { id: { in: citaIds } }
+      });
     }
 
-    const paciente = await prisma.paciente.findUnique({
+    await tx.expediente.deleteMany({
+      where: { pacienteId }
+    });
+
+    await tx.paciente.delete({
       where: { id: pacienteId }
     });
+  });
 
-    if (!paciente) {
-      return res.status(404).json({ success: false, message: 'Paciente no encontrado' });
-    }
-
-    // Regla de negocio estricta: Solo permitir eliminar expedientes de pacientes NO agendados (o con citas canceladas)
-    const citasActivas = await prisma.cita.count({
-      where: {
-        pacienteId,
-        estado_cita: { not: 'CANCELADA' }
-      }
-    });
-
-    if (citasActivas > 0) {
-      return res.status(400).json({
-        success: false,
-        message: `No se puede eliminar el expediente de "${paciente.nombre}" porque tiene ${citasActivas} cita(s) activa(s) en la agenda. Primero elimina o cancela sus citas en el calendario.`
-      });
-    }
-
-    // Transacción para eliminar notas de expediente, citas canceladas residuales y paciente
-    await prisma.$transaction(async (tx) => {
-      const citasResiduales = await tx.cita.findMany({
-        where: { pacienteId },
-        select: { id: true }
-      });
-      const citaIds = citasResiduales.map(c => c.id);
-
-      if (citaIds.length > 0) {
-        await tx.logNotificacion.deleteMany({
-          where: { citaId: { in: citaIds } }
-        });
-        await tx.cita.deleteMany({
-          where: { id: { in: citaIds } }
-        });
-      }
-
-      await tx.expediente.deleteMany({
-        where: { pacienteId }
-      });
-
-      await tx.paciente.delete({
-        where: { id: pacienteId }
-      });
-    });
-
-    res.json({
-      success: true,
-      message: `Expediente y paciente "${paciente.nombre}" eliminados permanentemente`
-    });
-
-
-  } catch (error) {
-    logger.error('Error al eliminar paciente', error);
-    res.status(500).json({ success: false, message: 'Error interno al eliminar paciente' });
-  }
+  res.json({
+    success: true,
+    message: `Expediente y paciente "${pacienteDesc.nombre}" eliminados permanentemente`
+  });
 };
 
 module.exports = {
@@ -503,4 +460,3 @@ module.exports = {
   listarDirectorioPacientes,
   eliminarPaciente
 };
-

@@ -1,0 +1,104 @@
+/* =========================================================
+   MÓDULO DE EXPEDIENTES CLÍNICOS Y NOTAS DE SESIÓN (PSICOLAU)
+   ========================================================= */
+
+/* Tarjetas del Directorio de Pacientes */
+.directorio-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.directorio-card:hover {
+  border-color: var(--turquesa);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(62, 184, 204, 0.12);
+}
+
+.pill-exp-count {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pill-exp-count.has-notes {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.pill-exp-count.no-notes {
+  background: #f8fafc;
+  color: #94a3b8;
+  border: 1px solid #e2e8f0;
+}
+
+.btn-ver-expediente-directorio {
+  background: #f8fafc;
+  color: var(--texto-oscuro);
+  border: 1px solid #cbd5e1;
+  padding: 0.45rem 0.85rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  width: auto;
+}
+
+.btn-ver-expediente-directorio:hover {
+  background: var(--turquesa);
+  color: #ffffff;
+  border-color: var(--turquesa);
+}
+
+.btn-borrar-paciente-directorio {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fee2e2;
+  padding: 0.45rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  width: auto;
+}
+
+.btn-borrar-paciente-directorio:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-color: #fca5a5;
+  transform: scale(1.05);
+}
+
+.btn-borrar-paciente-directorio.is-disabled {
+  background: #f8fafc;
+  color: #94a3b8;
+  border-color: #e2e8f0;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.btn-borrar-paciente-directorio.is-disabled:hover {
+  background: #f1f5f9;
+  color: #64748b;
+  border-color: #cbd5e1;
+  transform: none;
+}
+
+
+

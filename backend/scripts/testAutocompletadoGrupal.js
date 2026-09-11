@@ -1,8 +1,13 @@
+const { test } = require('node:test');
+const assert = require('node:assert');
 require('dotenv').config();
 const prisma = require('../src/config/db');
 
-async function testAutocompletadoGrupal() {
+test('Lógica de autocompletado de terapias grupales', async () => {
   console.log('=== TEST: LÓGICA DE AUTOCOMPLETADO DE TERAPIAS GRUPALES ===\n');
+
+  let pac = null;
+  let cita = null;
 
   try {
     const testNombre = 'Terapia Grupal para Autistas Adultos';
@@ -11,7 +16,7 @@ async function testAutocompletadoGrupal() {
 
     // 1. Simular registro previo en BD
     console.log('1. Creando registro previo de grupo...');
-    const pac = await prisma.paciente.create({
+    pac = await prisma.paciente.create({
       data: {
         nombre: `[GRUPAL] ${testNombre}`,
         email: `grupal-${Date.now()}@psicolau.com`,
@@ -20,7 +25,7 @@ async function testAutocompletadoGrupal() {
       }
     });
 
-    const cita = await prisma.cita.create({
+    cita = await prisma.cita.create({
       data: {
         pacienteId: pac.id,
         fechaHora: new Date(),
@@ -47,33 +52,21 @@ async function testAutocompletadoGrupal() {
       return nom === nombreLimpio || (nombreLimpio.length >= 4 && nom.includes(nombreLimpio));
     });
 
-    if (!citaGrupalPrevia) {
-      throw new Error('No se detectó la cita grupal previa');
-    }
-
+    assert.ok(citaGrupalPrevia, 'No se detectó la cita grupal previa');
     console.log(`✓ Grupo detectado exitosamente: "${citaGrupalPrevia.paciente.nombre}"`);
     console.log(`✓ Enlace de Zoom autocompletado: "${citaGrupalPrevia.paciente.enlaceZoom}"`);
     console.log(`✓ Color autocompletado: "${citaGrupalPrevia.color}"`);
 
-    if (citaGrupalPrevia.paciente.enlaceZoom !== testZoom) {
-      throw new Error('El enlace de Zoom no coincide');
-    }
-
-    // 3. Limpieza
-    console.log('\n3. Limpiando datos...');
-    await prisma.cita.delete({ where: { id: cita.id } });
-    await prisma.paciente.delete({ where: { id: pac.id } });
-    console.log('✓ Limpieza completada.');
+    assert.strictEqual(citaGrupalPrevia.paciente.enlaceZoom, testZoom, 'El enlace de Zoom debe coincidir');
 
     console.log('\n============================================================');
     console.log('🎉 TODOS LOS TESTS DE AUTOCOMPLETADO GRUPAL PASARON AL 100%');
     console.log('============================================================');
-  } catch (error) {
-    console.error('❌ Error en el test:', error);
-    process.exit(1);
   } finally {
+    console.log('\n3. Limpiando datos...');
+    if (cita) await prisma.cita.delete({ where: { id: cita.id } }).catch(() => {});
+    if (pac) await prisma.paciente.delete({ where: { id: pac.id } }).catch(() => {});
     await prisma.$disconnect();
+    console.log('✓ Limpieza completada.');
   }
-}
-
-testAutocompletadoGrupal();
+});

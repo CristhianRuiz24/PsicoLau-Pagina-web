@@ -9,7 +9,7 @@ process.on('uncaughtException', (err) => {
   process.exit(1);
 });
 
-process.on('unhandledRejection', (reason, promise) => {
+process.on('unhandledRejection', (reason, _promise) => {
   console.error('CRITICAL UNHANDLED REJECTION:', reason);
 });
 
@@ -39,6 +39,7 @@ const PORT = process.env.PORT || 3000;
 app.set('trust proxy', 1);
 
 const routes = require('./routes');
+const logger = require('./utils/logger');
 
 // Middlewares de seguridad y parseo
 app.use(helmet());
@@ -61,29 +62,36 @@ if (process.env.FRONTEND_URL) {
 
 const isProduction = process.env.NODE_ENV === 'production';
 
-if (!isProduction) {
-  // En desarrollo (y al abrir archivos locales/file://), permitimos todo para facilitar pruebas
-  app.use(cors());
-} else {
-  // Configuración de CORS estricta para producción (dominios exactos autorizados)
-  app.use(cors({
-    origin: function (origin, callback) {
-      if (!origin) {
-        // Permitir solicitudes del mismo origen / monitor health checks (ej. UptimeRobot)
+// Configuración de CORS (estricta en producción, restringida a local/LAN en desarrollo)
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) {
+      // Permitir solicitudes del mismo origen / monitor health checks (ej. UptimeRobot)
+      return callback(null, true);
+    }
+    const normalizedOrigin = normalizeUrl(origin);
+
+    // En producción: solo dominios explícitos autorizados
+    if (isProduction) {
+      if (baseAllowedOrigins.includes(normalizedOrigin)) {
         return callback(null, true);
       }
-      const normalizedOrigin = normalizeUrl(origin);
-      if (baseAllowedOrigins.includes(normalizedOrigin)) {
-        callback(null, true);
-      } else {
-        const corsErr = new Error('No permitido por CORS');
-        corsErr.status = 403;
-        callback(corsErr);
-      }
-    },
-    credentials: true
-  }));
-}
+      const corsErr = new Error('No permitido por CORS');
+      corsErr.status = 403;
+      return callback(corsErr);
+    }
+
+    // En desarrollo: permitir localhost, 127.0.0.1, IPs LAN (192.168.x, 10.x, 172.16-31.x) y file://
+    const devAllowed = /^https?:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)(:\d+)?$/;
+    if (baseAllowedOrigins.includes(normalizedOrigin) || devAllowed.test(normalizedOrigin)) {
+      return callback(null, true);
+    }
+    const corsErr = new Error('No permitido por CORS (desarrollo)');
+    corsErr.status = 403;
+    callback(corsErr);
+  },
+  credentials: true
+}));
 
 // Parseo de JSON con límite estricto de tamaño para prevenir ataques DoS
 app.use(express.json({ limit: '100kb' }));
@@ -97,28 +105,46 @@ app.get('/api/health', (req, res) => {
 app.use('/api', routes);
 
 // Middleware 404 para rutas no encontradas dentro de /api
-app.use('/api/*', (req, res) => {
+app.use('/api', (req, res) => {
   res.status(404).json({ success: false, message: 'Ruta no encontrada' });
 });
 
 // Middleware centralizado de manejo de errores
-app.use((err, req, res, next) => {
-  const status = err.status || 500;
+app.use((err, req, res, _next) => {
+  // Manejo de errores de validación de Zod
+  if (err.name === 'ZodError') {
+    const msg = err.errors ? err.errors.map(e => e.message).join(', ') : 'Error de validación';
+    return res.status(400).json({ success: false, message: msg, errors: err.errors });
+  }
+
+  // Manejo de errores de unicidad de Prisma (P2002)
+  if (err.code === 'P2002') {
+    return res.status(400).json({
+      success: false,
+      message: 'Ya existe otro paciente registrado con ese correo electrónico en el sistema.'
+    });
+  }
+
+  const status = err.status || err.statusCode || 500;
   const isProd = process.env.NODE_ENV === 'production';
   
   if (status >= 500) {
-    console.error('Error no controlado en la aplicación:', err);
+    logger.error('Error no controlado en la aplicación', err);
   }
 
   res.status(status).json({
     success: false,
-    message: err.message || 'Error interno del servidor',
+    message: isProd && status >= 500 ? 'Error interno del servidor' : (err.message || 'Error interno del servidor'),
     ...(!isProd && { stack: err.stack })
   });
 });
 
 // Inicialización del servidor
-app.listen(PORT, () => {
-  console.log(`Servidor PsicoLau corriendo en el puerto ${PORT} (Entorno: ${process.env.NODE_ENV || 'development'})`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Servidor PsicoLau corriendo en el puerto ${PORT} (Entorno: ${process.env.NODE_ENV || 'development'})`);
+  });
+}
+
+module.exports = app;
 

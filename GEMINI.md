@@ -14,6 +14,7 @@ El resto (contexto de proyecto, comandos, estilo) vive en AGENTS.md.
 
 ## Durante el trabajo (`$work`)
 
+- **NUNCA modifiques código fuente** tras redactar una spec. Tu rol (como modelo de planificación) es redactar la especificación, el plan y las tareas (`spec.md`, `plan.md`, `tasks.md`) hasta completarlos, y luego detenerte. No toques el código hasta recibir autorización explícita, ya que se utiliza otro modelo especializado para la generación de código.
 - Sigue el flujo SDD definido en el prompt inicial del proyecto
   (constitución → spec → clarificación → plan → tareas → implementación →
   validación → cambio). No te saltes fases.

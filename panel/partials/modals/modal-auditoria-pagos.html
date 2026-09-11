@@ -1,0 +1,38 @@
+<!-- Modal / Auditoría de Pagos y Cobranza -->
+  <div id="modalAuditoriaPagos" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; padding: 1rem;">
+    <div style="background: #ffffff; padding: 1.8rem; border-radius: 14px; width: 100%; max-width: 580px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 16px 40px rgba(0,0,0,0.25);">
+      <!-- Cabecera de Auditoría -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.8rem;">
+        <div>
+          <h3 style="color: #ea580c; font-size: 1.3rem; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-clock-rotate-left"></i> Auditoría de Pagos
+          </h3>
+          <p id="auditSubtitulo" style="font-size: 0.84rem; color: #64748b; margin: 0.25rem 0 0 0;">Control de sesiones pendientes por cobrar</p>
+        </div>
+        <button type="button" class="btn-close-modal" onclick="cerrarModalAuditoriaPagos()" title="Cerrar modal">&times;</button>
+      </div>
+
+      <!-- Filtros: Esta Semana vs Todo el Historial -->
+      <div class="audit-tabs-row">
+        <button type="button" id="tabAuditSemana" class="audit-tab-btn active" onclick="cambiarFiltroAuditoria('SEMANA')">
+          <i class="fa-solid fa-calendar-week"></i> Esta Semana
+        </button>
+        <button type="button" id="tabAuditTodas" class="audit-tab-btn" onclick="cambiarFiltroAuditoria('TODAS')">
+          <i class="fa-solid fa-layer-group"></i> Todo el Historial
+        </button>
+      </div>
+
+      <!-- Lista de Cuentas por Cobrar -->
+      <div id="auditListaContainer" style="flex: 1; overflow-y: auto; padding-right: 4px; margin-bottom: 1rem; min-height: 180px;">
+        <!-- Se genera dinámicamente -->
+      </div>
+
+      <!-- Pie del Modal -->
+      <div class="modal-auditoria-footer" style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.8rem; border-top: 1px solid #f1f5f9;">
+        <button type="button" class="btn" style="background: var(--gris-calido); width: auto; padding: 0.5rem 1.4rem;" onclick="cerrarModalAuditoriaPagos()">Cerrar</button>
+        <button type="button" class="btn" style="background: var(--turquesa); width: auto; padding: 0.5rem 1.2rem; font-size: 0.85rem;" onclick="cerrarModalAuditoriaPagos(); abrirModalDatosPago();">
+          <i class="fa-solid fa-gear" style="margin-right: 4px;"></i> Configurar Datos de Pago
+        </button>
+      </div>
+    </div>
+  </div>

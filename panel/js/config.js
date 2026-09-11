@@ -12,6 +12,10 @@ const API_URL = isLocal
   ? `http://${window.location.hostname || 'localhost'}:3001/api`
   : (window.PSICOLAU_API_URL || 'https://api.psicolau.com/api');
 
+if (typeof window !== 'undefined') {
+  window.API_URL = API_URL;
+}
+
 
 const PALETA_COLORES = [
   // Rosas y Corales (Marca PsicoLau)
@@ -51,13 +55,20 @@ const PALETA_COLORES = [
   { nombre: 'Moka / Café Cálido', hex: '#78350f' }
 ];
 
-// Estado global en memoria
-let citasCache = [];
-let currentWeekOffset = 0;
-let filtroDias = parseInt(localStorage.getItem('psicolau_filtro_dias')) || 7;
-let terminoBusqueda = '';
-let tipoRegistroActual = 'CITA'; // 'CITA' | 'EVALUACION' | 'GRUPAL' | 'BLOQUEO'
-let filtroAuditoriaActual = 'SEMANA'; // 'SEMANA' | 'TODAS'
+// Estado global en memoria sincronizado en window para módulos ESM
+window.citasCache = [];
+window.currentWeekOffset = 0;
+window.filtroDias = parseInt(localStorage.getItem('psicolau_filtro_dias')) || 7;
+window.terminoBusqueda = '';
+window.tipoRegistroActual = 'CITA'; // 'CITA' | 'EVALUACION' | 'GRUPAL' | 'BLOQUEO'
+window.filtroAuditoriaActual = 'SEMANA'; // 'SEMANA' | 'TODAS'
+
+let citasCache = window.citasCache;
+let currentWeekOffset = window.currentWeekOffset;
+let filtroDias = window.filtroDias;
+let terminoBusqueda = window.terminoBusqueda;
+let tipoRegistroActual = window.tipoRegistroActual;
+let filtroAuditoriaActual = window.filtroAuditoriaActual;
 
 // Helper para cálculo de contraste de color
 function getContrastColor(hexColor) {

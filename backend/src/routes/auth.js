@@ -9,6 +9,7 @@ const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, 
   max: 5, 
   validate: { xForwardedForHeader: false },
+  skip: () => process.env.NODE_ENV === 'test',
   message: { success: false, message: 'Demasiados intentos de login. Por favor, intenta de nuevo en 15 minutos.' }
 });
 
@@ -17,6 +18,7 @@ const cambiarPasswordLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
   validate: { xForwardedForHeader: false },
+  skip: () => process.env.NODE_ENV === 'test',
   message: { success: false, message: 'Demasiados intentos de cambio de contraseña. Por favor, intenta de nuevo en 15 minutos.' }
 });
 

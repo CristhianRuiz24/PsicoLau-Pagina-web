@@ -1,7 +1,9 @@
+const { test } = require('node:test');
+const assert = require('node:assert');
 require('dotenv').config();
 const prisma = require('../src/config/db');
 
-async function testAislamientoYAutocompletado() {
+test('Aislamiento de expedientes y autocompletado exacto', async () => {
   console.log('=== TEST: AISLAMIENTO DE EXPEDIENTES Y AUTOCOMPLETADO EXACTO ===\n');
 
   try {
@@ -19,9 +21,8 @@ async function testAislamientoYAutocompletado() {
     const hayGrupos = filtrados.some(p => p.nombre.toUpperCase().includes('[GRUPAL]'));
     const hayBloqueos = filtrados.some(p => p.nombre.toUpperCase().includes('[BLOQUEO]'));
 
-    if (hayGrupos || hayBloqueos) {
-      throw new Error('El directorio de pacientes contiene grupos o bloqueos.');
-    }
+    assert.strictEqual(hayGrupos, false, 'El directorio de pacientes contiene grupos');
+    assert.strictEqual(hayBloqueos, false, 'El directorio de pacientes contiene bloqueos');
     console.log(`✓ Directorio limpio: ${filtrados.length} pacientes individuales encontrados, 0 grupos, 0 bloqueos.`);
 
     // 2. Verificar lógica de coincidencia exacta de grupos
@@ -49,15 +50,11 @@ async function testAislamientoYAutocompletado() {
     }
 
     const res1 = buscarGrupo('grupal');
-    if (res1) {
-      throw new Error('Escribir "grupal" no debe coincidir prematuramente con "Grupal autistas adultos".');
-    }
+    assert.strictEqual(Boolean(res1), false, 'Escribir "grupal" no debe coincidir prematuramente');
     console.log('✓ Correcto: Escribir "grupal" no dispara autocompletado prematuro.');
 
     const res2 = buscarGrupo('Grupal autistas adultos');
-    if (!res2 || !res2.paciente.enlaceZoom) {
-      throw new Error('Escribir el nombre completo debe detectar el grupo y su enlace.');
-    }
+    assert.ok(res2 && res2.paciente.enlaceZoom, 'Escribir el nombre completo debe detectar el grupo y su enlace.');
     console.log('✓ Correcto: Escribir "Grupal autistas adultos" detecta el grupo con éxito.');
 
     // 3. Verificar filtro del buscador global en app.js
@@ -70,20 +67,13 @@ async function testAislamientoYAutocompletado() {
       return p.nombre.toLowerCase().includes(terminoBusqueda);
     });
 
-    if (pacientesCoincidentes.length > 0) {
-      throw new Error('El buscador de expedientes no debe retornar registros de grupos.');
-    }
+    assert.strictEqual(pacientesCoincidentes.length, 0, 'El buscador de expedientes no debe retornar registros de grupos.');
     console.log('✓ Correcto: La sección de Expedientes Clínicos no contiene registros de grupos.');
 
     console.log('\n============================================================');
     console.log('🎉 TODOS LOS TESTS DE AISLAMIENTO PASARON AL 100%');
     console.log('============================================================');
-  } catch (error) {
-    console.error('❌ Error en el test:', error);
-    process.exit(1);
   } finally {
     await prisma.$disconnect();
   }
-}
-
-testAislamientoYAutocompletado();
+});

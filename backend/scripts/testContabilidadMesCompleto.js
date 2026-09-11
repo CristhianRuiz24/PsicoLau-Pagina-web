@@ -1,15 +1,16 @@
 /**
  * Suite de Validación Contable Integral Mensual y Exportaciones (Septiembre 2026)
- * Ejecución: node backend/scripts/testContabilidadMesCompleto.js
  */
 
+const { test } = require('node:test');
+const assert = require('node:assert');
 const express = require('express');
 const http = require('http');
 const jwt = require('jsonwebtoken');
 const prisma = require('../src/config/db');
 const agendaRoutes = require('../src/routes/agenda');
 
-async function runMonthlyAccountingAudit() {
+test('Auditoría contable mensual integral y exportadores (PsicoLau)', async () => {
   console.log('\n=== AUDITORÍA CONTABLE MENSUAL INTEGRAL Y EXPORTADORES (PSICOLAU) ===\n');
 
   const app = express();
@@ -82,9 +83,7 @@ async function runMonthlyAccountingAudit() {
       { pacienteId: pacienteD.id, fechaHora: new Date('2026-09-29T17:00:00Z'), monto: 0, estado_cita: 'REALIZADA', estado_pago: 'PAGADO', categoria: 'Cortesía 2' },
 
       // Paciente E: 2 citas Canceladas
-      // Cita 1: Cancelada SIN pago previo -> NO debe sumar ni a ingresos ni a cuentas por cobrar
       { pacienteId: pacienteE.id, fechaHora: new Date('2026-09-07T12:00:00Z'), monto: 600, estado_cita: 'CANCELADA', estado_pago: 'PENDIENTE', categoria: 'Canceló sin pagar' },
-      // Cita 2: Cancelada CON pago previo -> SÍ debe sumar a Total Cobrado ($600) y NO a cuentas por cobrar
       { pacienteId: pacienteE.id, fechaHora: new Date('2026-09-14T12:00:00Z'), monto: 600, estado_cita: 'CANCELADA', estado_pago: 'PAGADO', categoria: 'Canceló pero pagó tarifa' },
 
       // Bloqueos de Horario: 2 bloqueos ($0) -> Excluidos de reporte de sesiones clínicas
@@ -102,17 +101,17 @@ async function runMonthlyAccountingAudit() {
     }
     console.log(`✓ ${citasData.length} Citas sembradas en Septiembre 2026 con casos variados.`);
 
-    // 3. Consultar la API para simular el frontend
+    // 3. Consultar la API
     const res = await fetch(`${baseUrl}/agenda/citas`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     const resData = await res.json();
-    if (!resData.success) throw new Error('Fallo al obtener citas del backend');
+    assert.strictEqual(resData.success, true, 'Fallo al obtener citas del backend');
 
     const citasBackend = resData.data;
 
     // 4. Ejecutar algoritmo de reporte contable para Septiembre 2026 (mes 8 en base 0)
-    const mesReporte = 8; // Septiembre
+    const mesReporte = 8;
     const anioReporte = 2026;
 
     const citasMes = citasBackend.filter(c => {
@@ -156,13 +155,13 @@ async function runMonthlyAccountingAudit() {
     console.log(`• Total Por Cobrar / Pendiente: $${totalPorPagar} MXN (Esperado: $1,800 MXN)`);
     console.log(`• Tarifa Promedio: $${tarifaPromedio.toFixed(2)} MXN (Esperado: $654.55 MXN)`);
 
-    // Validaciones estrictas
-    if (totalSesiones !== 13) throw new Error(`Total sesiones erróneo: ${totalSesiones} != 13`);
-    if (sesionesConCosto !== 11) throw new Error(`Sesiones con costo erróneo: ${sesionesConCosto} != 11`);
-    if (sesionesCortesia !== 2) throw new Error(`Sesiones cortesía erróneo: ${sesionesCortesia} != 2`);
-    if (totalCobrado !== 5400) throw new Error(`Total cobrado erróneo: ${totalCobrado} != 5400`);
-    if (totalPorPagar !== 1800) throw new Error(`Total por cobrar erróneo: ${totalPorPagar} != 1800`);
-    if (Math.abs(tarifaPromedio - 654.5454) > 0.01) throw new Error(`Tarifa promedio errónea: ${tarifaPromedio}`);
+    // Validaciones estrictas con assert
+    assert.strictEqual(totalSesiones, 13, `Total sesiones erróneo: ${totalSesiones}`);
+    assert.strictEqual(sesionesConCosto, 11, `Sesiones con costo erróneo: ${sesionesConCosto}`);
+    assert.strictEqual(sesionesCortesia, 2, `Sesiones cortesía erróneo: ${sesionesCortesia}`);
+    assert.strictEqual(totalCobrado, 5400, `Total cobrado erróneo: ${totalCobrado}`);
+    assert.strictEqual(totalPorPagar, 1800, `Total por cobrar erróneo: ${totalPorPagar}`);
+    assert.ok(Math.abs(tarifaPromedio - 654.5454) < 0.01, `Tarifa promedio errónea: ${tarifaPromedio}`);
 
     console.log('✓ VALIDACIÓN 1: Todos los KPIs contables calculados con precisión milimétrica al centavo.');
 
@@ -176,9 +175,9 @@ Psicóloga: Ana Laura Gómez Díaz
 • Total de ingresos cobrados: $${totalCobrado.toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN (${countPagadas} sesiones pagadas)
 • Total pendiente por cobrar: $${totalPorPagar.toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN (${countPendientes} sesiones pendientes)`;
 
-    if (!textoWA.includes('SEPTIEMBRE 2026') || !textoWA.includes('$5,400.00') || !textoWA.includes('$1,800.00')) {
-      throw new Error('Texto de WhatsApp incompleto o con datos inconsistentes');
-    }
+    assert.ok(textoWA.includes('SEPTIEMBRE 2026'), 'Texto de WhatsApp debe incluir SEPTIEMBRE 2026');
+    assert.ok(textoWA.includes('$5,400.00'), 'Texto de WhatsApp debe incluir $5,400.00');
+    assert.ok(textoWA.includes('$1,800.00'), 'Texto de WhatsApp debe incluir $1,800.00');
     console.log('✓ VALIDACIÓN 2: Generador de texto para WhatsApp verificado y consistente.');
 
     // 6. Validar Exportación a CSV / Excel
@@ -193,9 +192,9 @@ Psicóloga: Ana Laura Gómez Díaz
       csvContent += `${fecha},${hora},${nombre},${monto},${c.estado_pago},${c.estado_cita}\n`;
     });
 
-    if (!csvContent.startsWith('\uFEFF') || !csvContent.includes('Paciente A') || !csvContent.includes('Paciente B')) {
-      throw new Error('Estructura CSV o codificación UTF-8 BOM inválida');
-    }
+    assert.ok(csvContent.startsWith('\uFEFF'), 'CSV debe comenzar con BOM UTF-8');
+    assert.ok(csvContent.includes('Paciente A'), 'CSV debe incluir Paciente A');
+    assert.ok(csvContent.includes('Paciente B'), 'CSV debe incluir Paciente B');
     console.log('✓ VALIDACIÓN 3: Archivo CSV con cabecera BOM UTF-8 y escape de comillas validado.');
 
     console.log('\n🎉 ¡AUDITORÍA CONTABLE MENSUAL SUPERADA CON 100% DE ÉXITO! 🎉\n');
@@ -206,11 +205,7 @@ Psicóloga: Ana Laura Gómez Díaz
     if (createdPatientIds.length > 0) {
       await prisma.paciente.deleteMany({ where: { id: { in: createdPatientIds } } }).catch(() => {});
     }
+    await prisma.$disconnect();
     server.close();
   }
-}
-
-runMonthlyAccountingAudit().catch((err) => {
-  console.error('\n❌ ERROR EN LA AUDITORÍA CONTABLE:', err);
-  process.exit(1);
 });

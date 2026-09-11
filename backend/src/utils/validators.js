@@ -1,30 +1,115 @@
 const { z } = require('zod');
 
+// Expresiones regulares y reglas de seguridad para entradas
+const REGEX_URL = /https?:\/\/|www\./i;
+const REGEX_HTML_TAGS = /<\s*(script|iframe|object|embed|a|link|meta|img|form|[a-z]+)\b/i;
+const REGEX_CHARS_PELIGROSOS = /[<>{}]/;
+
+// 1. Nombre para formularios públicos (Estrictamente nombres humanos con acentos/ñ)
+const nombreHumanoSchema = z.string().trim()
+  .min(2, "El nombre debe tener al menos 2 caracteres")
+  .max(100, "El nombre no puede exceder 100 caracteres")
+  .refine(val => !REGEX_URL.test(val), {
+    message: "El nombre no puede contener enlaces ni URLs"
+  })
+  .refine(val => !/[<>{}\[\]=]/.test(val), {
+    message: "El nombre contiene caracteres no permitidos"
+  })
+  .refine(val => /^[\p{L}\s.'\-]+$/u.test(val), {
+    message: "El nombre solo puede contener letras, espacios, puntos o guiones"
+  });
+
+// 2. Teléfono con formato internacional
+const telefonoRequeridoSchema = z.string().trim()
+  .min(7, "Teléfono demasiado corto")
+  .max(25, "Teléfono demasiado largo")
+  .refine(val => !REGEX_URL.test(val) && !REGEX_CHARS_PELIGROSOS.test(val), {
+    message: "Teléfono no válido"
+  })
+  .refine(val => /^[0-9+\s().-]+$/.test(val), {
+    message: "El teléfono solo puede contener números y signos válidos (+, -, (), .)"
+  })
+  .refine(val => {
+    const digits = val.replace(/\D/g, '');
+    return digits.length >= 7 && digits.length <= 20;
+  }, {
+    message: "El teléfono debe contener entre 7 y 20 dígitos numéricos"
+  });
+
+const telefonoOpcionalSchema = z.union([
+  telefonoRequeridoSchema,
+  z.literal(''),
+  z.null()
+]).optional();
+
+// 3. Nombre para panel administrativo (admite prefijos [GRUPAL], [BLOQUEO], [EVALUACION] pero bloquea URLs y HTML)
+const nombreAdminSchema = z.string().trim()
+  .min(1, "El nombre es obligatorio")
+  .max(150, "Nombre demasiado largo")
+  .refine(val => !REGEX_URL.test(val), {
+    message: "El nombre no puede ser una URL o enlace externo"
+  })
+  .refine(val => !REGEX_CHARS_PELIGROSOS.test(val), {
+    message: "El nombre contiene caracteres HTML o código no permitido"
+  })
+  .refine(val => !/^[=+@-]/.test(val), {
+    message: "El nombre no puede comenzar con caracteres de fórmula (=, +, -, @)"
+  })
+  .refine(val => {
+    const sinPrefijo = val.replace(/^\[(BLOQUEO|GRUPAL|EVALUACION)\]\s*/i, '').trim();
+    if (!sinPrefijo) return false;
+    return /^[\p{L}0-9\s.'\-()]+$/u.test(sinPrefijo);
+  }, {
+    message: "El nombre contiene caracteres no permitidos"
+  });
+
+// 4. Mensaje del formulario de contacto (Anti-spam: máximo 2 URLs y cero HTML ejecutable)
+const mensajeContactoSchema = z.string().trim()
+  .min(5, "El mensaje debe tener al menos 5 caracteres")
+  .max(3000, "El mensaje no puede exceder 3000 caracteres")
+  .refine(val => !REGEX_HTML_TAGS.test(val), {
+    message: "El mensaje contiene etiquetas HTML o código ejecutable no permitido"
+  })
+  .refine(val => {
+    const matches = val.match(/https?:\/\/|www\./gi) || [];
+    return matches.length <= 2;
+  }, {
+    message: "Por motivos de seguridad, el mensaje no puede contener más de 2 enlaces"
+  });
+
 // Schema para el formulario público de agendamiento
 const citaSchema = z.object({
-  nombre: z.string().trim().min(2, "El nombre es muy corto").max(100, "El nombre es muy largo"),
-  telefono: z.string().trim().min(8, "Teléfono inválido").max(20, "Teléfono inválido"),
+  nombre: nombreHumanoSchema,
+  telefono: telefonoRequeridoSchema,
   email: z.string().trim().email("Correo inválido"),
   fechaHora: z.coerce.date({
     required_error: "La fecha y hora son requeridas",
     invalid_type_error: "Formato de fecha inválido",
   }),
-  categoria: z.string().trim().max(100).optional()
+  categoria: z.string().trim().max(100)
+    .refine(val => !REGEX_URL.test(val) && !REGEX_CHARS_PELIGROSOS.test(val), {
+      message: "La categoría contiene caracteres no permitidos"
+    })
+    .optional()
 });
 
 // Schema para el formulario de contacto público
 const contactoSchema = z.object({
-  nombre: z.string().trim().min(2, "El nombre debe tener al menos 2 caracteres").max(100, "El nombre es muy largo"),
+  nombre: nombreHumanoSchema,
   email: z.string().trim().email("Correo electrónico inválido"),
-  telefono: z.string().trim().max(30, "Teléfono inválido").optional().or(z.literal('')),
-  categoria: z.string().trim().max(100).optional().or(z.literal('')),
-  mensaje: z.string().trim().min(5, "El mensaje debe tener al menos 5 caracteres").max(3000, "El mensaje no puede exceder 3000 caracteres")
+  telefono: telefonoOpcionalSchema,
+  categoria: z.string().trim().max(100)
+    .refine(val => !val || (!REGEX_URL.test(val) && !REGEX_CHARS_PELIGROSOS.test(val)), {
+      message: "La categoría contiene caracteres no permitidos"
+    })
+    .optional().or(z.literal('')),
+  mensaje: mensajeContactoSchema
 });
 
 // Schema para creación de citas en el panel administrativo
 const crearCitaAdminSchema = z.object({
-  nombre: z.string().trim().min(1, "El nombre es obligatorio").max(150, "Nombre demasiado largo"),
-  telefono: z.string().trim().max(50, "Teléfono inválido").optional().nullable().or(z.literal('')),
+  nombre: nombreAdminSchema,
+  telefono: telefonoOpcionalSchema,
   email: z.union([
     z.string().trim().email("Correo inválido"),
     z.literal(''),
@@ -49,8 +134,8 @@ const crearCitaAdminSchema = z.object({
 
 // Schema para edición de citas en el panel administrativo
 const editarCitaAdminSchema = z.object({
-  nombre: z.string().trim().min(1, "El nombre es obligatorio").max(150, "Nombre demasiado largo").optional(),
-  telefono: z.string().trim().max(50, "Teléfono inválido").optional().nullable().or(z.literal('')),
+  nombre: nombreAdminSchema.optional(),
+  telefono: telefonoOpcionalSchema,
   email: z.union([
     z.string().trim().email("Correo inválido"),
     z.literal(''),

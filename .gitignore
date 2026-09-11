@@ -51,3 +51,41 @@ __pycache__/
 # Reportes Locales de Auditoría y Escaneo
 reports/
 .pentest-ai/
+
+# Scripts y Lanzadores Locales de Desarrollo
+/scripts/
+/scratch/
+iniciar.bat
+iniciar.ps1
+package.json
+
+# Respaldos y Volcados de Base de Datos
+*.sql
+*.sql.gz
+*.dump
+*.backup
+*.sqlite
+*.sqlite3
+*.db
+
+# Exportaciones Locales de Datos (CSV / Excel / JSON)
+*.csv
+*.xlsx
+*.tsv
+export_*.json
+backup_*.json
+
+# Certificados y Llaves Criptográficas
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*.p12
+
+# Archivos Temporales de Sistema Operativo
+desktop.ini
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
