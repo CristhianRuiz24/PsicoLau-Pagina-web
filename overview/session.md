@@ -176,21 +176,31 @@
       - **T3**: Se añadió el script `"lint": "eslint src/ scripts/"` en `backend/package.json` y se limpiaron 8 variables/parámetros no utilizados en controladores (`authController`, `citaController`, `agendaController`, `index.js`, `testCitasRecurrentes.js`, `migrateEncryptPacientes.js`). `npm run lint` pasa con 0 errores y 0 advertencias.
       - **T4**: Se ejecutó la suite completa `npm test`: **40/40 tests aprobados al 100%** en 58 segundos sin ninguna regresión.
 
+21. **Migración Transaccional de Supabase Producción y Despliegue Oficial (Push a `main`)**:
+    - **Paso 1 (Respaldo)**: Exportación manual de seguridad de datos completada por el usuario.
+    - **Paso 2 (Variables)**: Validación de las 9 variables de entorno en Render (`ENCRYPTION_KEY`, `DATABASE_URL`, etc.).
+    - **Paso 3 (DDL Supabase)**: Ejecución en el SQL Editor de Supabase Producción para agregar columna `emailHash` con índice único y remover `@unique` de `email`.
+    - **Paso 4 (Migración Transaccional)**: Ejecución y verificación al 100% de `migrateEncryptPacientes.js` en producción: datos PII cifrados con AES-256-GCM y blind indexes deterministas generados con 0 errores.
+    - **Paso 5 (Commit y Despliegue)**: Empaquetado de Specs 010 a 020 en commit `0ded263` y `git push origin main` completado con éxito, disparando despliegues automáticos en Cloudflare Pages y Render.
+
 ## En qué quedó
 
-- **Spec 019 y Spec 020 COMPLETADAS Y VALIDADAS AL 100%**: Suite unificada en verde perfecto (40/40 tests PASS, `npm run lint` 0 errores/warnings).
-- **Repositorio blindado para escrutinio público y reclutadores**: `.gitignore` robusto y correos sanitizados.
-- **CERO acciones de Git ejecutadas**: Repositorio local sin `git push` ni `git commit` y base de datos de producción completamente intacta y protegida.
+- **DESPLIEGUE A PRODUCCIÓN COMPLETADO CON ÉXITO**:
+  - Base de datos Supabase Producción 100% migrada, cifrada con AES-256-GCM y con índices ciegos deterministas.
+  - Rama `main` en GitHub sincronizada con todas las specs y código modularizado.
+  - Frontend público y Suite Clínica en proceso de actualización en Cloudflare Pages (`psicolau.com`).
+  - Backend API en proceso de actualización en Render (`api.psicolau.com`).
 
 ## Próximo paso
 
-- Evaluar la estrategia de producción y sincronización de base de datos cuando el usuario decida avanzar hacia el despliegue.
+- Verificar el estado de los despliegues en los dashboards de Cloudflare Pages y Render, y realizar prueba de humo en `psicolau.com/panel` para confirmar la operación en vivo.
 
 ## Notas rápidas
 
 - Servidores locales accesibles mediante `scripts/dev.js` y `iniciar.bat`.
 - Ejecutar pruebas en cualquier momento con `npm test` dentro de `backend/`.
 - Ejecutar linter en cualquier momento con `npm run lint` dentro de `backend/`.
-- Specs 010 a 020 **COMPLETADAS AL 100%**.
+- Specs 010 a 020 **COMPLETADAS Y EN PRODUCCIÓN**.
 - **Flujo SDD Validado con Éxito**.
+
 
