@@ -6,7 +6,13 @@ aplicarlo solo, lo anota aquí para que tú decidas si lo promueves.
 
 ## Propuestas pendientes
 
-*(Ninguna propuesta pendiente por el momento)*
+- [ ] **Protocolo Seguro de Migración en Base de Datos de Producción (Zero Data Loss)**:
+  Toda modificación estructural de esquema (DDL) o migración de datos en la base de datos de producción de Supabase debe seguir obligatoriamente el protocolo de 4 fases antes del despliegue de código:
+  1. *Respaldo preventivo*: Exportación física (CSV o SQL dump) de todas las tablas descargada en local antes de iniciar.
+  2. *DDL pre-despliegue en SQL Editor*: Aplicación manual de cambios estructurales no destructivos (ej. añadir columnas con soporte `NULL` o eliminar constraints antiguos) antes de compilar el backend.
+  3. *Simulación `--dry-run`*: Todo script de migración de datos debe contar con modo `--dry-run` de solo lectura que reporte los registros afectados antes de mutar la base de datos.
+  4. *Transacción Atómica (`prisma.$transaction`)*: Las mutaciones deben ejecutarse en un bloque transaccional ACID con verificación post-migración que certifique la integridad de los datos.
+
 
 ## Reglas promovidas y aplicadas
 

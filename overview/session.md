@@ -183,6 +183,11 @@
     - **Paso 4 (Migración Transaccional)**: Ejecución y verificación al 100% de `migrateEncryptPacientes.js` en producción: datos PII cifrados con AES-256-GCM y blind indexes deterministas generados con 0 errores.
     - **Paso 5 (Commit y Despliegue)**: Empaquetado de Specs 010 a 020 en commit `0ded263` y `git push origin main` completado con éxito, disparando despliegues automáticos en Cloudflare Pages y Render.
 
+22. **Diagnóstico y Liberación de Puertos Locales (`EADDRINUSE`)**:
+    - Detección de procesos Node huérfanos preexistentes (PID 3040 y 31836) que retenían los puertos `5500` y `3001`.
+    - Terminación de procesos y liberación total de sockets de red para garantizar la ejecución limpia de `scripts/iniciar.bat` y `node scripts/dev.js`.
+
+
 ## En qué quedó
 
 - **DESPLIEGUE A PRODUCCIÓN COMPLETADO CON ÉXITO**:
