@@ -212,22 +212,25 @@
 
 ## En qué quedó
 
-- **SPEC 021 COMPLETADA Y VERIFICADA AL 100%**:
-  - Plataforma Web y Suite Clínica con dictamen sobresaliente de cumplimiento de la LFPDPPP y Lineamientos del INAI.
-  - Formulario de contacto blindado con consentimiento informado obligatorio en frontend y backend.
-  - Suite de pruebas unificada ampliada a 48 tests en verde (100% PASS).
+- **DESPLIEGUE OFICIAL COMPLETADO EN ORIGIN/MAIN (SPEC 021)**:
+  - Commit `3d9f033` integrado en `main` y desplegado automáticamente en Cloudflare Pages (`psicolau.com`) y Render (`api.psicolau.com`).
+  - Aviso de Privacidad Integral en [privacidad.html](file:///c:/Users/crist/Documents/Proyectos/Web%20PsicoLau/privacidad.html) 100% conforme con la LFPDPPP, Lineamientos del INAI y la NOM-004-SSA3-2012 (expediente clínico).
+  - Validación semántica estricta de consentimiento informado (`privacyCheck: true`) implementada en frontend ([main.js](file:///c:/Users/crist/Documents/Proyectos/Web%20PsicoLau/js/main.js)) y backend ([validators.js](file:///c:/Users/crist/Documents/Proyectos/Web%20PsicoLau/backend/src/utils/validators.js)).
+  - Suite de pruebas unificada con 23 archivos y **48/48 tests aprobados al 100% (48/48 PASS)** en 58s.
   - Linter backend pasando con 0 errores y 0 advertencias.
+  - Dictamen clínico-legal resuelto con Laura: su documento físico/digital de Consentimiento Informado es plenamente suficiente y el aviso de privacidad de la web no requiere cambios adicionales.
 
 ## Próximo paso
 
-- Probar la interacción en el navegador local (`http://127.0.0.1:5500/privacidad` y `/contacto`) y, tras la confirmación del usuario, empaquetar cambios para el siguiente despliegue.
+- Monitorear la operación en vivo en `psicolau.com` y `psicolau.com/panel` y definir junto con Laura la siguiente prioridad funcional o clínica del proyecto.
 
 ## Notas rápidas
 
 - Servidores locales accesibles mediante `scripts/dev.js` y `iniciar.bat`.
 - Ejecutar pruebas en cualquier momento con `npm test` dentro de `backend/`.
 - Ejecutar linter en cualquier momento con `npm run lint` dentro de `backend/`.
-- Specs 010 a 021 **COMPLETADAS Y VALIDADAS CON ÉXITO**.
+- Specs 010 a 021 **COMPLETADAS, VALIDADAS Y EN PRODUCCIÓN**.
 - **Flujo SDD Validado con Éxito**.
+
 
 

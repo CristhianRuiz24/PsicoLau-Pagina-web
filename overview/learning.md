@@ -6,7 +6,7 @@ aplicarlo solo, lo anota aquí para que tú decidas si lo promueves.
 
 ## Propuestas pendientes
 
-*Ninguna por el momento.*
+- [ ] **Validación Semántica Obligatoria de Consentimiento Informado en Formularios Web**: Todo formulario que capture datos de contacto, solicitud de cita o consulta psicológica debe validar la aceptación expresa del Aviso de Privacidad (`privacyCheck: true`) con defensa en profundidad (en el DOM del cliente mediante atributo `required` y en el esquema del servidor con `z.literal(true)`), rechazando con HTTP 400 cualquier solicitud sin consentimiento antes de persistir o remitir información, garantizando certeza y trazabilidad jurídica bajo la LFPDPPP.
 
 ## Reglas promovidas y aplicadas
 
