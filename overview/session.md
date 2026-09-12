@@ -197,28 +197,37 @@
     - Se certificó cero afectación al repositorio principal `Web PsicoLau`: 40 de 40 pruebas automatizadas superadas al 100% sin una sola modificación en su código fuente.
 
 
+25. **Implementación y Validación Completa de Spec 021 (Cumplimiento Integral de la LFPDPPP y Blindaje del Aviso de Privacidad)**:
+    - **Auditoría Minuciosa**: Evaluación exhaustiva del cumplimiento de la LFPDPPP, su Reglamento, los Lineamientos del INAI y la NOM-004-SSA3-2012 (expediente clínico).
+    - **T1: Aviso de Privacidad Integral (`privacidad.html`)**: Incorporadas las cláusulas obligatorias de:
+      - *Cookies y Tecnologías Similares* (Lineamiento 31 INAI): Transparencia sobre `localStorage` de sesión en `/panel`, analítica agregada de Cloudflare sin cookies y fachadas `youtube-nocookie.com`.
+      - *Transferencias y Remisiones en la Nube* (Art. 36/37 LFPDPPP y 49 RLFPDPPP): Prohibición de cesión comercial y remisiones a encargados tecnológicos (Supabase, Render, Cloudflare, Resend) bajo cifrado.
+      - *Excepción Médica Legal de Retención de 5 Años y Bloqueo* (NOM-004-SSA3-2012 y Art. 26 Fracc. II LFPDPPP).
+      - *Plazos ARCO Completos* (Art. 32 LFPDPPP): 20 días hábiles de respuesta + 15 días hábiles para cumplimiento efectivo.
+    - **T2: Backend (`validators.js`)**: `contactoSchema` actualizado con validación estricta de `privacyCheck: z.literal(true)` rechazando con HTTP 400 ante omisión o `false`.
+    - **T3: Frontend (`js/main.js`)**: Manejador del formulario de contacto adaptado para extraer y enviar el estado booleano de `privacyCheck`.
+    - **T4: Suite de Pruebas Automatizadas (`testConsentimientoLFPDPPP.js`)**: Creada con 8 aserciones cubriendo validación semántica Zod, rechazo ante omisión/false y aceptación ante `privacyCheck: true`.
+    - **T5: Verificación Integral de No-Regresión**: `npm run lint` pasando con 0 errores y suite unificada `npm test` ejecutando 23 archivos de prueba con **48/48 tests aprobados al 100% (48/48 PASS)** en 58s.
+
+
 ## En qué quedó
 
-- **DESPLIEGUE A PRODUCCIÓN COMPLETADO CON ÉXITO**:
-  - Base de datos Supabase Producción 100% migrada, cifrada con AES-256-GCM y con índices ciegos deterministas.
-  - Rama `main` en GitHub sincronizada con todas las specs y código modularizado.
-  - Frontend público y Suite Clínica en proceso de actualización en Cloudflare Pages (`psicolau.com`).
-  - Backend API en proceso de actualización en Render (`api.psicolau.com`).
-- **PLANTILLA DEMO (`psico-demo`) SINCRONIZADA Y BLINDADA**:
-  - 15/15 pruebas automatizadas pasando en local con Docker Postgres.
-  - 0 vulnerabilidades en `npm audit`.
-  - Commit realizado en su repo independiente.
+- **SPEC 021 COMPLETADA Y VERIFICADA AL 100%**:
+  - Plataforma Web y Suite Clínica con dictamen sobresaliente de cumplimiento de la LFPDPPP y Lineamientos del INAI.
+  - Formulario de contacto blindado con consentimiento informado obligatorio en frontend y backend.
+  - Suite de pruebas unificada ampliada a 48 tests en verde (100% PASS).
+  - Linter backend pasando con 0 errores y 0 advertencias.
 
 ## Próximo paso
 
-- Verificar el estado de los despliegues en los dashboards de Cloudflare Pages y Render, y realizar prueba de humo en `psicolau.com/panel` para confirmar la operación en vivo.
+- Probar la interacción en el navegador local (`http://127.0.0.1:5500/privacidad` y `/contacto`) y, tras la confirmación del usuario, empaquetar cambios para el siguiente despliegue.
 
 ## Notas rápidas
 
 - Servidores locales accesibles mediante `scripts/dev.js` y `iniciar.bat`.
 - Ejecutar pruebas en cualquier momento con `npm test` dentro de `backend/`.
 - Ejecutar linter en cualquier momento con `npm run lint` dentro de `backend/`.
-- Specs 010 a 020 **COMPLETADAS Y EN PRODUCCIÓN**.
+- Specs 010 a 021 **COMPLETADAS Y VALIDADAS CON ÉXITO**.
 - **Flujo SDD Validado con Éxito**.
 
 

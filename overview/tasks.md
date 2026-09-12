@@ -4,6 +4,14 @@
 *Ninguna.*
 
 ## Completadas Recientemente
+- [x] **[Spec 021: Cumplimiento Integral de la LFPDPPP, Actualización del Aviso de Privacidad y Validación de Consentimiento](../specs/021-cumplimiento-lfpdppp-aviso-privacidad/spec.md)** (2026-09-12):
+  - **T1**: Actualización exhaustiva de [privacidad.html](file:///c:/Users/crist/Documents/Proyectos/Web%20PsicoLau/privacidad.html) incorporando las cláusulas de Remisiones y Transferencias en la Nube (Art. 36/37 LFPDPPP, Art. 49 RLFPDPPP), Declaración de Cookies y Tecnologías Similares (Lineamiento 31 INAI), Excepción Médica Legal de Retención de 5 Años y Bloqueo (NOM-004-SSA3-2012 / Art. 26 Fracc. II LFPDPPP) y plazos ARCO completos (20 días de respuesta + 15 días de cumplimiento, Art. 32 LFPDPPP).
+  - **T2**: Validación semántica estricta en backend de `privacyCheck: true` en `contactoSchema` dentro de [validators.js](file:///c:/Users/crist/Documents/Proyectos/Web%20PsicoLau/backend/src/utils/validators.js).
+  - **T3**: Extracción y transmisión del consentimiento `privacyCheck: true` en el payload JSON del formulario de contacto en [main.js](file:///c:/Users/crist/Documents/Proyectos/Web%20PsicoLau/js/main.js).
+  - **T4**: Creación y validación de suite automatizada `testConsentimientoLFPDPPP.js` (8/8 aserciones unitarias y HTTP en verde).
+  - **T5**: Verificación integral de no-regresión y linter: `npm run lint` (0 errores) y suite unificada `npm test` aprobando el 100% (48/48 tests en verde en 58s).
+  - **T6**: Documentación SDD actualizada en `session.md` y `tasks.md`.
+
 - [x] **[Spec 020: Configuración de Linter Automatizado (ESLint) en Backend](../specs/020-linter-eslint-backend/spec.md)** (2026-09-11):
   - **T1**: Instalación de `eslint` (^10.10.0) en `devDependencies` de `backend/package.json`.
   - **T2**: Configuración moderna de Flat Config `backend/eslint.config.js` adaptada para Node.js ESM y CommonJS, ignorando variables con prefijo `_`.

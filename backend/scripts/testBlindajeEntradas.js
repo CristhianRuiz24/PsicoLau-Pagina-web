@@ -94,7 +94,8 @@ test('Blindaje semántico contra inyecciones, URLs y abuso en formularios (Spec 
       body: JSON.stringify({
         nombre: 'Remitente Spam',
         email: 'spam@bot.com',
-        mensaje: 'Visita http://sitio1.com y también www.sitio2.org y además https://sitio3.net para ofertas.'
+        mensaje: 'Visita http://sitio1.com y también www.sitio2.org y además https://sitio3.net para ofertas.',
+        privacyCheck: true
       })
     });
     const dataSpam = await resSpam.json();

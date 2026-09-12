@@ -103,7 +103,10 @@ const contactoSchema = z.object({
       message: "La categoría contiene caracteres no permitidos"
     })
     .optional().or(z.literal('')),
-  mensaje: mensajeContactoSchema
+  mensaje: mensajeContactoSchema,
+  privacyCheck: z.literal(true, {
+    errorMap: () => ({ message: "Debes aceptar el Aviso de Privacidad para enviar tu consulta" })
+  })
 });
 
 // Schema para creación de citas en el panel administrativo

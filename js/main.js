@@ -17,12 +17,14 @@ document.addEventListener('DOMContentLoaded', () => {
       
       const btn = contactForm.querySelector('button[type="submit"]');
       const msgEl = document.getElementById('formMessage');
+      const privacyCheckEl = document.getElementById('privacyCheck');
       const formData = {
         nombre: document.getElementById('name').value,
         email: document.getElementById('email').value,
         telefono: document.getElementById('phone').value,
         categoria: document.getElementById('reason').value,
-        mensaje: document.getElementById('mensaje').value
+        mensaje: document.getElementById('mensaje').value,
+        privacyCheck: privacyCheckEl ? privacyCheckEl.checked : false
       };
 
       btn.disabled = true;
