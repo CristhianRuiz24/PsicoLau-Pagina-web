@@ -92,6 +92,11 @@ El proyecto sigue rigurosamente el flujo SDD para cualquier funcionalidad o camb
 8. **Validación Semántica Estricta (Defensa en Profundidad)**: Todo campo de entrada público o administrativo debe contar con validación por lista blanca (ej. regex Unicode para nombres, validación estricta de dominios).
 9. **Descifrado Transparente y Búsqueda Ciega**: El backend siempre se encarga de descifrar la PII antes de enviarla al cliente autorizado. Las búsquedas en base de datos sobre PII cifrada deben utilizar índices ciegos (Blind Indexing) como `emailHash` vía HMAC-SHA256.
 10. **Carga Dinámica Asíncrona Obligatoria en Modales Desacoplados**: Cuando se extraigan modales HTML a partials independientes (lazy loading vía fetch), toda función global, helper o manejador de eventos que interactúe con el modal debe asegurar su existencia en el DOM mediante el helper asíncrono (`await asegurarModal(...)`) y jamás asumir la presencia estática del elemento en el HTML base. Asimismo, queda prohibido duplicar funciones de apertura o gestión de modales en scripts auxiliares (ej. `app.js`) que sobreescriban módulos ESM con salidas sincrónicas prematuras (`if (!modal) return;`).
+11. **Protocolo Seguro de Migración en Base de Datos de Producción (Zero Data Loss)**: Toda modificación estructural de esquema (DDL) o migración de datos en la base de datos de producción de Supabase debe seguir obligatoriamente el protocolo de 4 fases antes del despliegue de código:
+    1. *Respaldo preventivo*: Exportación física de seguridad (CSV o SQL dump) de todas las tablas descargada en local antes de iniciar.
+    2. *DDL pre-despliegue en SQL Editor*: Aplicación manual de cambios estructurales no destructivos (ej. añadir columnas con soporte `NULL` o eliminar constraints antiguos) antes de compilar o arrancar el backend en producción.
+    3. *Simulación `--dry-run`*: Todo script de migración de datos debe contar con un modo `--dry-run` de solo lectura que reporte con precisión los registros afectados antes de mutar la base de datos.
+    4. *Transacción Atómica (`prisma.$transaction`)*: Las mutaciones deben ejecutarse en un bloque transaccional ACID con verificación post-migración que certifique la integridad de los datos.
 
 ---
 

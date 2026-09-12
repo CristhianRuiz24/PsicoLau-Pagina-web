@@ -187,6 +187,15 @@
     - Detección de procesos Node huérfanos preexistentes (PID 3040 y 31836) que retenían los puertos `5500` y `3001`.
     - Terminación de procesos y liberación total de sockets de red para garantizar la ejecución limpia de `scripts/iniciar.bat` y `node scripts/dev.js`.
 
+23. **Promoción de Regla a `AGENTS.md` (§6.11 - Protocolo de Migración en Producción Zero Data Loss)**:
+    - Se formalizó la regla constitucional §6.11 en `AGENTS.md` detallando las 4 fases obligatorias para cualquier cambio estructural o migración en Supabase Producción: (1) Respaldo preventivo local, (2) DDL pre-despliegue en SQL Editor, (3) Simulación de solo lectura con `--dry-run`, y (4) Mutación atómica en `prisma.$transaction`.
+    - Se actualizó `overview/learning.md` archivando la regla como aprobada y promovida.
+
+24. **Sincronización y Blindaje de la Plantilla de Demostración (`demo/` - `psico-demo`)**:
+    - Se auditó el repositorio independiente de la demo y se portaron todas las mejoras arquitectónicas de Specs 010 a 020 (Express 5, bcryptjs, modularización CSS/HTML/JS, cifrado PII AES-256-GCM y blind index HMAC-SHA256).
+    - Preservación innegociable de la marca comercial de la Dra. Sofía Ramos (paleta Teal/Azul, contacto WhatsApp serverless, acceso en 1 clic).
+    - Se certificó cero afectación al repositorio principal `Web PsicoLau`: 40 de 40 pruebas automatizadas superadas al 100% sin una sola modificación en su código fuente.
+
 
 ## En qué quedó
 
@@ -195,6 +204,10 @@
   - Rama `main` en GitHub sincronizada con todas las specs y código modularizado.
   - Frontend público y Suite Clínica en proceso de actualización en Cloudflare Pages (`psicolau.com`).
   - Backend API en proceso de actualización en Render (`api.psicolau.com`).
+- **PLANTILLA DEMO (`psico-demo`) SINCRONIZADA Y BLINDADA**:
+  - 15/15 pruebas automatizadas pasando en local con Docker Postgres.
+  - 0 vulnerabilidades en `npm audit`.
+  - Commit realizado en su repo independiente.
 
 ## Próximo paso
 

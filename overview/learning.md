@@ -6,16 +6,11 @@ aplicarlo solo, lo anota aquí para que tú decidas si lo promueves.
 
 ## Propuestas pendientes
 
-- [ ] **Protocolo Seguro de Migración en Base de Datos de Producción (Zero Data Loss)**:
-  Toda modificación estructural de esquema (DDL) o migración de datos en la base de datos de producción de Supabase debe seguir obligatoriamente el protocolo de 4 fases antes del despliegue de código:
-  1. *Respaldo preventivo*: Exportación física (CSV o SQL dump) de todas las tablas descargada en local antes de iniciar.
-  2. *DDL pre-despliegue en SQL Editor*: Aplicación manual de cambios estructurales no destructivos (ej. añadir columnas con soporte `NULL` o eliminar constraints antiguos) antes de compilar el backend.
-  3. *Simulación `--dry-run`*: Todo script de migración de datos debe contar con modo `--dry-run` de solo lectura que reporte los registros afectados antes de mutar la base de datos.
-  4. *Transacción Atómica (`prisma.$transaction`)*: Las mutaciones deben ejecutarse en un bloque transaccional ACID con verificación post-migración que certifique la integridad de los datos.
-
+*Ninguna por el momento.*
 
 ## Reglas promovidas y aplicadas
 
+- [x] **Protocolo Seguro de Migración en Base de Datos de Producción (Zero Data Loss)**: Promovida a [`AGENTS.md`](../AGENTS.md) (§6.11). Toda modificación estructural de esquema o migración en producción requiere respaldo preventivo local, DDL previo no destructivo en SQL Editor, simulación `--dry-run` y mutación atómica en `prisma.$transaction`. — [Aprobado y promovido: 2026-09-11]
 - [x] **Carga Dinámica Asíncrona Obligatoria en Modales Desacoplados**: Promovida a [`AGENTS.md`](../AGENTS.md) (§6.10). Toda interacción con modales desacoplados debe asegurar su inyección en el DOM mediante `await asegurarModal(...)` y evitar sobreescrituras sincrónicas en scripts auxiliares (`if (!modal) return;`). — [Aprobado y promovido: 2026-09-11]
 - [x] **Validación Semántica Estricta y Pruebas Adversarias Obligatorias (Defensa en Profundidad)**: Promovida a [`AGENTS.md`](../AGENTS.md) (§6.8 y §7.8). Todo campo de entrada se valida por lista blanca y la suite de pruebas incluye ataques adversarios (XSS/DAST). — [Aprobado y promovido: 2026-09-11]
 - [x] **Descifrado Transparente en Controladores y Búsqueda Ciega de PII**: Promovida a [`AGENTS.md`](../AGENTS.md) (§6.9). Backend siempre descifra la PII; búsquedas en DB cifrada se hacen vía Blind Indexing (`emailHash`). — [Aprobado y promovido: 2026-09-11]
