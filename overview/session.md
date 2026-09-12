@@ -214,7 +214,7 @@
 
 - **DESPLIEGUE OFICIAL COMPLETADO EN ORIGIN/MAIN (SPEC 021)**:
   - Commit `3d9f033` integrado en `main` y desplegado automáticamente en Cloudflare Pages (`psicolau.com`) y Render (`api.psicolau.com`).
-  - Aviso de Privacidad Integral en [privacidad.html](file:///c:/Users/crist/Documents/Proyectos/Web%20PsicoLau/privacidad.html) 100% conforme con la LFPDPPP, Lineamientos del INAI y la NOM-004-SSA3-2012 (expediente clínico).
+  - Aviso de Privacidad Integral en [privacidad.html](file:///c:/Users/crist/Documents/Proyectos/Web%20PsicoLau/privacidad.html) 100% conforme con la LFPDPPP, Lineamientos del INAI y la NOM-004-SSA3-2012 (expediente clínico), con domicilio convencional postal específico en Ixtapaluca (atención 100% en línea).
   - Validación semántica estricta de consentimiento informado (`privacyCheck: true`) implementada en frontend ([main.js](file:///c:/Users/crist/Documents/Proyectos/Web%20PsicoLau/js/main.js)) y backend ([validators.js](file:///c:/Users/crist/Documents/Proyectos/Web%20PsicoLau/backend/src/utils/validators.js)).
   - Suite de pruebas unificada con 23 archivos y **48/48 tests aprobados al 100% (48/48 PASS)** en 58s.
   - Linter backend pasando con 0 errores y 0 advertencias.
