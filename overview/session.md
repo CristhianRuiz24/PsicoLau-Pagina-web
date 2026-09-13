@@ -210,26 +210,32 @@
     - **T5: Verificación Integral de No-Regresión**: `npm run lint` pasando con 0 errores y suite unificada `npm test` ejecutando 23 archivos de prueba con **48/48 tests aprobados al 100% (48/48 PASS)** en 58s.
 
 
+26. **Implementación y Validación Completa de Spec 022 (Rediseño Visual de Plantillas de Correo HTML Transaccionales)**:
+    - **T1: Helper de Layout Base y Aviso de Cita**: Se implementó `construirPlantillaBase` en `backend/src/services/emailService.js` con soporte para tablas responsivas, degradado institucional rosa `#EC5E86`, tipografía moderna legible, badges semánticos, botón de acción turquesa `#1E94A8` y pie legal con secreto profesional. En `enviarAvisoLaura`, se eliminó definitivamente el texto plano *"Revisa el panel de administración para confirmarla"* y se reemplazó por el botón de acción **[Abrir Panel Clínico →]** (`https://psicolau.com/panel`).
+    - **T2: Confirmación al Paciente y Mensaje de Contacto**: Se adaptó `enviarConfirmacionPaciente` con mensaje de bienvenida empático, horario destacado en caja de acento y botón directo a WhatsApp. Se adaptó `enviarMensajeContacto` armonizando la ficha del remitente con botón de respuesta directa por correo.
+    - **T3: Vistas Previas HTML**: Se creó `backend/scripts/previewEmails.js`, exportando `construirPlantillaBase` y generando archivos HTML de previsualización en `scratch/email-previews/` constatando visualmente el renderizado responsivo y la compatibilidad con clientes de correo.
+    - **T4: Verificación Integral de No-Regresión**: Linter `npm run lint` pasando con 0 errores y 0 advertencias. Suite unificada `npm test` ejecutando 23 archivos y aprobando el 100% (**48/48 PASS**) en 59 segundos.
+
 ## En qué quedó
 
-- **DESPLIEGUE OFICIAL COMPLETADO EN ORIGIN/MAIN (SPEC 021)**:
-  - Commit `3d9f033` integrado en `main` y desplegado automáticamente en Cloudflare Pages (`psicolau.com`) y Render (`api.psicolau.com`).
-  - Aviso de Privacidad Integral en [privacidad.html](file:///c:/Users/crist/Documents/Proyectos/Web%20PsicoLau/privacidad.html) 100% conforme con la LFPDPPP, Lineamientos del INAI y la NOM-004-SSA3-2012 (expediente clínico), con domicilio convencional postal específico en Ixtapaluca (atención 100% en línea).
-  - Validación semántica estricta de consentimiento informado (`privacyCheck: true`) implementada en frontend ([main.js](file:///c:/Users/crist/Documents/Proyectos/Web%20PsicoLau/js/main.js)) y backend ([validators.js](file:///c:/Users/crist/Documents/Proyectos/Web%20PsicoLau/backend/src/utils/validators.js)).
-  - Suite de pruebas unificada con 23 archivos y **48/48 tests aprobados al 100% (48/48 PASS)** en 58s.
-  - Linter backend pasando con 0 errores y 0 advertencias.
-  - Dictamen clínico-legal resuelto con Laura: su documento físico/digital de Consentimiento Informado es plenamente suficiente y el aviso de privacidad de la web no requiere cambios adicionales.
+- **SPEC 022 COMPLETADA Y VERIFICADA EN LOCAL**:
+  - Plantillas de correo transaccionales en [`backend/src/services/emailService.js`](file:///c:/Users/crist/Documents/Proyectos/Web%20PsicoLau/backend/src/services/emailService.js) 100% rediseñadas con identidad corporativa de PsicoLau (`#EC5E86` y `#1E94A8`).
+  - Eliminado por completo el texto plano legacy *"Revisa el panel de administración para confirmarla"*, sustituido por botón de acción directo al panel clínico.
+  - Linter backend con 0 errores y 0 advertencias (`npm run lint`).
+  - Suite de pruebas de integración pasando al 100% (**48/48 PASS** en 59s).
+  - Vistas previas generadas en `scratch/email-previews/`.
+  - DNS en Cloudflare guiado para la redirección de `www` a `psicolau.com` y registro DMARC para Resend.
 
 ## Próximo paso
 
-- Monitorear la operación en vivo en `psicolau.com` y `psicolau.com/panel` y definir junto con Laura la siguiente prioridad funcional o clínica del proyecto.
+- Probar o desplegar las nuevas plantillas de correo a producción (`git commit` y `git push` previa autorización) y verificar la recepción en vivo en la bandeja de Laura.
 
 ## Notas rápidas
 
 - Servidores locales accesibles mediante `scripts/dev.js` y `iniciar.bat`.
 - Ejecutar pruebas en cualquier momento con `npm test` dentro de `backend/`.
 - Ejecutar linter en cualquier momento con `npm run lint` dentro de `backend/`.
-- Specs 010 a 021 **COMPLETADAS, VALIDADAS Y EN PRODUCCIÓN**.
+- Specs 010 a 022 **COMPLETADAS Y VALIDADAS**.
 - **Flujo SDD Validado con Éxito**.
 
 

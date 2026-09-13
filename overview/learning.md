@@ -6,9 +6,11 @@ aplicarlo solo, lo anota aquí para que tú decidas si lo promueves.
 
 ## Propuestas pendientes
 
-- [ ] **Validación Semántica Obligatoria de Consentimiento Informado en Formularios Web**: Todo formulario que capture datos de contacto, solicitud de cita o consulta psicológica debe validar la aceptación expresa del Aviso de Privacidad (`privacyCheck: true`) con defensa en profundidad (en el DOM del cliente mediante atributo `required` y en el esquema del servidor con `z.literal(true)`), rechazando con HTTP 400 cualquier solicitud sin consentimiento antes de persistir o remitir información, garantizando certeza y trazabilidad jurídica bajo la LFPDPPP.
+*Ninguna.*
 
 ## Reglas promovidas y aplicadas
+
+- [x] **Validación Semántica Obligatoria de Consentimiento Informado en Formularios Web**: Promovida a [`AGENTS.md`](../AGENTS.md) (§6.12). Todo formulario que capture datos de contacto, solicitud de cita o consulta psicológica debe validar la aceptación expresa del Aviso de Privacidad (`privacyCheck: true`) con defensa en profundidad (en el DOM del cliente mediante atributo `required` y en el esquema del servidor con `z.literal(true)`), rechazando con HTTP 400 cualquier solicitud sin consentimiento antes de persistir o remitir información, garantizando certeza y trazabilidad jurídica bajo la LFPDPPP. — [Aprobado y promovido: 2026-09-13]
 
 - [x] **Protocolo Seguro de Migración en Base de Datos de Producción (Zero Data Loss)**: Promovida a [`AGENTS.md`](../AGENTS.md) (§6.11). Toda modificación estructural de esquema o migración en producción requiere respaldo preventivo local, DDL previo no destructivo en SQL Editor, simulación `--dry-run` y mutación atómica en `prisma.$transaction`. — [Aprobado y promovido: 2026-09-11]
 - [x] **Carga Dinámica Asíncrona Obligatoria en Modales Desacoplados**: Promovida a [`AGENTS.md`](../AGENTS.md) (§6.10). Toda interacción con modales desacoplados debe asegurar su inyección en el DOM mediante `await asegurarModal(...)` y evitar sobreescrituras sincrónicas en scripts auxiliares (`if (!modal) return;`). — [Aprobado y promovido: 2026-09-11]

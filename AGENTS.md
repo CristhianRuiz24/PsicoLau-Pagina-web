@@ -97,6 +97,8 @@ El proyecto sigue rigurosamente el flujo SDD para cualquier funcionalidad o camb
     2. *DDL pre-despliegue en SQL Editor*: Aplicación manual de cambios estructurales no destructivos (ej. añadir columnas con soporte `NULL` o eliminar constraints antiguos) antes de compilar o arrancar el backend en producción.
     3. *Simulación `--dry-run`*: Todo script de migración de datos debe contar con un modo `--dry-run` de solo lectura que reporte con precisión los registros afectados antes de mutar la base de datos.
     4. *Transacción Atómica (`prisma.$transaction`)*: Las mutaciones deben ejecutarse en un bloque transaccional ACID con verificación post-migración que certifique la integridad de los datos.
+12. **Validación Semántica Obligatoria de Consentimiento Informado en Formularios Web**: Todo formulario que capture datos de contacto, solicitud de cita o consulta psicológica debe validar la aceptación expresa del Aviso de Privacidad (`privacyCheck: true`) con defensa en profundidad (en el DOM del cliente mediante atributo `required` y en el esquema del servidor con `z.literal(true)`), rechazando con HTTP 400 cualquier solicitud sin consentimiento antes de persistir o remitir información, garantizando certeza y trazabilidad jurídica bajo la LFPDPPP.
+
 
 ---
 
