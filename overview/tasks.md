@@ -5,10 +5,10 @@
 
 ## Completadas Recientemente
 - [x] **[Spec 022: Rediseño Visual de Plantillas de Correo HTML Transaccionales](../specs/022-plantillas-email-notificaciones/spec.md)** (2026-09-13):
-  - **T1**: Helper de Layout Base (`construirPlantillaBase`) y rediseño institucional de `enviarAvisoLaura` con cabecera corporativa `#EC5E86`, tarjeta con datos estructurados y botón CTA turquesa (`#1E94A8`) hacia `https://psicolau.com/panel`, eliminando definitivamente el texto plano legacy *"Revisa el panel de administración para confirmarla"*.
-  - **T2**: Rediseño de `enviarConfirmacionPaciente` (mensaje empático, sesión destacada, firma profesional de Laura y botón directo a WhatsApp) y `enviarMensajeContacto` (ficha del remitente, cita del mensaje y botón de respuesta rápida por correo).
+  - **T1**: Helper de Layout Base (`construirPlantillaBase`) y rediseño institucional de `enviarAvisoLaura` con cabecera corporativa `#EC5E86`, tarjeta con datos estructurados y botón directo a WhatsApp (`wa.me/`) para contactar al paciente en 1 toque, eliminando el texto plano legacy y la referencia a horario solicitado.
+  - **T2**: Rediseño de `enviarConfirmacionPaciente` (mensaje empático sin fechas artificiales, firma profesional de Laura y botón a WhatsApp) y `enviarMensajeContacto` (ficha del remitente, mensaje citado y botón de respuesta rápida por correo).
   - **T3**: Creación del script `backend/scripts/previewEmails.js` y generación exitosa de vistas previas HTML en `scratch/email-previews/` con renderizado responsive impecable.
-  - **T4**: Verificación de linter `npm run lint` (0 errores, 0 advertencias) y suite unificada de backend `npm test` ejecutando 23 archivos y aprobando el 100% de las pruebas (**48/48 PASS** en 59s).
+  - **T4**: Verificación de linter `npm run lint` (0 errores, 0 advertencias) y suite unificada de backend `npm test` ejecutando 23 archivos y aprobando el 100% de las pruebas (**48/48 PASS** en 57s). Verificado con envío real vía Resend API.
   - **T5**: Documentación de sesión actualizada en `session.md` y `tasks.md`.
 - [x] **[Spec 021: Cumplimiento Integral de la LFPDPPP, Actualización del Aviso de Privacidad y Validación de Consentimiento](../specs/021-cumplimiento-lfpdppp-aviso-privacidad/spec.md)** (2026-09-12):
   - **T1**: Actualización exhaustiva de [privacidad.html](file:///c:/Users/crist/Documents/Proyectos/Web%20PsicoLau/privacidad.html) incorporando las cláusulas de Remisiones y Transferencias en la Nube (Art. 36/37 LFPDPPP, Art. 49 RLFPDPPP), Declaración de Cookies y Tecnologías Similares (Lineamiento 31 INAI), Excepción Médica Legal de Retención de 5 Años y Bloqueo (NOM-004-SSA3-2012 / Art. 26 Fracc. II LFPDPPP) y plazos ARCO completos (20 días de respuesta + 15 días de cumplimiento, Art. 32 LFPDPPP).

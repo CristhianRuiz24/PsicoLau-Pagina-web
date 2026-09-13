@@ -211,10 +211,10 @@
 
 
 26. **Implementación y Validación Completa de Spec 022 (Rediseño Visual de Plantillas de Correo HTML Transaccionales)**:
-    - **T1: Helper de Layout Base y Aviso de Cita**: Se implementó `construirPlantillaBase` en `backend/src/services/emailService.js` con soporte para tablas responsivas, degradado institucional rosa `#EC5E86`, tipografía moderna legible, badges semánticos, botón de acción turquesa `#1E94A8` y pie legal con secreto profesional. En `enviarAvisoLaura`, se eliminó definitivamente el texto plano *"Revisa el panel de administración para confirmarla"* y se reemplazó por el botón de acción **[Abrir Panel Clínico →]** (`https://psicolau.com/panel`).
-    - **T2: Confirmación al Paciente y Mensaje de Contacto**: Se adaptó `enviarConfirmacionPaciente` con mensaje de bienvenida empático, horario destacado en caja de acento y botón directo a WhatsApp. Se adaptó `enviarMensajeContacto` armonizando la ficha del remitente con botón de respuesta directa por correo.
+    - **T1: Helper de Layout Base y Aviso de Cita**: Se implementó `construirPlantillaBase` en `backend/src/services/emailService.js` con soporte para tablas responsivas, degradado institucional rosa `#EC5E86`, tipografía moderna legible, badges semánticos y pie legal con secreto profesional. En `enviarAvisoLaura`, se eliminó definitivamente el texto plano legacy *"Revisa el panel de administración para confirmarla"*, se removió la referencia a horario solicitado y se implementó un botón de acción directo en verde WhatsApp (`#25D366`) con mensaje precargado para contactar al paciente en 1 clic (o respuesta directa por correo).
+    - **T2: Confirmación al Paciente y Mensaje de Contacto**: Se adaptó `enviarConfirmacionPaciente` con mensaje de bienvenida empático sin fechas artificiales, firma profesional de Laura y botón directo a WhatsApp. Se adaptó `enviarMensajeContacto` armonizando la ficha del remitente con botón de respuesta directa por correo.
     - **T3: Vistas Previas HTML**: Se creó `backend/scripts/previewEmails.js`, exportando `construirPlantillaBase` y generando archivos HTML de previsualización en `scratch/email-previews/` constatando visualmente el renderizado responsivo y la compatibilidad con clientes de correo.
-    - **T4: Verificación Integral de No-Regresión**: Linter `npm run lint` pasando con 0 errores y 0 advertencias. Suite unificada `npm test` ejecutando 23 archivos y aprobando el 100% (**48/48 PASS**) en 59 segundos.
+    - **T4: Verificación Integral de No-Regresión**: Linter `npm run lint` pasando con 0 errores y 0 advertencias. Suite unificada `npm test` ejecutando 23 archivos y aprobando el 100% (**48/48 PASS**) en 57 segundos. Verificado con envío de correo real vía Resend.
 
 ## En qué quedó
 
