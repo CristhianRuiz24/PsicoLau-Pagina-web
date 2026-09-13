@@ -218,17 +218,20 @@
 
 ## En qué quedó
 
-- **SPEC 022 COMPLETADA Y VERIFICADA EN LOCAL**:
+- **DESPLIEGUE OFICIAL COMPLETADO EN ORIGIN/MAIN (SPEC 022)**:
+  - Commit `f7d5fe0` integrado en `main` y desplegado en Cloudflare Pages (`psicolau.com`) y Render (`api.psicolau.com`).
   - Plantillas de correo transaccionales en [`backend/src/services/emailService.js`](file:///c:/Users/crist/Documents/Proyectos/Web%20PsicoLau/backend/src/services/emailService.js) 100% rediseñadas con identidad corporativa de PsicoLau (`#EC5E86` y `#1E94A8`).
-  - Eliminado por completo el texto plano legacy *"Revisa el panel de administración para confirmarla"*, sustituido por botón de acción directo al panel clínico.
+  - Eliminado por completo el texto plano legacy *"Revisa el panel de administración para confirmarla"*, y eliminada la referencia a horario solicitado.
+  - Enfoque 100% de contacto para Laura: botón verde de acción directa a WhatsApp (`wa.me/`) con saludo precargado y enlace a correo electrónico.
   - Linter backend con 0 errores y 0 advertencias (`npm run lint`).
-  - Suite de pruebas de integración pasando al 100% (**48/48 PASS** en 59s).
-  - Vistas previas generadas en `scratch/email-previews/`.
-  - DNS en Cloudflare guiado para la redirección de `www` a `psicolau.com` y registro DMARC para Resend.
+  - Suite de pruebas de integración pasando al 100% (**48/48 PASS** en 57s).
+  - Verificado en vivo mediante correo de prueba real vía Resend API con entrega exitosa en bandeja.
+  - DNS en Cloudflare guiado para redirección de `www` a `psicolau.com` y registro DMARC para Resend.
 
 ## Próximo paso
 
-- Probar o desplegar las nuevas plantillas de correo a producción (`git commit` y `git push` previa autorización) y verificar la recepción en vivo en la bandeja de Laura.
+- Monitorear la operación en vivo de los correos transaccionales y el tráfico en `psicolau.com` y `psicolau.com/panel`.
+
 
 ## Notas rápidas
 
