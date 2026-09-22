@@ -30,7 +30,7 @@ function generarMensajeRecordatorio({ nombrePaciente, esEvaluacion, esGrupal, di
 
 function generarMensajeCobro({ nombrePaciente, esEvaluacion, esGrupal, diaTexto, diaNum, mesTexto, horaLimpia, bloqueDatos }) {
   const tipoTexto = esEvaluacion ? 'evaluación' : (esGrupal ? 'terapia grupal' : 'terapia');
-  return `Hola ${nombrePaciente}, te saludo con gusto. Te comparto este mensaje respecto a tu sesión de ${tipoTexto} del ${diaTexto} ${diaNum} de ${mesTexto} a las ${horaLimpia}.\n\nPara confirmar y mantener al día tu registro de sesiones, te dejo los datos para tu aportación:${bloqueDatos}\n\nUna vez realizado, te agradecería mucho compartirme tu comprobante por este medio. Si ya lo enviaste, haz caso omiso a este mensaje. ¡Muchas gracias!\n\n- PsicoLau (Laura Gómez)`;
+  return `Hola ${nombrePaciente}, te saludo con gusto. Te comparto este mensaje respecto a tu sesión de ${tipoTexto} del ${diaTexto} ${diaNum} de ${mesTexto} a las ${horaLimpia}.\n\nPara confirmar y mantener al día tu registro de sesiones, te dejo los datos para el pago de tu sesión:${bloqueDatos}\n\nUna vez realizado, te agradecería mucho compartirme tu comprobante por este medio. Si ya lo enviaste, haz caso omiso a este mensaje. ¡Muchas gracias!\n\n- PsicoLau (Laura Gómez)`;
 }
 
 function validarYLimpiarTelefono(telRaw) {

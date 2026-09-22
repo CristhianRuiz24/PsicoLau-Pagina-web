@@ -118,7 +118,7 @@ window.enviarWhatsAppCobro = function(id, e) {
   }
 
   const tipoTexto = esEvaluacion ? 'evaluación' : (esGrupal ? 'terapia grupal' : 'terapia');
-  const mensaje = encodeURIComponent(`Hola ${nombrePaciente}, te saludo con gusto. Te comparto este mensaje respecto a tu sesión de ${tipoTexto} del ${diaTexto} ${diaNum} de ${mesTexto} a las ${horaLimpia}.\n\nPara confirmar y mantener al día tu registro de sesiones, te dejo los datos para tu aportación:${bloqueDatos}\n\nUna vez realizado, te agradecería mucho compartirme tu comprobante por este medio. Si ya lo enviaste, haz caso omiso a este mensaje. ¡Muchas gracias!\n\n- PsicoLau (Laura Gómez)`);
+  const mensaje = encodeURIComponent(`Hola ${nombrePaciente}, te saludo con gusto. Te comparto este mensaje respecto a tu sesión de ${tipoTexto} del ${diaTexto} ${diaNum} de ${mesTexto} a las ${horaLimpia}.\n\nPara confirmar y mantener al día tu registro de sesiones, te dejo los datos para el pago de tu sesión:${bloqueDatos}\n\nUna vez realizado, te agradecería mucho compartirme tu comprobante por este medio. Si ya lo enviaste, haz caso omiso a este mensaje. ¡Muchas gracias!\n\n- PsicoLau (Laura Gómez)`);
 
   abrirEnlaceWhatsApp(`https://wa.me/${telLimpio}?text=${mensaje}`);
 };
