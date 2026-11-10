@@ -9,7 +9,7 @@ graph TD
     end
 
     subgraph Suite_Clinica ["Panel Administrativo (/panel)"]
-        D[panel/index.html + js/login.js - Login JWT Desacoplado]
+        D[panel/index.html + js/login.js + js/errorHelper.js - Login Resiliente con Reintento]
         E[panel/agenda.html - Easy Table Semanal]
         F[panel/js/agenda/ - ESM Entry Point + 9 Submódulos]
         F2[panel/js/expedientes/ - Dynamic import lazy-load + 6 Submódulos]
@@ -20,7 +20,7 @@ graph TD
     end
 
     subgraph Backend_API ["Backend API (Node.js + Express)"]
-        G[index.js / Rutas API + Rate Limiting Diferenciado]
+        G[index.js / Rutas API + errorHandler.js Sanitizado + /api/health/db Keep-Alive]
         H[authMiddleware - JWT 8h]
         I[crypto.js - AES-256-GCM Cifrado Clínico]
         J[Controllers: agenda, pacientes, expedientes, pagos, auth, contacto]
@@ -92,4 +92,5 @@ graph TD
 - **Despliegue y Migración de Producción Zero Data Loss (2026-09-11)**: Protocolo seguro en 5 pasos para sincronización de base de datos en Supabase Producción (respaldo físico, DDL pre-despliegue en SQL Editor, migración transaccional idempotente `migrateEncryptPacientes.js` y push a `main`), garantizando compatibilidad absoluta y 100% de datos PII cifrados en producción sin tiempo de inactividad.
 - **Cumplimiento Integral de la LFPDPPP y Validación Semántica de Consentimiento (2026-09-12, Spec 021)**: Actualización exhaustiva del Aviso de Privacidad (`privacidad.html`) conforme a la LFPDPPP, RLFPDPPP, Lineamientos del INAI y la NOM-004-SSA3-2012 (retención médica legal de 5 años y bloqueo, transparencia de cookies y remisiones cifradas a proveedores cloud). Blindaje con defensa en profundidad mediante validación estricta de `privacyCheck: true` con `z.literal(true)` en backend ([validators.js](file:///c:/Users/crist/Documents/Proyectos/Web%20PsicoLau/backend/src/utils/validators.js)) y frontend ([main.js](file:///c:/Users/crist/Documents/Proyectos/Web%20PsicoLau/js/main.js)), formalizado como regla constitucional §6.12 en `AGENTS.md`.
 - **Rediseño Visual de Plantillas de Correo HTML Transaccionales (2026-09-13, Spec 022)**: Creación de layout base responsivo (`construirPlantillaBase`) en [emailService.js](file:///c:/Users/crist/Documents/Proyectos/Web%20PsicoLau/backend/src/services/emailService.js) con tablas HTML y CSS 100% inline compatible con Outlook, Gmail, Apple Mail y Yahoo. Erradicación del texto plano legacy *"Revisa el panel de administración para confirmarla"* y de referencias a horarios solicitados ficticios. Enfoque 100% de contacto para Laura con botones de acción directa a WhatsApp (`wa.me/`) y respuesta por correo, degradado institucional rosa `#EC5E86`, tarjetas estructuradas y cláusula de secreto profesional médico.
+- **Arquitectura de Orquestación Multiagente SDD, Catálogo de Skills y Compuertas Fail-Fast (2026-10-26, Spec 023)**: Implantación de la arquitectura de Progressive Disclosure gobernada por `.agents/rules/orchestrator.md`. El Orquestador Central asume `spec-generator` como Skill pura en el chat principal para entrevista EARS y delega tareas en 4 subagentes ejecutables en `.agents/agents/` (`builder-frontend`, `builder-backend`, `auditor-calidad` en modo estricto de solo lectura, y `devops`), validados bajo contratos estructurados de Handshake. Compuerta fail-fast `.agents/hooks.json` con `quickCheck.js` que verifica sintaxis ESM (`test:syntax`) e imports (`test:imports`) en caliente tras cada edición. Rotación de memoria a ventana deslizante activa en `overview/` con archivo histórico en `overview/archive/` para máxima economía de tokens en `$boot`.
 

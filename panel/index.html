@@ -27,12 +27,13 @@
           <input type="password" id="password" required placeholder="••••••••">
         </div>
         <button type="submit" class="btn" id="loginBtn"><i class="fa-solid fa-right-to-bracket" style="margin-right: 6px;"></i> Ingresar al Panel</button>
-        <p class="error-message" id="errorMessage">Credenciales inválidas.</p>
+        <p class="error-message" id="errorMessage" role="alert" aria-live="assertive"></p>
       </form>
     </div>
   </div>
 
   <script src="/panel/js/config.js"></script>
-  <script src="/panel/js/login.js"></script>
+  <script type="module" src="/panel/js/errorHelper.js"></script>
+  <script type="module" src="/panel/js/login.js"></script>
 </body>
 </html>

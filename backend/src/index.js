@@ -39,7 +39,8 @@ const PORT = process.env.PORT || 3000;
 app.set('trust proxy', 1);
 
 const routes = require('./routes');
-const logger = require('./utils/logger');
+const prisma = require('./config/db');
+const errorHandler = require('./middlewares/errorHandler');
 
 // Middlewares de seguridad y parseo
 app.use(helmet());
@@ -96,9 +97,23 @@ app.use(cors({
 // Parseo de JSON con límite estricto de tamaño para prevenir ataques DoS
 app.use(express.json({ limit: '100kb' }));
 
-// Endpoint de prueba y salud de la API
+// Liveness probe de Node.js en memoria (liveness check rápido, no bloqueante)
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'API funcionando correctamente' });
+});
+
+// Endpoint de diagnóstico y keep-alive de base de datos PostgreSQL (Spec 024)
+app.get('/api/health/db', async (req, res, next) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({
+      status: 'ok',
+      db: 'connected',
+      message: 'Conexión a base de datos operativa'
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // Montar todas las rutas de la API
@@ -109,35 +124,8 @@ app.use('/api', (req, res) => {
   res.status(404).json({ success: false, message: 'Ruta no encontrada' });
 });
 
-// Middleware centralizado de manejo de errores
-app.use((err, req, res, _next) => {
-  // Manejo de errores de validación de Zod
-  if (err.name === 'ZodError') {
-    const msg = err.errors ? err.errors.map(e => e.message).join(', ') : 'Error de validación';
-    return res.status(400).json({ success: false, message: msg, errors: err.errors });
-  }
-
-  // Manejo de errores de unicidad de Prisma (P2002)
-  if (err.code === 'P2002') {
-    return res.status(400).json({
-      success: false,
-      message: 'Ya existe otro paciente registrado con ese correo electrónico en el sistema.'
-    });
-  }
-
-  const status = err.status || err.statusCode || 500;
-  const isProd = process.env.NODE_ENV === 'production';
-  
-  if (status >= 500) {
-    logger.error('Error no controlado en la aplicación', err);
-  }
-
-  res.status(status).json({
-    success: false,
-    message: isProd && status >= 500 ? 'Error interno del servidor' : (err.message || 'Error interno del servidor'),
-    ...(!isProd && { stack: err.stack })
-  });
-});
+// Middleware centralizado de manejo y sanitización de errores (Spec 024)
+app.use(errorHandler);
 
 // Inicialización del servidor
 if (require.main === module) {
