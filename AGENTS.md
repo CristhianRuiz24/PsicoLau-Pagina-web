@@ -22,10 +22,22 @@ El proyecto sigue rigurosamente el flujo SDD para cualquier funcionalidad o camb
 1. **Constitución**: Principios innegociables en [`docs/constitution.md`](./docs/constitution.md). Nunca se modifican sin solicitud explícita del usuario.
 2. **Especificación**: Cada feature nueva se gestiona en `specs/00X-[nombre]/spec.md` con requisitos funcionales numerados (`RF-1`, `RF-2`...) en notación EARS.
 3. **Memoria de Sesión Persistente**:
-   - `overview/session.md`: Estado actual, qué se logró, próximo paso.
-   - `overview/tasks.md`: Tareas activas, estado y bloqueos.
+   - `overview/session.md`: Estado actual, qué se logró, próximo paso (ventana deslizante activa).
+   - `overview/tasks.md`: Tareas activas, estado y bloqueos (ventana deslizante activa).
+   - `overview/archive/`: Historial archivado (`session-history.md`, `tasks-history.md`).
    - `overview/architecture.md`: Diagrama vivo de arquitectura y decisiones técnicas.
    - `overview/learning.md`: Propuestas de reglas para revisión del usuario.
+
+### 🤖 2.1. Arquitectura de Orquestación Multiagente (Spec 023)
+En este repositorio, el agente principal opera como un **Orquestador Central (Master)** (regulado por `.agents/rules/orchestrator.md`) que asume la **Skill de Requisitos** y delega fases operativas en **Subagentes Especialistas** en `.agents/agents/`:
+1. **Arquitecto de Requisitos** (Skill `spec-generator` en `.agents/skills/`): Asumido directamente por el Orquestador en el chat principal para entrevista interactiva EARS, redacción de specs, planes y tareas atómicas.
+2. **Builder Frontend** (Subagente `builder-frontend`): HTML5 semántico, CSS Vanilla con paleta oficial (`#EC5E86`, `#1E94A8`), módulos ESM en `panel/js/`, mobile-first y accesibilidad WCAG 2.1 AA.
+3. **Builder Backend** (Subagente `builder-backend`): Express 5, Prisma ORM (Supabase), Zod + LFPDPPP, `AES-256-GCM` + Blind Index `HMAC-SHA256` y TDD en `backend/scripts/`.
+4. **Auditor de Calidad** (Subagente `auditor-calidad`): Modo estricto de solo lectura, 5 dimensiones técnicas y trazabilidad SDD RF por RF.
+5. **DevOps y Release** (Subagente `devops`): Compuertas de pre-vuelo (`test:syntax`, `test:imports`, `lint`, `test`), CSP segmentada en `_headers`, protocolo Zero Data Loss (§6.11) y despliegues a Cloudflare Pages y Render.
+6. **Tester E2E Visual** (Subagente nativo `browser_subagent`): Navegación autónoma en navegador headless.
+
+El flujo cuenta con compuertas automáticas fail-fast en `.agents/hooks.json` (`scripts/hooks/quickCheck.js`) que validan sintaxis ESM tras editar archivos sin interferir en la fluidez del desarrollo.
 
 ---
 
@@ -77,6 +89,8 @@ El proyecto sigue rigurosamente el flujo SDD para cualquier funcionalidad o camb
 - **Generar cliente Prisma**: `cd backend && npx prisma generate`.
 - **Sincronizar esquema DB Dev**: `cd backend && npx prisma db push`.
 - **Crear/actualizar usuario admin real**: `node backend/scripts/seedUser.js <email> <password>`.
+- **Validar sintaxis e imports ESM del panel**: `npm run test:syntax` y `npm run test:imports`.
+- **Ejecutar linter backend**: `npm run lint` (o `cd backend && npm run lint`).
 - **Ejecutar tests automatizados**: `cd backend && npm test` (o `node scripts/runTests.js` que orquesta la suite con `--test-concurrency=1`).
 
 ---
@@ -113,3 +127,11 @@ Ningún cambio o tarea se da por terminado sin comprobar:
 6. **Limpieza obligatoria en scripts de test**: Todo script de prueba o verificación en `backend/scripts/` que inserte registros temporales en base de datos debe incluir un bloque `finally` con limpieza automática (`delete`) o ejecutarse en transacción revertida para evitar registros huérfanos o duplicados en el entorno de desarrollo que confundan el directorio clínico.
 7. **Ejecución secuencial determinista (`--test-concurrency=1`)**: Al ejecutar pruebas automatizadas contra la base de datos de desarrollo, debe mantenerse la ejecución secuencial (`--test-concurrency=1` en `runTests.js`) para prevenir condiciones de carrera, falsos positivos por colisiones de datos y bloqueos en contadores globales.
 8. **Pruebas Adversarias Obligatorias**: La suite de pruebas de integración debe incluir pruebas adversarias negativas que simulen ataques (XSS, inyección CSV, payloads DAST) y aseguren que el servidor los bloquea con HTTP 400 sin alterar la base de datos.
+
+---
+
+## ⚡ 8. Eficiencia de Contexto y Gestión de Tokens (Spec 023)
+
+1. **Memoria Activa Deslizante**: `overview/session.md` y `overview/tasks.md` mantienen únicamente las últimas 4-5 specs activas. Toda la historia previa vive en `overview/archive/session-history.md` y `overview/archive/tasks-history.md` para evitar lecturas masivas en `$boot`.
+2. **Lecturas Acotadas**: En archivos mayores a 100 líneas, usar rangos precisos (`StartLine`/`EndLine`) al invocar `view_file` / `read_file` en lugar de volcar archivos completos al contexto.
+3. **Ciclo de Vida de Conversaciones**: Tras cerrar una spec mayor y validar sus criterios, se recomienda abrir un chat limpio (`$boot`) para reiniciar la ventana de tokens sin arrastrar el historial de herramientas y comandos pasados.

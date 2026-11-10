@@ -14,10 +14,11 @@ El resto (contexto de proyecto, comandos, estilo) vive en AGENTS.md.
 
 ## Durante el trabajo (`$work`)
 
-- **NUNCA modifiques código fuente** tras redactar una spec. Tu rol (como modelo de planificación) es redactar la especificación, el plan y las tareas (`spec.md`, `plan.md`, `tasks.md`) hasta completarlos, y luego detenerte. No toques el código hasta recibir autorización explícita, ya que se utiliza otro modelo especializado para la generación de código.
-- Sigue el flujo SDD definido en el prompt inicial del proyecto
+- Sigue el flujo SDD definido en el proyecto
   (constitución → spec → clarificación → plan → tareas → implementación →
   validación → cambio). No te saltes fases.
+- Tras redactar una spec (`spec.md`, `plan.md`, `tasks.md`), espera la aprobación explícita del usuario antes de iniciar la implementación.
+- Implementa una sola tarea atómica a la vez delegando en los subagentes especialistas, y valida con el auditor antes de pasar a la siguiente.
 - Cada vez que cierres una tarea de `overview/tasks.md`, márcala y anota
   brevemente qué se hizo.
 
@@ -42,3 +43,13 @@ El resto (contexto de proyecto, comandos, estilo) vive en AGENTS.md.
 - Prioridad innegociable de la paleta oficial de marca sobre contrastes automáticos:
   La identidad visual oficial de Laura (rosa `#EC5E86`, turquesa `#1E94A8`) debe
   preservarse intacta y prevalecer sobre sugerencias algorítmicas de contraste.
+- **Eficiencia de Contexto y Memoria (Spec 023)**:
+  - En `$boot`, leer únicamente la memoria activa compacta (`session.md` y `tasks.md`). Los archivos históricos en `overview/archive/` NO se leen al inicio salvo solicitud explícita del usuario.
+  - En archivos de más de 100 líneas, priorizar lecturas acotadas (`StartLine` y `EndLine`) para no saturar el contexto.
+  - Al cerrar o validar una spec completa, recomendar al usuario abrir un nuevo chat con `$boot` para evitar el arrastre de decenas de miles de tokens acumulados.
+- **Orquestación Multiagente Especializada (Spec 023)**:
+  - El agente principal opera como Orquestador Master gobernado por `.agents/rules/orchestrator.md`.
+  - La fase de especificación la asume el Orquestador en el chat principal mediante la Skill `spec-generator` (`.agents/skills/spec-generator/`).
+  - Las tareas de código se delegan atómicamente en sus 4 subagentes ejecutables (`builder-frontend`, `builder-backend`, `auditor-calidad`, `devops`).
+  - Ningún Builder da por buena su propia tarea; el veredicto lo emite exclusivamente el `auditor-calidad` en modo solo lectura.
+  - Los pases a release y despliegues los verifica `devops` solicitando confirmación humana previa a `git push origin main`.

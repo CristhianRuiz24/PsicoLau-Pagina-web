@@ -1,0 +1,17 @@
+{
+  "quick-syntax-check": {
+    "enabled": true,
+    "PostToolUse": [
+      {
+        "matcher": "replace_file_content|multi_replace_file_content|write_to_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ../scripts/hooks/quickCheck.js",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
