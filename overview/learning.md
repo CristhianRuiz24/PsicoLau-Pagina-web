@@ -6,7 +6,9 @@ aplicarlo solo, lo anota aquí para que tú decidas si lo promueves.
 
 ## Propuestas pendientes
 
-*Ninguna.*
+- [ ] **Sanitización Estricta de Errores por Diseño (Secure by Default / OWASP CWE-209)**: Ninguna respuesta HTTP de error (500/503) del backend debe incluir la propiedad `stack`, consultas SQL, nombres de esquemas ni rutas locales de archivos bajo ninguna circunstancia, independientemente del valor de `NODE_ENV`. Las trazas completas pertenecen exclusivamente a `logger.error` para auditoría interna. En frontend, todo mensaje de error debe sanitizarse antes de insertarse en el DOM mediante `sanitizarMensajeError` con inyección segura (`textContent`), sustituyendo fugas técnicas por mensajes institucionales empáticos.
+
+- [ ] **Desacoplamiento de Liveness Probe y Database Keep-Alive Probe**: En arquitecturas con bases de datos en la nube sujetas a suspensión por inactividad (ej. Supabase Free Tier) y monitores externos (UptimeRobot), se debe desacoplar siempre `GET /api/health` (liveness probe ultraligero e incondicional en memoria, para que runners de pruebas y despliegues no fallen si la BD está temporalmente inalcanzable) de `GET /api/health/db` (readiness & keep-alive con `await prisma.$queryRaw\`SELECT 1\`` para reactivar el contador de inactividad 24/7 y generar alertas reales inmediatas ante caídas de datos).
 
 ## Reglas promovidas y aplicadas
 
